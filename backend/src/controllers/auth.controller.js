@@ -147,7 +147,7 @@ const updateProfile = async (req, res) => {
         const updatedUser = await User.findByIdAndUpdate(
             req.user._id,
             { name, targetGoal },
-            { new: true, runValidators: true }
+            { returnDocument: "after", runValidators: true }
         );
 
         return sendSuccess(res, 200, "Profile updated successfully.", {

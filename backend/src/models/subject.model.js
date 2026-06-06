@@ -94,13 +94,12 @@ const subjectSchema = new mongoose.Schema(
 );
 
 // Auto-calculate progress before saving
-subjectSchema.pre("save", function (next) {
+subjectSchema.pre("save", function () {
     if (this.totalTopics > 0) {
         this.progress = Math.round((this.completedTopics / this.totalTopics) * 100);
     } else {
         this.progress = 0;
     }
-    next();
 });
 
 module.exports = mongoose.model("Subject", subjectSchema);

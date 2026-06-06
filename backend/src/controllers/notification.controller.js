@@ -27,7 +27,7 @@ const markAsRead = async (req, res) => {
         const notification = await Notification.findOneAndUpdate(
             { _id: req.params.id, userId: req.user._id },
             { isRead: true },
-            { new: true }
+            { returnDocument: "after" }
         );
         if (!notification) return sendError(res, 404, "Notification not found.");
         return sendSuccess(res, 200, "Marked as read.", notification);

@@ -1,22 +1,4 @@
-const mongoose = require("mongoose");
-
-const userSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        require: true
-    },
-    email: {
-        type: string,
-        require: true
-    },
-    password: {
-        type: string,
-        require: true
-    }
-});
-
-
-module.exports = mongoose.model('User', userSchema);/**
+/**
  * user.model.js
  * Defines the User schema for MongoDB.
  * Stores authentication info and basic profile.
@@ -72,21 +54,16 @@ const userSchema = new mongoose.Schema(
 
 // -----------------------------------------------
 // MIDDLEWARE: Hash password before saving
-// This runs automatically before every .save() call
 // -----------------------------------------------
-userSchema.pre("save", async function (next) {
-    // Only hash if the password field was actually changed
-    if (!this.isModified("password")) return next();
+userSchema.pre("save", async function () {
+    if (!this.isModified("password")) return;
 
-    // Generate salt and hash the password
     const salt = await bcrypt.genSalt(12);
     this.password = await bcrypt.hash(this.password, salt);
-    next();
 });
 
 // -----------------------------------------------
 // INSTANCE METHOD: Check if entered password is correct
-// Used during login
 // -----------------------------------------------
 userSchema.methods.comparePassword = async function (enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password);
