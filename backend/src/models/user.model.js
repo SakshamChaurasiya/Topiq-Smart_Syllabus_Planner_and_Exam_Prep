@@ -69,6 +69,13 @@ const userSchema = new mongoose.Schema(
             type: String,
             default: null,
         },
+
+        // College/University name for better AI contexts
+        institution: {
+            type: String,
+            default: "",
+            trim: true,
+        },
     },
     {
         // Automatically add createdAt and updatedAt fields

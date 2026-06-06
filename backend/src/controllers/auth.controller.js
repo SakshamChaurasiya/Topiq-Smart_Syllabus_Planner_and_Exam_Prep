@@ -25,7 +25,7 @@ const generateToken = (userId) => {
 // -------------------------------------------
 const register = async (req, res) => {
     try {
-        const { name, email, password, targetGoal } = req.body;
+        const { name, email, password, targetGoal, institution } = req.body;
 
         // Basic validation
         if (!name || !email || !password) {
@@ -44,6 +44,7 @@ const register = async (req, res) => {
             email,
             password,
             targetGoal: targetGoal || "good",
+            institution: institution || "",
         });
 
         // Generate JWT token
@@ -61,6 +62,7 @@ const register = async (req, res) => {
                 level: user.level,
                 streak: user.streak,
                 targetXP: user.level * 250,
+                institution: user.institution || "",
             },
         });
     } catch (error) {
@@ -111,6 +113,7 @@ const login = async (req, res) => {
                 level: user.level,
                 streak: user.streak,
                 targetXP: user.level * 250,
+                institution: user.institution || "",
             },
         });
     } catch (error) {
@@ -140,6 +143,7 @@ const getMe = async (req, res) => {
             streak: user.streak,
             targetXP: user.level * 250,
             createdAt: user.createdAt,
+            institution: user.institution || "",
         });
     } catch (error) {
         console.error("[Auth] GetMe error:", error.message);
@@ -154,11 +158,16 @@ const getMe = async (req, res) => {
 // -------------------------------------------
 const updateProfile = async (req, res) => {
     try {
-        const { name, targetGoal } = req.body;
+        const { name, targetGoal, institution } = req.body;
+
+        const updateData = {};
+        if (name !== undefined) updateData.name = name;
+        if (targetGoal !== undefined) updateData.targetGoal = targetGoal;
+        if (institution !== undefined) updateData.institution = institution;
 
         const updatedUser = await User.findByIdAndUpdate(
             req.user._id,
-            { name, targetGoal },
+            updateData,
             { returnDocument: "after", runValidators: true }
         );
 
@@ -172,6 +181,7 @@ const updateProfile = async (req, res) => {
             level: updatedUser.level,
             streak: updatedUser.streak,
             targetXP: updatedUser.level * 250,
+            institution: updatedUser.institution || "",
         });
     } catch (error) {
         console.error("[Auth] UpdateProfile error:", error.message);

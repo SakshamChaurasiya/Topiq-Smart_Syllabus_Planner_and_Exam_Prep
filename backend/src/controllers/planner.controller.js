@@ -123,6 +123,7 @@ const generatePlan = async (req, res) => {
             availableHoursPerDay: Number(availableHoursPerDay),
             targetGoal,
             daysRemaining,
+            institution: req.user.institution || "",
         });
 
         // Build daily plans with actual dates
@@ -221,6 +222,7 @@ const generateCheatCode = async (req, res) => {
             daysRemaining: days,
             targetGoal: targetGoal || "pass",
             availableHoursPerDay: Number(availableHoursPerDay) || 6,
+            institution: req.user.institution || "",
         });
 
         // Save as a study plan with cheat code mode

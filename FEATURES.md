@@ -15,12 +15,12 @@ Welcome to the **Smart Syllabus Planner (SSP)** project! This application is des
 ## 🛠️ Detailed Features List
 
 ### 1. Secure Authentication & Dynamic User Profile
-* **Registration & Sign Up:** Allows students to create accounts using their name, email, and password. During signup, they can select a custom target academic goal:
+* **Registration & Sign Up:** Allows students to create accounts using their name, email, password, and optionally their **College / University**. During signup, they can select a custom target academic goal:
   * **Pass:** Focuses on passing threshold content (40%+ weightage).
   * **Good:** Balanced prep targeting standard grading (65%+ weightage).
   * **Excellent:** In-depth topper-focused coverage (85%+ weightage).
 * **JWT-Based Login:** Protects private endpoints and secures client sessions.
-* **Student profile dashboard:** Allows students to edit credentials, modify their target study goals, and manage basic settings.
+* **Student profile dashboard:** Allows students to edit credentials, modify their target study goals, update their College / University, and manage basic settings.
 
 ### 2. Subject Management Hub
 * **Subject Listing & Creation:** Students can manage individual cards for subjects. Each subject records details such as credit weight, code, exam date, and a custom theme color.
@@ -30,7 +30,7 @@ Welcome to the **Smart Syllabus Planner (SSP)** project! This application is des
 ### 3. AI-Powered Syllabus Analysis
 * **Multiple Import Channels:** Students can upload a **PDF syllabus file**, an **image snapshot** (JPG, PNG, WEBP), or paste **raw text syllabus content**.
 * **Text Extraction:** Uses the `pdf-parse` library on the Node.js backend to extract text.
-* **Gemini AI Integration:** Utilizes Google Gemini's `gemini-1.5-flash` model with `responseMimeType: "application/json"` to generate structured data containing:
+* **Gemini AI Integration:** Utilizes Google Gemini's `gemini-1.5-flash` model with `responseMimeType: "application/json"` (and incorporates their registered College/University context to optimize study recommendations based on specific institutional patterns) to generate structured data containing:
   * **Units & Topics:** Nested list mapping importance levels (`critical`, `high`, `medium`, `low`), difficulty levels (`easy`, `medium`, `hard`), estimated study hours, weightage marks, and clear topic-focus tips.
   * **Top Priority Topics:** Focus subjects recommended for immediate study.
   * **Exam-Likely Topics:** High probability questions prediction.
@@ -76,8 +76,8 @@ Welcome to the **Smart Syllabus Planner (SSP)** project! This application is des
 
 | Feature Category | Feature Name | Description | Key Tech / APIs Used |
 | :--- | :--- | :--- | :--- |
-| **User Space** | Authentication | Signup, Login, and Auth state management. | JWT, BcryptJS, Express, React Context |
-| | Goal Settings | Select academic target goals (`pass`, `good`, `excellent`). | MongoDB User Schema, React State |
+| **User Space** | Authentication | Signup, Login, Profile, and Auth state management. Includes College/University context. | JWT, BcryptJS, Express, React Context |
+| | Goal Settings | Select academic target goals (`pass`, `good`, `excellent`) and College/University field. | MongoDB User Schema, React State |
 | **Subjects** | Subject Manager | Register, update, and manage subjects. | Express Router, Mongoose |
 | | Progress Ring | Shows subject completion based on completed topics. | SVG ProgressRing, CSS transitions |
 | **Syllabus** | Multi-uploader | Import syllabus via PDF, Image, or plain text. | Multer, PDF-Parse, Express |

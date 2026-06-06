@@ -39,7 +39,7 @@ const GOALS = [
 ];
 
 const Register = () => {
-  const [form, setForm]       = useState({ name: '', email: '', password: '', targetGoal: 'good' });
+  const [form, setForm]       = useState({ name: '', email: '', password: '', targetGoal: 'good', institution: '' });
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [step, setStep]       = useState(1); // 1 = account info, 2 = goal selection
@@ -59,7 +59,7 @@ const Register = () => {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      await register(form.name, form.email, form.password, form.targetGoal);
+      await register(form.name, form.email, form.password, form.targetGoal, form.institution.trim());
       toast.success('🎉 Welcome to Smart Syllabus Planner!');
       navigate('/dashboard');
     } catch (err) {
@@ -210,6 +210,17 @@ const Register = () => {
                       ))}
                     </div>
                   )}
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">College / University (Optional)</label>
+                  <input
+                    id="register-institution"
+                    className="form-input"
+                    placeholder="e.g. Stanford University"
+                    value={form.institution}
+                    onChange={e => set('institution', e.target.value)}
+                  />
                 </div>
 
                 <button type="submit" className="btn-cta" style={{ width: '100%', marginTop: 8 }}>

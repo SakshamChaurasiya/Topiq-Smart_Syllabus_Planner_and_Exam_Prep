@@ -165,7 +165,8 @@ const analyzeSyllabus = async (req, res) => {
         // Call AI service for analysis
         const analysisResult = await aiService.analyzeSyllabus(
             syllabus.rawContent,
-            subject.name
+            subject.name,
+            req.user.institution || ""
         );
 
         // Build units array from AI response

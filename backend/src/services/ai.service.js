@@ -40,11 +40,16 @@ const callAI = async (systemPrompt, userPrompt) => {
 // 1. ANALYZE SYLLABUS
 // Takes raw syllabus text and returns structured units/topics
 // ============================================================
-const analyzeSyllabus = async (syllabusText, subjectName) => {
+const analyzeSyllabus = async (syllabusText, subjectName, institution = "") => {
     try {
         const systemPrompt = `You are an expert academic advisor and syllabus analyzer.
 Your job is to analyze a student's syllabus and extract structured information.
 Always respond in valid JSON format exactly matching the schema provided.`;
+
+        let contextPrompt = "";
+        if (institution) {
+            contextPrompt = `\n[Context: The student is enrolled at "${institution}". Tailor the study tips, priorities, and exam likely topics using any known patterns, standard curricula, or expectations for this college/university if applicable.]\n`;
+        }
 
         const userPrompt = `Analyze this syllabus for the subject "${subjectName}" and return a JSON object with this exact structure:
 
@@ -74,7 +79,7 @@ Always respond in valid JSON format exactly matching the schema provided.`;
   "examLikelyTopics": ["Topic A", "Topic B"],
   "studyTips": ["Tip 1", "Tip 2", "Tip 3"]
 }
-
+${contextPrompt}
 Syllabus content:
 ${syllabusText}`;
 
@@ -103,6 +108,7 @@ const generateStudyPlan = async ({
     availableHoursPerDay,
     targetGoal,
     daysRemaining,
+    institution = "",
 }) => {
     try {
         const systemPrompt = `You are a smart academic planner AI. 
@@ -116,10 +122,15 @@ Always prioritize high-importance topics. Return valid JSON only.`;
             )
             .join("\n");
 
+        let contextPrompt = "";
+        if (institution) {
+            contextPrompt = `Student's College/University: ${institution} (incorporate standard study/exam patterns and pacing suitable for this institution)\n`;
+        }
+
         const userPrompt = `Create a personalized study plan for a student.
 
 Subject: ${subjectName}
-Days Remaining: ${daysRemaining} days
+${contextPrompt}Days Remaining: ${daysRemaining} days
 Available Study Hours/Day: ${availableHoursPerDay} hours
 Target Goal: ${targetGoal} (pass=40%, good=65%, excellent=85%+)
 
@@ -175,6 +186,7 @@ const generateCheatCode = async ({
     daysRemaining,
     targetGoal,
     availableHoursPerDay,
+    institution = "",
 }) => {
     try {
         const systemPrompt = `You are an exam survival expert AI.
@@ -193,8 +205,13 @@ Be ruthless about prioritization. Be specific. Be honest. Return valid JSON only
             }))
         );
 
+        let contextPrompt = "";
+        if (institution) {
+            contextPrompt = `Student's College/University: ${institution} (consider its typical exam patterns, high-priority areas, and question styles)\n`;
+        }
+
         const userPrompt = `A student has ${daysRemaining} day(s) left before their ${subjectName} exam.
-They can study ${availableHoursPerDay} hours/day. Target: ${targetGoal}.
+${contextPrompt}They can study ${availableHoursPerDay} hours/day. Target: ${targetGoal}.
 
 All topics:
 ${JSON.stringify(allTopics, null, 2)}

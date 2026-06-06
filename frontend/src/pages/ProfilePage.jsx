@@ -1,5 +1,5 @@
 // ProfilePage.jsx — View & update user profile
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../api/auth.api';
 import { format } from 'date-fns';
@@ -14,9 +14,23 @@ const goalOptions = [
 const ProfilePage = () => {
   const { user, updateUser, logout } = useAuth();
 
-  const [form, setForm]     = useState({ name: user?.name || '', targetGoal: user?.targetGoal || 'good' });
+  const [form, setForm]     = useState({
+    name: user?.name || '',
+    targetGoal: user?.targetGoal || 'good',
+    institution: user?.institution || ''
+  });
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setForm({
+        name: user.name || '',
+        targetGoal: user.targetGoal || 'good',
+        institution: user.institution || ''
+      });
+    }
+  }, [user, editing]);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
@@ -25,7 +39,11 @@ const ProfilePage = () => {
     if (!form.name.trim()) return toast.error('Name cannot be empty.');
     setSaving(true);
     try {
-      const res = await authAPI.updateProfile({ name: form.name.trim(), targetGoal: form.targetGoal });
+      const res = await authAPI.updateProfile({
+        name: form.name.trim(),
+        targetGoal: form.targetGoal,
+        institution: form.institution.trim()
+      });
       updateUser(res.data.data);
       toast.success('Profile updated! ✅');
       setEditing(false);
@@ -81,6 +99,7 @@ const ProfilePage = () => {
           <div style={{ display: 'grid', gap: 12 }}>
             {[
               { label: 'Email', value: user?.email, icon: '📧' },
+              { label: 'College / University', value: user?.institution || 'Not specified', icon: '🏛️' },
               { label: 'Member Since', value: user?.createdAt ? format(new Date(user.createdAt), 'dd MMMM yyyy') : '—', icon: '📅' },
               { label: 'Study Goal', value: currentGoal?.label, icon: '🎯' },
               { label: 'Level', value: `Level ${user?.level || 1}`, icon: '⭐' },
@@ -117,6 +136,16 @@ const ProfilePage = () => {
                   onChange={e => set('name', e.target.value)}
                   required
                   autoFocus
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">College / University</label>
+                <input
+                  className="form-input"
+                  value={form.institution}
+                  onChange={e => set('institution', e.target.value)}
+                  placeholder="e.g. Stanford University"
                 />
               </div>
 

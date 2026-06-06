@@ -45,10 +45,24 @@ async function run() {
 
   // 1. Register
   console.log("🔹 1. Register");
-  const reg = await post("/auth/register", { name: "Core Test User", email: EMAIL, password: PASSWORD, targetGoal: "good" });
+  const reg = await post("/auth/register", { name: "Core Test User", email: EMAIL, password: PASSWORD, targetGoal: "good", institution: "Stanford University" });
   assert("Register → 201", reg.status === 201);
   assert("Register returns token", !!reg.data?.data?.token);
+  assert("Register returns correct institution", reg.data?.data?.user?.institution === "Stanford University");
   TOKEN = reg.data?.data?.token || "";
+
+  // 1a. Update Profile (Institution)
+  console.log("🔹 1a. Update Profile (Institution)");
+  const updateP = await put("/auth/update-profile", { name: "Core Test User Upd", targetGoal: "excellent", institution: "MIT" });
+  assert("Update profile -> 200", updateP.status === 200);
+  assert("Name is updated", updateP.data?.data?.name === "Core Test User Upd");
+  assert("TargetGoal is updated", updateP.data?.data?.targetGoal === "excellent");
+  assert("Institution is updated to MIT", updateP.data?.data?.institution === "MIT");
+
+  // Get current profile check
+  const checkProfile = await get("/auth/me");
+  assert("Get profile -> 200", checkProfile.status === 200);
+  assert("Profile has updated institution MIT", checkProfile.data?.data?.institution === "MIT");
 
   // 2. Create Subject
   console.log("🔹 2. Create Subject");

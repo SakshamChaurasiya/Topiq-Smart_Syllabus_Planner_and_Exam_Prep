@@ -37,8 +37,8 @@ export const AuthProvider = ({ children }) => {
     return newUser;
   }, []);
 
-  const register = useCallback(async (name, email, password, targetGoal) => {
-    const res = await authAPI.register({ name, email, password, targetGoal });
+  const register = useCallback(async (name, email, password, targetGoal, institution) => {
+    const res = await authAPI.register({ name, email, password, targetGoal, institution });
     const { token: newToken, user: newUser } = res.data.data;
     localStorage.setItem('ssp_token', newToken);
     localStorage.setItem('ssp_user', JSON.stringify(newUser));
