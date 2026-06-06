@@ -37,6 +37,7 @@ Welcome to the **Smart Syllabus Planner (SSP)** project! This application is des
   * **Overall Difficulty:** Dynamic classification (`easy`, `medium`, `hard`, `very-hard`).
   * **Study Tips & Strategy:** General tips tailored for the subject.
 * **Topic Progress Tracking:** Checkboxes beside each parsed topic allow students to complete them, updating progress rings in real time.
+* **Resilience & Graceful Degradation:** The AI analysis and planning engines are designed to gracefully degrade. If the Gemini API key is missing or calls fail/rate-limit, the system returns mock syllabus structures so the application remains fully usable.
 
 ### 4. Smart Study Planner (Normal Mode)
 * **Tailored Schedule Generation:** Takes exam date, daily available study hours, and target goal as inputs.
@@ -56,9 +57,9 @@ Welcome to the **Smart Syllabus Planner (SSP)** project! This application is des
 
 ### 6. Gamification, Leveling & Streaks
 * **Study & Revision Missions:** Study plans dynamically generate daily tasks including Study Sessions, Spaced Revision, and End-of-Day Summaries.
-* **Experience Points (XP):** Completing tasks rewards the student with XP.
-* **Progress Badges & Titles:** Level up across ranges from level 1 to level 12 (Beginner $\rightarrow$ Ace $\rightarrow$ Scholar $\rightarrow$ Master $\rightarrow$ Legend).
-* **Daily Streaks:** Tracks consecutive active days of study with streak badges to promote consistency.
+* **Dynamic XP Engine:** Completing tasks rewards the student with XP. The backend tracks experience progression and triggers level-ups dynamically using the `level * 250` progression curve.
+* **Daily Streaks:** Monitors consecutive active days of study via the database. Streaks increment on consecutive daily activity, persist if active today, and automatically reset to `0` on the dashboard if a calendar day is missed.
+* **Dynamic Badges:** Displays interactive level progression bars and streak badges on the student's Dashboard and Profile page.
 
 ### 7. Notification Center
 * Keeps users informed on plan creations, exam countdown milestones, and system updates.
@@ -88,7 +89,7 @@ Welcome to the **Smart Syllabus Planner (SSP)** project! This application is des
 | | Score Predictor | Predicts Minimum, Expected, and Best Case score range. | Mongoose & Gemini AI |
 | | Topic Offloader | Suggests topics to skip entirely to optimize time. | Mongoose & Gemini AI |
 | **Gamification** | Mission Creator | Generates study, revision, and summary daily tasks. | MongoDB Mission Schema |
-| | XP Engine | Level up, earn titles (Rookie to Master), track streaks. | React State, CSS Keyframes |
+| | XP Engine & Streak | Updates user level, dynamically rewards XP, and tracks consecutive daily streaks. | Mongoose (User model), Express, React |
 | **Alerts** | Notification System | Alerts for exam warnings and system confirmations. | MongoDB Notification Schema |
 | **Dashboard** | Unified Command | Displays countdowns, stats, recommendations, & warnings. | Aggregated API Controller |
 
