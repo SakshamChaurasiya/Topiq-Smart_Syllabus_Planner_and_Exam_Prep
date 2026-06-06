@@ -292,6 +292,49 @@ const SyllabusPage = () => {
               </div>
             )}
 
+            {/* AI-Suggested Focus Areas */}
+            {syllabus.aiAnalysis?.aiSuggestedFocusAreas?.length > 0 && (
+              <div style={{ marginTop: 16, padding: '16px', background: 'var(--bg-elevated)', borderRadius: 12, border: '1px solid var(--border)' }}>
+                <div style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: 4, color: 'var(--text-primary)' }}>
+                  🎯 AI-Suggested Focus Areas
+                </div>
+                <p style={{ margin: '0 0 16px', fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                  Based on topic weightage and importance tags from your syllabus. The AI has no access to past papers or your institution's exam history. Upload PYQs below to get evidence-based topic priorities.
+                </p>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
+                  {/* Column A: AI Suggested */}
+                  <div>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--primary-light)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+                      AI Suggested
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {syllabus.aiAnalysis.aiSuggestedFocusAreas.map((topic, i) => (
+                        <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--surface2)', borderRadius: 8, border: '1px solid var(--border)', gap: 8 }}>
+                          <span style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-primary)' }}>{topic}</span>
+                          <span className="badge badge-warning" style={{ textTransform: 'none', border: '1px solid var(--warning-border)', flexShrink: 0 }}>
+                            AI guess
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Column B: From Your PYQs */}
+                  <div style={{ opacity: 0.5, pointerEvents: 'none' }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+                      From Your PYQs
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 80, padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, border: '1px dashed var(--border-default)', textAlign: 'center' }}>
+                      <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                        Upload past year papers in the Syllabus tab to populate this column.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Strategy */}
             {syllabus.aiAnalysis?.studyStrategy && (
               <div style={{ marginTop: 12, padding: '12px', background: 'var(--bg-base)', borderRadius: 8, border: '1px solid var(--border-subtle)' }}>

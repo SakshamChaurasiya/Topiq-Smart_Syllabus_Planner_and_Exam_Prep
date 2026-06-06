@@ -212,11 +212,15 @@ const analyzeSyllabus = async (req, res) => {
             progress: 0,
         });
 
+        const aiAnalysisObj = syllabus.aiAnalysis.toObject();
+        aiAnalysisObj.aiSuggestedFocusAreas = aiAnalysisObj.examLikelyTopics || [];
+        delete aiAnalysisObj.examLikelyTopics;
+
         return sendSuccess(res, 200, "AI analysis complete! Topics and units extracted.", {
             syllabusId: syllabus._id,
             totalUnits: units.length,
             totalTopics,
-            aiAnalysis: syllabus.aiAnalysis,
+            aiAnalysis: aiAnalysisObj,
             units: syllabus.units,
         });
     } catch (error) {
@@ -241,7 +245,13 @@ const getSyllabus = async (req, res) => {
             return sendError(res, 404, "No syllabus found for this subject.");
         }
 
-        return sendSuccess(res, 200, "Syllabus fetched successfully.", syllabus);
+        const syllabusObj = syllabus.toObject();
+        if (syllabusObj.aiAnalysis) {
+            syllabusObj.aiAnalysis.aiSuggestedFocusAreas = syllabusObj.aiAnalysis.examLikelyTopics || [];
+            delete syllabusObj.aiAnalysis.examLikelyTopics;
+        }
+
+        return sendSuccess(res, 200, "Syllabus fetched successfully.", syllabusObj);
     } catch (error) {
         console.error("[Syllabus] GetBySubject error:", error.message);
         return sendError(res, 500, "Failed to fetch syllabus.");

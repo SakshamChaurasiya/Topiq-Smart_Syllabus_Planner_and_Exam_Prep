@@ -30,6 +30,8 @@ const CheatCodePage = () => {
   const [hoursPerDay, setHoursPerDay]   = useState(6);
   const [targetGoal, setTargetGoal]     = useState('pass');
 
+  const [showDisclaimer, setShowDisclaimer] = useState(true);
+
   useEffect(() => {
     const fetch = async () => {
       try {
@@ -44,6 +46,14 @@ const CheatCodePage = () => {
     };
     fetch();
   }, [subjectId]);
+
+  const formatScore = (val) => {
+    if (val === undefined || val === null) return '';
+    const valStr = String(val).trim();
+    const hasPercent = valStr.endsWith('%');
+    const hasTilde = valStr.startsWith('~');
+    return `${hasTilde ? '' : '~'}${valStr}${hasPercent ? '' : '%'}`;
+  };
 
   const activatCheatCode = async () => {
     if (!selectedMode) return toast.error('Select a mode first.');
@@ -200,7 +210,64 @@ const CheatCodePage = () => {
             {/* Expected score */}
             {result.expectedScore && (
               <div className="card" style={{ borderColor: 'rgba(16,185,129,0.3)' }}>
-                <div style={{ fontWeight: 700, marginBottom: 12 }}>📊 Expected Score Range</div>
+                <div style={{ fontWeight: 700, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                  <span>📊 Estimated Score Range (AI Rough Estimate)</span>
+                  <div className="tooltip-wrap" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}>
+                    <span style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>ⓘ</span>
+                    <div className="tooltip-box" style={{ 
+                      whiteSpace: 'normal', 
+                      width: '260px', 
+                      textAlign: 'left', 
+                      lineHeight: '1.4', 
+                      fontWeight: 'normal', 
+                      textTransform: 'none',
+                      boxShadow: 'var(--shadow-md)'
+                    }}>
+                      This estimate assumes you study the recommended topics for the stated duration. It has no access to your actual exam paper, marking scheme, or professor's preferences.
+                    </div>
+                  </div>
+                </div>
+
+                {showDisclaimer && (
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    background: 'var(--warning-bg)',
+                    border: '1px solid var(--warning-border)',
+                    borderRadius: '8px',
+                    padding: '10px 14px',
+                    marginBottom: '16px',
+                    gap: '12px'
+                  }}>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--txt2)', lineHeight: 1.4 }}>
+                      These are rough AI estimates based on topic coverage and time available — not predictions. Actual scores depend on your exam format, professor, and preparation quality.
+                    </span>
+                    <button
+                      onClick={() => setShowDisclaimer(false)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: 'var(--warning)',
+                        cursor: 'pointer',
+                        fontSize: '1.2rem',
+                        fontWeight: 'bold',
+                        padding: '0 4px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        lineHeight: 1,
+                        opacity: 0.8,
+                        transition: 'opacity 0.15s'
+                      }}
+                      onMouseEnter={(e) => e.target.style.opacity = 1}
+                      onMouseLeave={(e) => e.target.style.opacity = 0.8}
+                    >
+                      ×
+                    </button>
+                  </div>
+                )}
+
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12 }}>
                   {[
                     { label: 'Minimum', val: result.expectedScore.minimum, color: 'var(--danger)' },
@@ -208,7 +275,7 @@ const CheatCodePage = () => {
                     { label: 'Best Case', val: result.expectedScore.maximum, color: 'var(--success)' },
                   ].map(s => (
                     <div key={s.label} style={{ textAlign: 'center', background: 'var(--bg-elevated)', borderRadius: 10, padding: '14px' }}>
-                      <div style={{ fontSize: '1.6rem', fontWeight: 900, color: s.color }}>{s.val}</div>
+                      <div style={{ fontSize: '1.6rem', fontWeight: 900, color: s.color }}>{formatScore(s.val)}</div>
                       <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 4, fontWeight: 600 }}>{s.label}</div>
                     </div>
                   ))}
