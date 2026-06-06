@@ -14,7 +14,6 @@ const rateLimitSchema = new mongoose.Schema({
 
 // TTL index: MongoDB auto-deletes documents when resetAt is reached
 rateLimitSchema.index({ resetAt: 1 }, { expireAfterSeconds: 0 });
-rateLimitSchema.index({ key: 1 }, { unique: true });
 
 const RateLimit = mongoose.model('RateLimit', rateLimitSchema);
 
