@@ -1,0 +1,18 @@
+# Node Modules
+frontend/node_modules/
+backend/node_modules/
+
+
+
+# Build Files
+frontend/dist/
+frontend/build/
+backend/dist/
+backend/build/
+
+# Logs
+*.log
+
+# OS Files
+.DS_Store
+Thumbs.db

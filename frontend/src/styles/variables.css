@@ -1,0 +1,174 @@
+/* ================================================
+   SSP Design System — CSS Variables (Premium Modern)
+   ================================================ */
+
+:root {
+  /* ── Brand Colors ── */
+  --brand-primary: #6366f1;
+  --brand-primary-light: #818cf8;
+  --brand-primary-dark: #4f46e5;
+  --brand-secondary: #8b5cf6;
+  --brand-secondary-light: #a78bfa;
+  --brand-accent: #06b6d4;
+  --brand-accent-light: #22d3ee;
+  --brand-success: #10b981;
+  --brand-warning: #f59e0b;
+  --brand-danger: #ef4444;
+
+  /* ── Legacy compat aliases ── */
+  --accent: #6366f1;
+  --accent2: #8b5cf6;
+  --accent3: #06b6d4;
+  --accent4: #f59e0b;
+  --accent-hover: #818cf8;
+  --primary: #6366f1;
+  --primary-light: #818cf8;
+  --primary-dark: #4f46e5;
+  --primary-glow: rgba(99, 102, 241, 0.2);
+  --primary-glow-strong: rgba(99, 102, 241, 0.35);
+  --secondary: #8b5cf6;
+  --secondary-light: #a78bfa;
+  --secondary-glow: rgba(139, 92, 246, 0.2);
+  --accent-cyan: #06b6d4;
+  --accent-cyan-light: #22d3ee;
+  --accent-emerald: #10b981;
+  --accent-orange: #f59e0b;
+
+  /* ── Backgrounds ── */
+  --bg: #0f0f1a;
+  --bg2: #1a1a2e;
+  --surface: #1a1a2e;
+  --surface2: #1f1f3a;
+  --bg-card: #16162a;
+  --bg-elevated: #1f1f3a;
+  --bg-hover: #252540;
+  --bg-input: #1a1a2e;
+
+  /* ── Legacy compat aliases ── */
+  --bg-base: #0f0f1a;
+  --bg-surface: #1a1a2e;
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border-default: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.2);
+
+  /* ── Text ── */
+  --txt: #ffffff;
+  --txt2: #e5e5e5;
+  --txt3: #a1a1aa;
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --text-disabled: #52525b;
+
+  /* ── Status Colors ── */
+  --success: #10b981;
+  --success-bg: rgba(16, 185, 129, 0.1);
+  --success-border: rgba(16, 185, 129, 0.3);
+  --warning: #f59e0b;
+  --warning-bg: rgba(245, 158, 11, 0.1);
+  --warning-border: rgba(245, 158, 11, 0.3);
+  --danger: #ef4444;
+  --danger-bg: rgba(239, 68, 68, 0.1);
+  --danger-border: rgba(239, 68, 68, 0.3);
+  --info: #06b6d4;
+  --info-bg: rgba(6, 182, 212, 0.1);
+  --info-border: rgba(6, 182, 212, 0.3);
+
+  /* ── Gradients ── */
+  --grad1: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+  --grad2: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+  --grad3: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+  --grad4: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+  --brand-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+  --brand-gradient-subtle: linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(139,92,246,0.1) 100%);
+  --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+  --gradient-secondary: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+  --gradient-success: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+  --gradient-warm: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+
+  /* ── Borders ── */
+  --border: rgba(255, 255, 255, 0.1);
+  --border2: rgba(255, 255, 255, 0.15);
+  --border-glow: rgba(99, 102, 241, 0.4);
+
+  /* ── Typography ── */
+  --font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* ── Border Radius ── */
+  --r4: 4px;
+  --r8: 8px;
+  --r12: 12px;
+  --r16: 16px;
+  --r20: 20px;
+  --r24: 24px;
+  --r-sm: 8px;
+  --r: 10px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 24px;
+  --r-2xl: 32px;
+  --r-full: 9999px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* ── Spacing ── */
+  --s1: 4px;  --s2: 8px;  --s3: 12px; --s4: 16px;
+  --s5: 20px; --s6: 24px; --s7: 28px; --s8: 32px;
+  --s10: 40px; --s12: 48px; --s16: 64px;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 16px 64px rgba(0, 0, 0, 0.6);
+  --shadow-glow-primary: 0 0 40px rgba(99, 102, 241, 0.3);
+  --shadow-glow-success: 0 0 20px rgba(16, 185, 129, 0.2);
+  --shadow-glow: 0 0 40px rgba(99, 102, 241, 0.3);
+
+  /* ── Transitions ── */
+  --t-fast: 150ms ease;
+  --t: 300ms ease;
+  --t-slow: 500ms ease;
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+
+  /* ── Layout ── */
+  --sidebar-w: 280px;
+  --navbar-h: 72px;
+}
+
+/* ── Light Theme ── */
+.light {
+  --bg: #F8F9FF;
+  --bg2: #EEEEF8;
+  --surface: #FFFFFF;
+  --surface2: #F2F2FA;
+  --bg-card: #FFFFFF;
+  --bg-elevated: #F5F5FC;
+  --bg-hover: #EBEBF5;
+  --bg-input: #F5F5FC;
+  --bg-base: #F8F9FF;
+  --bg-surface: #EEEEF8;
+
+  --txt: #0A0A1A;
+  --txt2: #444466;
+  --txt3: #8888AA;
+  --text-primary: #0A0A1A;
+  --text-secondary: #444466;
+  --text-muted: #8888AA;
+  --text-disabled: #BBBBCC;
+
+  --border: rgba(0, 0, 0, 0.08);
+  --border2: rgba(0, 0, 0, 0.12);
+  --border-subtle: #E2E2F0;
+  --border-default: #CBCBE0;
+  --border-strong: #AAAAC0;
+}

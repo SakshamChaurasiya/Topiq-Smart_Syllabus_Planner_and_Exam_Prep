@@ -1,0 +1,377 @@
+/* ================================================
+   SSP — Gamification UI Styles
+   ================================================ */
+
+/* ── XP Progress Bar ── */
+.xp-bar {
+  background: var(--bg-elevated);
+  border-radius: var(--r-full);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.xp-icon {
+  font-size: 1.5rem;
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.xp-info {
+  flex: 1;
+}
+
+.xp-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.xp-level {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+}
+
+.xp-progress {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--r-full);
+  overflow: hidden;
+}
+
+.xp-progress-fill {
+  height: 100%;
+  background: var(--gradient-primary);
+  border-radius: var(--r-full);
+  animation: progressFill 1s ease forwards;
+  position: relative;
+}
+
+.xp-progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+/* ── Streak Badge ── */
+.streak-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(239, 68, 68, 0.2));
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--r-full);
+  font-weight: 700;
+  color: var(--text-primary);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
+  transition: all var(--t);
+}
+
+.streak-badge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 30px rgba(245, 158, 11, 0.3);
+}
+
+.streak-icon {
+  font-size: 1.2rem;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+.streak-count {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #f59e0b;
+}
+
+/* ── Achievement Badge ── */
+.achievement-badge {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  transition: all var(--t);
+  cursor: pointer;
+}
+
+.achievement-badge:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-glow);
+}
+
+.achievement-badge.locked {
+  opacity: 0.5;
+  filter: grayscale(1);
+}
+
+.achievement-badge.locked:hover {
+  transform: none;
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+.achievement-icon {
+  width: 64px;
+  height: 64px;
+  background: var(--gradient-primary);
+  border-radius: var(--r-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  box-shadow: var(--shadow-glow);
+}
+
+.achievement-badge.locked .achievement-icon {
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.achievement-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.achievement-desc {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+/* ── Level Badge ── */
+.level-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--gradient-primary);
+  border-radius: var(--r-full);
+  font-weight: 700;
+  font-size: 0.9rem;
+  box-shadow: var(--shadow-glow);
+}
+
+.level-number {
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+/* ── XP Reward Popup ── */
+.xp-reward {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  background: var(--bg-card);
+  border: 2px solid var(--accent);
+  border-radius: var(--r-xl);
+  padding: 32px 48px;
+  text-align: center;
+  z-index: 2000;
+  box-shadow: var(--shadow-xl);
+  animation: badgeUnlock 0.6s ease forwards;
+}
+
+.xp-reward.show {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.xp-reward-amount {
+  font-size: 3rem;
+  font-weight: 900;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+
+.xp-reward-label {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+.xp-reward-icon {
+  font-size: 4rem;
+  margin-bottom: 16px;
+  animation: celebrate 0.6s ease;
+}
+
+/* ── Mission XP Tag ── */
+.mission-xp {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--r-full);
+  color: #f59e0b;
+  font-weight: 700;
+  font-size: 0.8rem;
+  transition: all var(--t);
+}
+
+.mission-xp:hover {
+  background: rgba(245, 158, 11, 0.25);
+  transform: scale(1.05);
+}
+
+/* ── Progress Ring with XP ── */
+.progress-ring-xp {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress-ring-xp .xp-center {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress-ring-xp .xp-value {
+  font-size: 1.5rem;
+  font-weight: 900;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.progress-ring-xp .xp-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ── Leaderboard Row ── */
+.leaderboard-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  transition: all var(--t);
+}
+
+.leaderboard-row:hover {
+  border-color: var(--accent);
+  transform: translateX(4px);
+}
+
+.leaderboard-row.top-3 {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(239, 68, 68, 0.1));
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.leaderboard-rank {
+  width: 32px;
+  height: 32px;
+  background: var(--surface);
+  border-radius: var(--r-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.leaderboard-row.top-3 .leaderboard-rank {
+  background: var(--gradient-warm);
+  color: white;
+}
+
+.leaderboard-avatar {
+  width: 40px;
+  height: 40px;
+  background: var(--gradient-primary);
+  border-radius: var(--r-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.leaderboard-info {
+  flex: 1;
+}
+
+.leaderboard-name {
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.leaderboard-xp {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.leaderboard-total {
+  font-weight: 800;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .xp-bar {
+    padding: 12px 16px;
+  }
+  
+  .xp-icon {
+    font-size: 1.2rem;
+  }
+  
+  .xp-label {
+    font-size: 0.8rem;
+  }
+  
+  .streak-badge {
+    padding: 10px 16px;
+    font-size: 0.85rem;
+  }
+  
+  .achievement-badge {
+    padding: 16px;
+  }
+  
+  .achievement-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 1.5rem;
+  }
+}
