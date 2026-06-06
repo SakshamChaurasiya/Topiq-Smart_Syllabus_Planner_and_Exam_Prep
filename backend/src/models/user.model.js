@@ -1,4 +1,22 @@
-/**
+const mongoose = require("mongoose");
+
+const userSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        require: true
+    },
+    email: {
+        type: string,
+        require: true
+    },
+    password: {
+        type: string,
+        require: true
+    }
+});
+
+
+module.exports = mongoose.model('User', userSchema);/**
  * user.model.js
  * Defines the User schema for MongoDB.
  * Stores authentication info and basic profile.
