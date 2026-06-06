@@ -1,70 +1,66 @@
-// Topbar.jsx — Motivational top bar with dynamic greetings
+// Topbar.jsx — Motivational top bar with Lucide icons
 import { useAuth } from '../../context/AuthContext';
+import { Trophy, Target, CheckCircle, Zap } from 'lucide-react';
 
 const motivationalMessages = [
-  '🔥 Keep the streak going!',
-  '🚀 You got this — study smart today',
-  '🎯 Small missions. Big results.',
-  '⚡ Complete More. Stress Less.',
-  '🏆 Study Smarter. Score Better.',
-  '💪 Every topic completed counts!',
+  'Keep the streak going!',
+  'You got this — study smart today',
+  'Small missions. Big results.',
+  'Complete More. Stress Less.',
+  'Study Smarter. Score Better.',
+  'Every topic completed counts!',
 ];
+
+const goalMeta = {
+  excellent: { label: 'Topper Mode', color: '#f59e0b', Icon: Trophy },
+  good:      { label: 'Score Mode',  color: '#6366f1', Icon: Target },
+  pass:      { label: 'Pass Mode',   color: '#10b981', Icon: CheckCircle },
+};
 
 const Topbar = ({ title, subtitle }) => {
   const { user } = useAuth();
 
   const hour = new Date().getHours();
-  const greeting = hour < 5 ? '🌙 Night owl' : hour < 12 ? '☀️ Good morning' : hour < 17 ? '🌤 Good afternoon' : '🌙 Good evening';
+  const greeting =
+    hour < 5  ? 'Night owl' :
+    hour < 12 ? 'Good morning' :
+    hour < 17 ? 'Good afternoon' :
+                'Good evening';
   const msg = motivationalMessages[new Date().getDay() % motivationalMessages.length];
 
-  const goalColors = { excellent: '#f59e0b', good: '#6366f1', pass: '#10b981' };
-  const goalLabels = { excellent: '🏆 Topper', good: '🎯 Score', pass: '✅ Pass' };
+  const meta = goalMeta[user?.targetGoal] || goalMeta.good;
+  const { label: goalLabel, color: goalColor, Icon: GoalIcon } = meta;
 
   return (
     <header className="topbar">
-      <div>
+      <div className="topbar-left">
         {title ? (
           <>
-            <h2 style={{ fontSize: '1rem', fontWeight: 700, margin: 0, letterSpacing: '-0.02em' }}>{title}</h2>
-            {subtitle && <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>{subtitle}</p>}
+            <h2 className="topbar-title">{title}</h2>
+            {subtitle && <p className="topbar-subtitle">{subtitle}</p>}
           </>
         ) : (
           <div>
-            <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginBottom: 1 }}>
+            <div className="topbar-greeting">
               {greeting},{' '}
-              <strong style={{ color: 'var(--text-primary)', fontWeight: 700 }}>
-                {user?.name?.split(' ')[0] || 'Student'}
-              </strong>
+              <strong className="topbar-name">{user?.name?.split(' ')[0] || 'Student'}</strong>
             </div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-disabled)', fontWeight: 500 }}>{msg}</div>
+            <div className="topbar-msg">{msg}</div>
           </div>
         )}
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      <div className="topbar-right">
         {/* Goal badge */}
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 6,
-          background: `${goalColors[user?.targetGoal] || '#6366f1'}15`,
-          border: `1px solid ${goalColors[user?.targetGoal] || '#6366f1'}35`,
-          borderRadius: 'var(--r-full)', padding: '5px 14px',
-          fontSize: '0.75rem', fontWeight: 700,
-          color: goalColors[user?.targetGoal] || 'var(--primary-light)',
-        }}>
-          {goalLabels[user?.targetGoal] || '🎯 Score'} Mode
+        <div className="topbar-goal-badge" style={{ '--goal-color': goalColor }}>
+          <GoalIcon size={13} strokeWidth={2.5} style={{ color: goalColor }} />
+          <span style={{ color: goalColor }}>{goalLabel}</span>
         </div>
 
-        {/* Brand identifier */}
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 7,
-          background: 'var(--bg-elevated)',
-          border: '1px solid var(--border-subtle)',
-          borderRadius: 'var(--r-full)', padding: '5px 14px',
-        }}>
-          <span style={{ fontSize: '0.7rem' }}>⚡</span>
-          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '-0.01em' }}>
-            Smart Syllabus Planner
-          </span>
+        {/* Brand chip */}
+        <div className="topbar-brand-chip">
+          <Zap size={12} strokeWidth={2.5} />
+          <span>SSP</span>
         </div>
       </div>
     </header>

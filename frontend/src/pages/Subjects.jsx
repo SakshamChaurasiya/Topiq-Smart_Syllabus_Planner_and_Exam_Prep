@@ -7,6 +7,7 @@ import Modal from '../components/ui/Modal';
 import EmptyState from '../components/ui/EmptyState';
 import { LoadingScreen } from '../components/ui/LoadingSpinner';
 import toast from 'react-hot-toast';
+import { BookOpen, Plus, Pencil, Trash2 } from 'lucide-react';
 
 const Subjects = () => {
   const [subjects, setSubjects] = useState([]);
@@ -73,18 +74,18 @@ const Subjects = () => {
           <h1>My Subjects</h1>
           <p>{subjects.length} subject{subjects.length !== 1 ? 's' : ''} — upload a syllabus to start AI analysis</p>
         </div>
-        <button className="btn btn-primary" onClick={openAdd}>
-          ➕ Add Subject
+        <button className="btn btn-primary" onClick={openAdd} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Plus size={16} strokeWidth={2.5} /> Add Subject
         </button>
       </div>
 
       {/* Subjects grid or empty state */}
       {!subjects.length ? (
         <EmptyState
-          icon="📚"
+          icon={<BookOpen size={42} strokeWidth={1} color="var(--text-disabled)" />}
           title="No subjects yet"
           description="Add your first subject, then upload the syllabus to get started."
-          action={<button className="btn btn-primary" onClick={openAdd}>➕ Add Your First Subject</button>}
+          action={<button className="btn btn-primary" onClick={openAdd} style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Plus size={15} strokeWidth={2.5} /> Add Your First Subject</button>}
         />
       ) : (
         <div className="subjects-grid">
@@ -110,7 +111,9 @@ const Subjects = () => {
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.background = 'var(--primary-glow)'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.background = 'var(--bg-card)'; }}
           >
-            <div style={{ width: 48, height: 48, borderRadius: 12, background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>➕</div>
+            <div style={{ width: 48, height: 48, borderRadius: 12, background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+              <Plus size={24} strokeWidth={1.75} />
+            </div>
             <div style={{ fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Add Subject</div>
           </div>
         </div>
@@ -120,7 +123,9 @@ const Subjects = () => {
       <Modal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editTarget ? '✏️ Edit Subject' : '➕ Add New Subject'}
+        title={editTarget
+          ? <span style={{ display: 'flex', alignItems: 'center', gap: 7 }}><Pencil size={16} /> Edit Subject</span>
+          : <span style={{ display: 'flex', alignItems: 'center', gap: 7 }}><Plus size={16} /> Add New Subject</span>}
       >
         <SubjectForm
           initial={editTarget}
@@ -134,7 +139,7 @@ const Subjects = () => {
       <Modal
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
-        title="🗑️ Delete Subject"
+        title={<span style={{ display: 'flex', alignItems: 'center', gap: 7, color: 'var(--danger)' }}><Trash2 size={16} /> Delete Subject</span>}
         size="sm"
         footer={
           <>

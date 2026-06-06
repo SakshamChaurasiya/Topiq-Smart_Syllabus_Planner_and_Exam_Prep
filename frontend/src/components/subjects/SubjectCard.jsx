@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import ProgressRing from '../ui/ProgressRing';
 import Badge from '../ui/Badge';
 import { format } from 'date-fns';
+import { Pencil, Trash2 } from 'lucide-react';
 
 const difficultyColors = { easy: 'var(--success)', medium: 'var(--warning)', hard: 'var(--danger)' };
 const priorityType    = { low: 'low', medium: 'medium', high: 'high', critical: 'critical' };
@@ -96,15 +97,15 @@ const SubjectCard = ({ subject, onEdit, onDelete }) => {
         {/* Action buttons */}
         <div style={{ display: 'flex', gap: 6 }} onClick={(e) => e.stopPropagation()}>
           <button
-            className="btn btn-secondary btn-sm"
+            className="btn btn-secondary btn-sm btn-icon"
             onClick={() => onEdit(subject)}
             title="Edit subject"
-          >✏️</button>
+          ><Pencil size={13} strokeWidth={2} /></button>
           <button
-            className="btn btn-danger btn-sm"
+            className="btn btn-danger btn-sm btn-icon"
             onClick={() => onDelete(subject)}
             title="Delete subject"
-          >🗑️</button>
+          ><Trash2 size={13} strokeWidth={2} /></button>
         </div>
       </div>
     </div>

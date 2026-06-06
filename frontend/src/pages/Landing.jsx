@@ -2,6 +2,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import {
+  Zap, BrainCircuit, Flame, Target, Map,
+  BarChart2, RefreshCcw, Upload, Sparkles, Rocket,
+  ArrowRight, LogIn,
+} from 'lucide-react';
 
 /* Animated counter hook */
 const useCounter = (target, duration = 1500) => {
@@ -21,37 +26,37 @@ const useCounter = (target, duration = 1500) => {
 
 const features = [
   {
-    icon: '🤖', color: '#6366f1', bg: 'rgba(99,102,241,0.12)',
+    Icon: BrainCircuit, color: '#6366f1', bg: 'rgba(99,102,241,0.12)',
     title: 'AI Syllabus Analyzer',
     desc: 'Upload any syllabus PDF. AI extracts every topic, rates difficulty, estimates marks weightage, and builds your priority list — in under 2 minutes.',
     tag: 'Most Popular',
   },
   {
-    icon: '⚡', color: '#ef4444', bg: 'rgba(239,68,68,0.12)',
+    Icon: Zap, color: '#ef4444', bg: 'rgba(239,68,68,0.12)',
     title: 'Cheat Code System',
     desc: '1 day left? 3 days? Activate survival mode. AI tells you exactly what to study, what to skip, and your hourly schedule to maximize marks.',
     tag: 'Game Changer',
   },
   {
-    icon: '🎯', color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',
+    Icon: Target, color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',
     title: 'Daily Mission Engine',
     desc: 'No more long timetables. Small, actionable missions: Study Topic 3.1 → Solve 5 questions → Revise notes. Done. Next.',
     tag: 'Most Used',
   },
   {
-    icon: '🗺️', color: '#06b6d4', bg: 'rgba(6,182,212,0.12)',
+    Icon: Map, color: '#06b6d4', bg: 'rgba(6,182,212,0.12)',
     title: 'Smart Study Roadmap',
     desc: 'AI-generated day-by-day plan based on your exam date, available hours, and target score. Adjusts as you complete topics.',
     tag: 'AI-Powered',
   },
   {
-    icon: '📊', color: '#10b981', bg: 'rgba(16,185,129,0.12)',
+    Icon: BarChart2, color: '#10b981', bg: 'rgba(16,185,129,0.12)',
     title: 'Exam Readiness Score',
     desc: 'Know exactly where you stand. Live readiness percentage, weak topic radar, and smart recommendations to close the gap.',
     tag: 'Real-Time',
   },
   {
-    icon: '🔄', color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)',
+    Icon: RefreshCcw, color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)',
     title: 'Revision Radar',
     desc: 'AI tracks which topics you completed and schedules revision sessions before you forget. Spaced repetition built-in.',
     tag: 'Smart',
@@ -65,10 +70,10 @@ const testimonials = [
 ];
 
 const steps = [
-  { n: '01', icon: '📤', t: 'Upload Syllabus', d: 'PDF, image, or paste text' },
-  { n: '02', icon: '🤖', t: 'AI Analyzes', d: 'Topics extracted in seconds' },
-  { n: '03', icon: '🗺️', t: 'Get Your Plan', d: 'Personalized roadmap + missions' },
-  { n: '04', icon: '✅', t: 'Execute Daily', d: 'Complete missions, ace exams' },
+  { n: '01', Icon: Upload,      t: 'Upload Syllabus', d: 'PDF, image, or paste text' },
+  { n: '02', Icon: BrainCircuit, t: 'AI Analyzes',   d: 'Topics extracted in seconds' },
+  { n: '03', Icon: Map,         t: 'Get Your Plan',  d: 'Personalized roadmap + missions' },
+  { n: '04', Icon: Sparkles,    t: 'Execute Daily',  d: 'Complete missions, ace exams' },
 ];
 
 const Landing = () => {
@@ -92,16 +97,20 @@ const Landing = () => {
       {/* ── NAVBAR ── */}
       <nav className="landing-nav">
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--brand-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', boxShadow: 'var(--shadow-glow)' }}>⚡</div>
+          <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--brand-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', boxShadow: 'var(--shadow-glow)' }}>
+            <Zap size={22} strokeWidth={2.5} />
+          </div>
           <div>
             <div style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>SMART SYLLABUS PLANNER</div>
             <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Your AI-Powered Exam Survival Assistant</div>
           </div>
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <button className="btn btn-ghost" onClick={() => navigate('/login')} style={{ fontSize: '0.9rem' }}>Sign In</button>
-          <button className="btn-cta" onClick={() => navigate('/register')} style={{ padding: '12px 28px', fontSize: '0.9rem', borderRadius: 'var(--r-full)' }}>
-            🚀 Get Started Free
+          <button className="btn btn-ghost" onClick={() => navigate('/login')} style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <LogIn size={15} strokeWidth={2} /> Sign In
+          </button>
+          <button className="btn-cta" onClick={() => navigate('/register')} style={{ padding: '12px 28px', fontSize: '0.9rem', borderRadius: 'var(--r-full)', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Rocket size={16} strokeWidth={2} /> Get Started Free
           </button>
         </div>
       </nav>
@@ -134,11 +143,11 @@ const Landing = () => {
 
           {/* CTAs */}
           <div className="hero-ctas">
-            <button className="btn-cta" onClick={() => navigate('/register')}>
-              🎯 Start Planning Free
+            <button className="btn-cta" onClick={() => navigate('/register')} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Target size={16} strokeWidth={2} /> Start Planning Free
             </button>
-            <button className="btn-outline-primary" onClick={() => navigate('/login')}>
-              📺 Watch Demo
+            <button className="btn-outline-primary" onClick={() => navigate('/login')} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <LogIn size={15} strokeWidth={2} /> Sign In
             </button>
           </div>
 
@@ -195,8 +204,8 @@ const Landing = () => {
           <div className="feature-grid">
             {features.map((f, i) => (
               <div key={f.title} className="feature-card animate-slide-up" style={{ animationDelay: `${i * 0.06}s` }}>
-                <div className="feature-icon-wrap" style={{ background: f.bg }}>
-                  <span style={{ fontSize: '1.4rem' }}>{f.icon}</span>
+                <div className="feature-icon-wrap" style={{ background: f.bg, color: f.color }}>
+                  <f.Icon size={24} strokeWidth={1.75} />
                 </div>
                 {f.tag && (
                   <span style={{ fontSize: '0.62rem', fontWeight: 800, color: f.color, textTransform: 'uppercase', letterSpacing: '0.08em', background: f.bg, padding: '2px 10px', borderRadius: 100, display: 'inline-block', marginBottom: 10 }}>
@@ -227,7 +236,9 @@ const Landing = () => {
                   onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(99,102,241,0.4)'}
                   onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-default)'}
                 >
-                  <div style={{ fontSize: '2rem', marginBottom: 10 }}>{s.icon}</div>
+                  <div style={{ width: 52, height: 52, borderRadius: 14, background: 'var(--surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px', color: 'var(--primary-light)' }}>
+                    <s.Icon size={24} strokeWidth={1.75} />
+                  </div>
                   <div style={{ fontSize: '0.62rem', color: 'var(--primary-light)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>Step {s.n}</div>
                   <div style={{ fontWeight: 800, fontSize: '0.95rem', marginBottom: 4, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>{s.t}</div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{s.d}</div>
@@ -310,8 +321,12 @@ const Landing = () => {
             Join thousands of students who stopped guessing what to study and started winning with AI-powered exam strategy.
           </p>
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button className="btn-cta" onClick={() => navigate('/register')}>🎯 Start Planning Free</button>
-            <button className="btn-outline-primary" onClick={() => navigate('/login')}>Already a member? Sign In</button>
+            <button className="btn-cta" onClick={() => navigate('/register')} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Target size={16} strokeWidth={2} /> Start Planning Free
+            </button>
+            <button className="btn-outline-primary" onClick={() => navigate('/login')} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <ArrowRight size={15} strokeWidth={2} /> Already a member? Sign In
+            </button>
           </div>
           <p style={{ fontSize: '0.78rem', color: 'var(--text-disabled)', marginTop: 20 }}>
             No credit card required · Works without OpenAI key · Free forever
@@ -322,7 +337,9 @@ const Landing = () => {
       {/* ── FOOTER ── */}
       <footer className="container" style={{ borderTop: '1px solid var(--border-subtle)', padding: '24px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 8, background: 'var(--brand-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem' }}>⚡</div>
+          <div style={{ width: 28, height: 28, borderRadius: 8, background: 'var(--brand-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+            <Zap size={14} strokeWidth={2.5} />
+          </div>
           <div>
             <div style={{ fontWeight: 800, fontSize: '0.8rem', color: 'var(--text-primary)' }}>Smart Syllabus Planner</div>
             <div style={{ fontSize: '0.62rem', color: 'var(--text-muted)' }}>AI Exam Survival Assistant</div>

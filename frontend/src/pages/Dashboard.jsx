@@ -11,6 +11,12 @@ import XPProgressBar from '../components/gamification/XPProgressBar';
 import StreakBadge from '../components/gamification/StreakBadge';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
+import {
+  BookOpen, Target, CalendarDays, Bell, Map,
+  Check, RefreshCcw, FileText, Plus, Rocket,
+  AlertTriangle, Zap, Lightbulb, ArrowRight,
+  BookMarked, ChevronRight,
+} from 'lucide-react';
 
 /* Motivational messages keyed to readiness % */
 const getReadinessMsg = (pct) => {
@@ -118,35 +124,35 @@ const Dashboard = () => {
       <div className="stats-grid" style={{ marginBottom: 32 }}>
         {[
           {
-            icon: '📚', label: 'Subjects',
+            Icon: BookOpen, label: 'Subjects',
             value: overview.totalSubjects || 0,
             color: 'var(--primary-light)', bg: 'rgba(99,102,241,0.1)',
             sub: 'enrolled',
           },
           {
-            icon: '🎯', label: 'Missions Today',
+            Icon: Target, label: 'Missions Today',
             value: `${todayStats.completed || 0}/${todayStats.total || 0}`,
             color: todayStats.completionRate >= 80 ? 'var(--success)' : 'var(--warning)',
             bg: 'rgba(245,158,11,0.1)',
             sub: `${todayStats.completionRate || 0}% done`,
           },
           {
-            icon: '📅', label: 'Upcoming Exams',
+            Icon: CalendarDays, label: 'Upcoming Exams',
             value: upcomingExams.length || 0,
             color: upcomingExams.some(e => e.daysLeft <= 3) ? 'var(--danger)' : 'var(--accent-cyan)',
             bg: 'rgba(6,182,212,0.1)',
             sub: upcomingExams[0] ? `Next: ${upcomingExams[0].name}` : 'No exams set',
           },
           {
-            icon: '🔔', label: 'Notifications',
+            Icon: Bell, label: 'Notifications',
             value: overview.unreadNotifications || 0,
             color: 'var(--secondary-light)', bg: 'rgba(139,92,246,0.1)',
             sub: 'unread alerts',
           },
         ].map((s, i) => (
           <div key={s.label} className="stat-card animate-slide-up" style={{ animationDelay: `${i * 0.06}s` }}>
-            <div className="stat-icon" style={{ background: s.bg }}>
-              <span style={{ fontSize: '1.1rem' }}>{s.icon}</span>
+            <div className="stat-icon" style={{ background: s.bg, color: s.color }}>
+              <s.Icon size={22} strokeWidth={1.75} />
             </div>
             <div>
               <div className="stat-value" style={{ color: s.color }}>{s.value}</div>
@@ -199,7 +205,10 @@ const Dashboard = () => {
           <div className="card-glow">
             <div className="card-header">
               <div>
-                <div className="card-title">🎯 Today's Missions</div>
+                <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                <Target size={16} strokeWidth={2} style={{ color: 'var(--warning)' }} />
+                Today's Missions
+              </div>
                 {missionMsg && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 2 }}>{missionMsg}</div>}
               </div>
               <button className="btn btn-secondary btn-sm" onClick={() => navigate('/missions')}>View All</button>
@@ -207,12 +216,12 @@ const Dashboard = () => {
 
             {!todayMissions?.length ? (
               <EmptyState
-                icon="🎯"
+                icon={<Target size={40} strokeWidth={1} color="var(--text-disabled)" />}
                 title="No missions yet today"
                 description="Generate a study plan for any subject to activate daily missions and start your execution streak."
                 action={
                   <button className="btn btn-primary" onClick={() => navigate('/subjects')}>
-                    📚 Set Up Subjects →
+                    <BookOpen size={15} strokeWidth={2} /> Set Up Subjects
                   </button>
                 }
               />
@@ -225,7 +234,7 @@ const Dashboard = () => {
                       onClick={() => mission.status !== 'completed' && completeMission(mission._id)}
                       style={{ cursor: mission.status === 'completed' ? 'default' : 'pointer' }}
                     >
-                      {mission.status === 'completed' && <span style={{ color: '#fff', fontSize: '0.75rem', fontWeight: 700 }}>✓</span>}
+                      {mission.status === 'completed' && <Check size={13} strokeWidth={3} style={{ color: '#fff' }} />}
                     </div>
 
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -240,14 +249,18 @@ const Dashboard = () => {
                         <Badge type={mission.priority} label={mission.priority} />
                       </div>
                       <div style={{ display: 'flex', gap: 12, fontSize: '0.72rem', color: 'var(--text-disabled)', flexWrap: 'wrap' }}>
-                        {mission.subjectId?.name && <span>📚 {mission.subjectId.name}</span>}
-                        <span>⏱ {mission.estimatedMinutes} min</span>
-                        <span>⭐ {mission.xpReward} XP</span>
+                        {mission.subjectId?.name && <span><BookOpen size={11} strokeWidth={2} style={{ display: 'inline', verticalAlign: 'middle' }} /> {mission.subjectId.name}</span>}
+                        <span>{mission.estimatedMinutes} min</span>
+                        <span>{mission.xpReward} XP</span>
                       </div>
                     </div>
 
-                    <div style={{ fontSize: '1rem' }}>
-                      {mission.type === 'study' ? '📖' : mission.type === 'revision' ? '🔄' : '📝'}
+                    <div style={{ color: 'var(--text-muted)' }}>
+                      {mission.type === 'study'
+                        ? <BookMarked size={16} strokeWidth={1.75} />
+                        : mission.type === 'revision'
+                        ? <RefreshCcw size={16} strokeWidth={1.75} />
+                        : <FileText size={16} strokeWidth={1.75} />}
                     </div>
                   </div>
                 ))}
@@ -262,7 +275,10 @@ const Dashboard = () => {
           {/* Upcoming Exams */}
           <div className="card-glow">
             <div className="card-header">
-              <div className="card-title">📅 Exam Countdown</div>
+              <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                <CalendarDays size={16} strokeWidth={2} style={{ color: 'var(--accent-cyan)' }} />
+                Exam Countdown
+              </div>
               <button className="btn btn-ghost btn-sm" onClick={() => navigate('/subjects')} style={{ fontSize: '0.72rem' }}>+ Add</button>
             </div>
             {!upcomingExams?.length ? (
@@ -303,7 +319,10 @@ const Dashboard = () => {
           {weakSubjects?.length > 0 && (
             <div className="card-glow" style={{ borderColor: 'rgba(239,68,68,0.2)', background: 'rgba(239,68,68,0.03)' }}>
               <div className="card-header">
-                <div className="card-title" style={{ color: 'var(--danger)' }}>⚠️ Revision Radar</div>
+                <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 7, color: 'var(--danger)' }}>
+                  <AlertTriangle size={16} strokeWidth={2} />
+                  Revision Radar
+                </div>
                 <span className="badge badge-danger">{weakSubjects.length} low</span>
               </div>
               <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: 10, margin: '0 0 10px' }}>
@@ -318,7 +337,7 @@ const Dashboard = () => {
                   </div>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                     <span style={{ fontSize: '0.78rem', color: 'var(--danger)', fontWeight: 800 }}>{sub.progress}%</span>
-                    <span style={{ fontSize: '0.68rem', color: 'var(--primary-light)', fontWeight: 600 }}>⚡ Cheat Code</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: '0.68rem', color: 'var(--primary-light)', fontWeight: 600 }}><Zap size={10} strokeWidth={2.5} /> Cheat Code</span>
                   </div>
                 </div>
               ))}
@@ -329,7 +348,10 @@ const Dashboard = () => {
           {activePlans?.length > 0 && (
             <div className="card-glow">
               <div className="card-header">
-                <div className="card-title">🗺️ Active Plans</div>
+                <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                  <Map size={16} strokeWidth={2} style={{ color: 'var(--accent-cyan)' }} />
+                  Active Plans
+                </div>
               </div>
               {activePlans.slice(0, 3).map(plan => (
                 <div key={plan._id} style={{ marginBottom: 10, cursor: 'pointer' }} onClick={() => navigate(`/subjects/${plan.subjectId?._id}/planner`)}>
@@ -351,15 +373,18 @@ const Dashboard = () => {
           {/* Smart Recommendations */}
           <div className="card-glow" style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.06), rgba(6,182,212,0.04))' }}>
             <div className="card-header">
-              <div className="card-title">💡 Smart Recommendations</div>
+              <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                <Lightbulb size={16} strokeWidth={2} style={{ color: 'var(--warning)' }} />
+                Smart Recommendations
+              </div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {[
-                !subjects.length && { icon: '📚', text: 'Add your subjects to get started', action: () => navigate('/subjects'), color: 'var(--primary-light)' },
-                subjects.some(s => !s.hasSyllabus) && { icon: '📤', text: 'Upload syllabuses for AI analysis', action: () => navigate('/subjects'), color: 'var(--accent-cyan)' },
-                !activePlans?.length && subjects.length > 0 && { icon: '🗺️', text: 'Generate your first study plan', action: () => navigate('/subjects'), color: 'var(--warning)' },
-                weakSubjects?.length > 0 && { icon: '⚡', text: 'Activate Cheat Code for weak subjects', action: () => navigate(`/subjects/${weakSubjects[0]?.id}/cheatcode`), color: 'var(--danger)' },
-                { icon: '🎯', text: 'Complete today\'s missions to build streak', action: () => navigate('/missions'), color: 'var(--success)' },
+                !subjects.length && { Icon: BookOpen, text: 'Add your subjects to get started', action: () => navigate('/subjects'), color: 'var(--primary-light)' },
+                subjects.some(s => !s.hasSyllabus) && { Icon: BookOpen, text: 'Upload syllabuses for AI analysis', action: () => navigate('/subjects'), color: 'var(--accent-cyan)' },
+                !activePlans?.length && subjects.length > 0 && { Icon: Map, text: 'Generate your first study plan', action: () => navigate('/subjects'), color: 'var(--warning)' },
+                weakSubjects?.length > 0 && { Icon: Zap, text: 'Activate Cheat Code for weak subjects', action: () => navigate(`/subjects/${weakSubjects[0]?.id}/cheatcode`), color: 'var(--danger)' },
+                { Icon: Target, text: "Complete today's missions to build streak", action: () => navigate('/missions'), color: 'var(--success)' },
               ].filter(Boolean).slice(0, 3).map((rec, i) => rec && (
                 <button key={i} onClick={rec.action} style={{
                   display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
@@ -370,9 +395,9 @@ const Dashboard = () => {
                   onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--border-strong)'}
                   onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-subtle)'}
                 >
-                  <span style={{ fontSize: '1rem', flexShrink: 0 }}>{rec.icon}</span>
+                  <rec.Icon size={16} strokeWidth={1.75} style={{ color: rec.color, flexShrink: 0 }} />
                   <span style={{ fontSize: '0.8rem', fontWeight: 600, color: rec.color, lineHeight: 1.3 }}>{rec.text}</span>
-                  <span style={{ marginLeft: 'auto', color: 'var(--text-disabled)', fontSize: '0.75rem', flexShrink: 0 }}>→</span>
+                  <ChevronRight size={14} strokeWidth={2} style={{ marginLeft: 'auto', color: 'var(--text-disabled)', flexShrink: 0 }} />
                 </button>
               ))}
             </div>
@@ -384,7 +409,10 @@ const Dashboard = () => {
       {subjects?.length > 0 && (
         <div style={{ marginTop: 28 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-            <h3 style={{ fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.02em' }}>📚 Your Subjects</h3>
+            <h3 style={{ fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <BookOpen size={17} strokeWidth={2} style={{ color: 'var(--primary-light)' }} />
+              Your Subjects
+            </h3>
             <button className="btn btn-secondary btn-sm" onClick={() => navigate('/subjects')}>Manage All</button>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(185px, 1fr))', gap: 10 }}>
@@ -422,7 +450,7 @@ const Dashboard = () => {
               onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.background = 'rgba(99,102,241,0.05)'; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.background = 'transparent'; }}
             >
-              <span style={{ fontSize: '1.3rem' }}>➕</span>
+              <Plus size={22} strokeWidth={1.75} style={{ color: 'var(--text-muted)' }} />
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>Add Subject</span>
             </div>
           </div>
@@ -432,13 +460,13 @@ const Dashboard = () => {
       {/* Empty state — no subjects at all */}
       {!subjects?.length && !loading && (
         <div className="card-glow" style={{ marginTop: 28, textAlign: 'center', padding: '48px' }}>
-          <div style={{ fontSize: '3rem', marginBottom: 16 }}>🚀</div>
+          <Rocket size={48} strokeWidth={1.25} style={{ color: 'var(--primary-light)', marginBottom: 16 }} />
           <h2 style={{ fontWeight: 800, marginBottom: 8, letterSpacing: '-0.03em' }}>Start your study journey</h2>
           <p style={{ marginBottom: 24, fontSize: '0.9rem', color: 'var(--text-muted)' }}>
             Add a subject → upload your syllabus → let AI build your personalized roadmap and daily missions.
           </p>
           <button className="btn-cta" onClick={() => navigate('/subjects')}>
-            📚 Add Your First Subject
+            <BookOpen size={16} strokeWidth={2} /> Add Your First Subject
           </button>
         </div>
       )}

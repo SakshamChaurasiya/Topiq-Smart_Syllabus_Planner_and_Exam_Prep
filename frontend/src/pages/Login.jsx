@@ -3,12 +3,13 @@ import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import { Zap, BrainCircuit, Target, Trophy, BarChart2, Eye, EyeOff, LogIn } from 'lucide-react';
 
 const LOGIN_BENEFITS = [
-  { icon: '⚡', title: 'Cheat Code System', desc: '1-day survival mode — know exactly what to study' },
-  { icon: '🤖', title: 'AI Syllabus Analysis', desc: 'Upload PDF → get topics, difficulty & marks weightage' },
-  { icon: '🎯', title: 'Daily Missions', desc: 'Small actionable tasks that actually get done' },
-  { icon: '🏆', title: 'Exam Readiness Score', desc: 'Know your % readiness before exam day' },
+  { Icon: Zap,          title: 'Cheat Code System',   desc: '1-day survival mode — know exactly what to study' },
+  { Icon: BrainCircuit, title: 'AI Syllabus Analysis', desc: 'Upload PDF → get topics, difficulty & marks weightage' },
+  { Icon: Target,       title: 'Daily Missions',       desc: 'Small actionable tasks that actually get done' },
+  { Icon: BarChart2,    title: 'Exam Readiness Score', desc: 'Know your % readiness before exam day' },
 ];
 
 const Login = () => {
@@ -48,7 +49,9 @@ const Login = () => {
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 380, width: '100%' }}>
           {/* Logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 36 }}>
-            <div style={{ width: 48, height: 48, borderRadius: 14, background: 'var(--brand-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', boxShadow: '0 6px 20px rgba(99,102,241,0.4)' }}>⚡</div>
+            <div style={{ width: 48, height: 48, borderRadius: 14, background: 'var(--brand-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', boxShadow: '0 6px 20px rgba(99,102,241,0.4)' }}>
+              <Zap size={22} strokeWidth={2.5} />
+            </div>
             <div>
               <div style={{ fontWeight: 900, fontSize: '1rem', color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Smart Syllabus Planner</div>
               <div style={{ fontSize: '0.65rem', color: 'var(--primary-light)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>AI Exam Survival Assistant</div>
@@ -72,7 +75,9 @@ const Login = () => {
                 borderRadius: 12, padding: '12px 14px',
                 animation: `slideIn 0.4s ease both ${i * 0.07}s`,
               }}>
-                <span style={{ fontSize: '1.1rem', flexShrink: 0, marginTop: 1 }}>{b.icon}</span>
+                <span style={{ flexShrink: 0, marginTop: 2, color: 'var(--primary-light)' }}>
+                  <b.Icon size={18} strokeWidth={1.75} />
+                </span>
                 <div>
                   <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-primary)', marginBottom: 2 }}>{b.title}</div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>{b.desc}</div>
@@ -136,7 +141,7 @@ const Login = () => {
                   onClick={() => setShowPass(v => !v)}
                   style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: '0.9rem', padding: 4 }}
                 >
-                  {showPass ? '🙈' : '👁'}
+                  {showPass ? <EyeOff size={16} strokeWidth={2} /> : <Eye size={16} strokeWidth={2} />}
                 </button>
               </div>
             </div>
@@ -153,7 +158,7 @@ const Login = () => {
                   <div className="spinner" style={{ width: 16, height: 16, borderWidth: 2, borderTopColor: '#fff', borderColor: 'rgba(255,255,255,0.3)' }} />
                   Signing in...
                 </span>
-              ) : '🚀 Sign In'}
+              ) : <><LogIn size={16} strokeWidth={2} /> Sign In</>}
             </button>
           </form>
 
