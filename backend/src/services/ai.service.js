@@ -1,6 +1,6 @@
 /**
  * ai.service.js
- * OpenAI API wrapper for all AI-powered features.
+ * Google Gemini API wrapper for all AI-powered features.
  * Handles: syllabus analysis, study plan generation, cheat codes.
  *
  * GRACEFUL DEGRADATION:
@@ -8,32 +8,32 @@
  * so the rest of the app still works during development.
  */
 
-const OpenAI = require("openai");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-// Initialize OpenAI client only if API key exists
-let openai = null;
-if (process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== "sk-your-openai-api-key-here") {
-    openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// Initialize Gemini client only if API key exists
+let genAI = null;
+if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "your-gemini-api-key-here") {
+    genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 }
 
-// Helper to call OpenAI chat completion
+// Helper to call Gemini chat completion
 const callAI = async (systemPrompt, userPrompt) => {
-    if (!openai) {
-        console.warn("[AI Service] OpenAI key not configured — returning mock response.");
+    if (!genAI) {
+        console.warn("[AI Service] Gemini key not configured — returning mock response.");
         return null; // Caller handles null = mock mode
     }
 
-    const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini", // Cost-effective model
-        messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt },
-        ],
-        temperature: 0.7,
-        response_format: { type: "json_object" }, // Always return valid JSON
+    const model = genAI.getGenerativeModel({
+        model: "gemini-1.5-flash", // Fast and cost-effective model
+        systemInstruction: systemPrompt,
+        generationConfig: {
+            responseMimeType: "application/json", // Always return valid JSON
+            temperature: 0.7,
+        },
     });
 
-    return response.choices[0].message.content;
+    const result = await model.generateContent(userPrompt);
+    return result.response.text();
 };
 
 // ============================================================
@@ -233,7 +233,7 @@ Create an EXAM SURVIVAL CHEAT CODE. Return JSON:
 };
 
 // ============================================================
-// MOCK RESPONSES — Used when OpenAI key is not configured
+// MOCK RESPONSES — Used when Gemini key is not configured
 // ============================================================
 
 const getMockSyllabusAnalysis = (subjectName) => ({
