@@ -23,6 +23,16 @@ const SyllabusPage = () => {
   const [pyqUploading, setPyqUploading] = useState(false);
   const pyqFileInputRef = useRef(null);
 
+  // Flashcards state
+  const [flashcardSet, setFlashcardSet] = useState(null);
+  const [generatingCards, setGeneratingCards] = useState(false);
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const [cardFlipped, setCardFlipped] = useState(false);
+  const [cardFilter, setCardFilter] = useState('all');
+  const [sharingNotes, setSharingNotes] = useState(false);
+  const [shareTitleInput, setShareTitleInput] = useState('');
+  const [generatedShareLink, setGeneratedShareLink] = useState('');
+
   const fetchData = async () => {
     try {
       const [subRes, sylRes] = await Promise.allSettled([
@@ -30,7 +40,27 @@ const SyllabusPage = () => {
         syllabusAPI.getBySubject(subjectId),
       ]);
       if (subRes.status === 'fulfilled') setSubject(subRes.value.data.data);
-      if (sylRes.status === 'fulfilled') setSyllabus(sylRes.value.data.data);
+      if (sylRes.status === 'fulfilled') {
+        const syllabusData = sylRes.value.data.data;
+        setSyllabus(syllabusData);
+        if (syllabusData && syllabusData._id) {
+          try {
+            const fcRes = await syllabusAPI.getFlashcards(syllabusData._id);
+            if (fcRes.data?.data) {
+              setFlashcardSet(fcRes.data.data);
+              if (fcRes.data.data.shareTitle) {
+                setShareTitleInput(fcRes.data.data.shareTitle);
+              }
+              if (fcRes.data.data.shareToken && fcRes.data.data.isShareable) {
+                const appUrl = window.location.origin;
+                setGeneratedShareLink(`${appUrl}/shared/cheatnote/${fcRes.data.data.shareToken}`);
+              }
+            }
+          } catch (err) {
+            console.error('Failed to load flashcards:', err);
+          }
+        }
+      }
     } catch { toast.error('Failed to load syllabus data.'); }
     finally { setLoading(false); }
   };
@@ -115,6 +145,82 @@ const SyllabusPage = () => {
       if (pyqFileInputRef.current) pyqFileInputRef.current.value = '';
     }
   };
+
+  const handleGenerateFlashcards = async () => {
+    if (!syllabus?._id) return;
+    setGeneratingCards(true);
+    try {
+      const res = await syllabusAPI.generateFlashcards(syllabus._id);
+      setFlashcardSet(res.data.data);
+      setActiveCardIndex(0);
+      setCardFlipped(false);
+      toast.success('AI Flashcards generated! 🧠');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to generate flashcards.');
+    } finally {
+      setGeneratingCards(false);
+    }
+  };
+
+  const handleShareFlashcards = async (e) => {
+    e.preventDefault();
+    if (!flashcardSet?._id) return;
+    setSharingNotes(true);
+    try {
+      const res = await syllabusAPI.shareFlashcards(flashcardSet._id, shareTitleInput);
+      const appUrl = window.location.origin;
+      const fullLink = `${appUrl}${res.data.data.shareUrl}`;
+      setGeneratedShareLink(fullLink);
+      toast.success('Share link generated!');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to generate share link.');
+    } finally {
+      setSharingNotes(false);
+    }
+  };
+
+  const handleCopyLink = () => {
+    if (!generatedShareLink) return;
+    navigator.clipboard.writeText(generatedShareLink);
+    toast.success('Share link copied to clipboard! 📋');
+  };
+
+  // Reset index when filter changes
+  useEffect(() => {
+    setActiveCardIndex(0);
+    setCardFlipped(false);
+  }, [cardFilter]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!flashcardSet?.cards || flashcardSet.cards.length === 0) return;
+      const activeEl = document.activeElement;
+      if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA')) return;
+
+      const filtered = flashcardSet.cards.filter(c => {
+        if (cardFilter === 'all') return true;
+        return c.importance === cardFilter;
+      });
+      if (filtered.length === 0) return;
+
+      if (e.code === 'Space') {
+        e.preventDefault();
+        setCardFlipped(f => !f);
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        setCardFlipped(false);
+        setActiveCardIndex(idx => (idx + 1) % filtered.length);
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        setCardFlipped(false);
+        setActiveCardIndex(idx => (idx - 1 + filtered.length) % filtered.length);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [flashcardSet, cardFilter]);
 
   if (loading) return <LoadingScreen text="Loading syllabus..." />;
 
@@ -654,6 +760,237 @@ const SyllabusPage = () => {
               );
             })}
           </div>
+
+          {/* Flashcards Section */}
+          {syllabus?.isAnalyzed && (
+            <div className="card" style={{ marginBottom: 24, position: 'relative' }}>
+              <style>{`
+                .flashcard-container {
+                  perspective: 1000px;
+                  width: 100%;
+                  max-width: 480px;
+                  height: 280px;
+                  margin: 16px auto;
+                  cursor: pointer;
+                }
+                .flashcard {
+                  width: 100%;
+                  height: 100%;
+                  position: relative;
+                  transform-style: preserve-3d;
+                  transition: transform 0.4s ease;
+                }
+                .flashcard.flipped {
+                  transform: rotateY(180deg);
+                }
+                .flashcard-front, .flashcard-back {
+                  width: 100%;
+                  height: 100%;
+                  position: absolute;
+                  backface-visibility: hidden;
+                  border-radius: 12px;
+                  padding: 24px;
+                  display: flex;
+                  flex-direction: column;
+                  justify-content: center;
+                  align-items: center;
+                  box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+                  border: 1px solid var(--border-strong);
+                  background: var(--bg-elevated);
+                  overflow-y: auto;
+                }
+                .flashcard-back {
+                  transform: rotateY(180deg);
+                  background: rgba(99, 102, 241, 0.05);
+                  border-color: rgba(99, 102, 241, 0.25);
+                }
+              `}</style>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
+                <div>
+                  <h3 style={{ fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    🧠 AI Flashcards & Last-Minute Prep
+                  </h3>
+                  <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    Study high-yield questions for critical and high importance topics.
+                  </p>
+                </div>
+              </div>
+
+              {!flashcardSet ? (
+                <div style={{ textAlign: 'center', padding: '24px 0' }}>
+                  <button
+                    onClick={handleGenerateFlashcards}
+                    disabled={generatingCards}
+                    className="btn btn-primary"
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '0 auto' }}
+                  >
+                    {generatingCards ? (
+                      <>
+                        <LoadingSpinner />
+                        Generating flashcards with AI...
+                      </>
+                    ) : (
+                      <>🧠 Generate Flashcards (Critical & High Topics)</>
+                    )}
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  {/* Filters */}
+                  <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+                    {['all', 'critical', 'high'].map(filter => (
+                      <button
+                        key={filter}
+                        onClick={() => setCardFilter(filter)}
+                        className={`btn btn-sm ${cardFilter === filter ? 'btn-primary' : 'btn-secondary'}`}
+                        style={{ textTransform: 'capitalize' }}
+                      >
+                        {filter === 'all' ? 'All Cards' : `${filter} Priority`}
+                      </button>
+                    ))}
+                  </div>
+
+                  {(() => {
+                    const filteredCards = flashcardSet?.cards?.filter(c => {
+                      if (cardFilter === 'all') return true;
+                      return c.importance === cardFilter;
+                    }) || [];
+                    
+                    const currentCard = filteredCards[activeCardIndex];
+
+                    if (filteredCards.length === 0) {
+                      return (
+                        <div style={{ textAlign: 'center', padding: '40px 0', border: '1px dashed var(--border-subtle)', borderRadius: 12 }}>
+                          <p style={{ color: 'var(--text-muted)', margin: 0 }}>No cards found for this priority level.</p>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div>
+                        {/* Deck Swiper */}
+                        <div className="flashcard-container" onClick={() => setCardFlipped(!cardFlipped)}>
+                          <div className={`flashcard ${cardFlipped ? 'flipped' : ''}`}>
+                            {/* Front (Question) */}
+                            <div className="flashcard-front">
+                              <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
+                                <Badge type={currentCard.importance} label={currentCard.importance.toUpperCase()} />
+                                <Badge type={currentCard.difficulty === 'easy' ? 'success' : currentCard.difficulty === 'hard' ? 'danger' : 'warning'} label={currentCard.difficulty.toUpperCase()} />
+                              </div>
+                              <h4 style={{ fontWeight: 800, fontSize: '1.1rem', margin: 0, lineHeight: 1.5 }}>
+                                {currentCard.front}
+                              </h4>
+                              <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 24, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                Click to Reveal Answer (or press Space)
+                              </p>
+                            </div>
+
+                            {/* Back (Answer) */}
+                            <div className="flashcard-back">
+                              <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
+                                <Badge type={currentCard.importance} label={currentCard.importance.toUpperCase()} />
+                                <Badge type={currentCard.difficulty === 'easy' ? 'success' : currentCard.difficulty === 'hard' ? 'danger' : 'warning'} label={currentCard.difficulty.toUpperCase()} />
+                              </div>
+                              <p style={{ fontSize: '0.88rem', margin: 0, lineHeight: 1.6, fontWeight: 500, color: 'var(--text-primary)', whiteSpace: 'pre-wrap' }}>
+                                {currentCard.back}
+                              </p>
+                              <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 24, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                Click to Flip Back (or press Space)
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Navigation controls */}
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 16, marginTop: 12 }}>
+                          <button
+                            className="btn btn-secondary btn-sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCardFlipped(false);
+                              setActiveCardIndex(idx => (idx - 1 + filteredCards.length) % filteredCards.length);
+                            }}
+                          >
+                            ◀ Prev
+                          </button>
+                          <span style={{ fontSize: '0.82rem', fontWeight: 600 }}>
+                            Card {activeCardIndex + 1} of {filteredCards.length}
+                          </span>
+                          <button
+                            className="btn btn-secondary btn-sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCardFlipped(false);
+                              setActiveCardIndex(idx => (idx + 1) % filteredCards.length);
+                            }}
+                          >
+                            Next ▶
+                          </button>
+                        </div>
+
+                        <div style={{ textAlign: 'center', marginTop: 8 }}>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                            Tip: Use Arrow Keys (◀ / ▶) to navigate, Spacebar to flip.
+                          </span>
+                        </div>
+
+                        {/* Share Notes Section */}
+                        <div style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid var(--border-subtle)' }}>
+                          <h4 style={{ fontWeight: 700, marginBottom: 8, fontSize: '0.95rem' }}>
+                            📢 Share as Last-Minute Cheat Note
+                          </h4>
+                          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: 12 }}>
+                            Publish these cards as a clean, public checklist to share with friends. No sign-up required.
+                          </p>
+
+                          <form onSubmit={handleShareFlashcards} style={{ display: 'flex', gap: 10, flexWrap: 'wrap', maxWidth: 600 }}>
+                            <input
+                              type="text"
+                              required
+                              placeholder="Note title (e.g. OS Exam — Last Minute Guide)"
+                              className="form-input"
+                              style={{ flex: 1, minWidth: 200, padding: '8px 12px', fontSize: '0.88rem' }}
+                              value={shareTitleInput}
+                              onChange={e => setShareTitleInput(e.target.value)}
+                            />
+                            <button
+                              type="submit"
+                              disabled={sharingNotes}
+                              className="btn btn-primary"
+                              style={{ padding: '8px 16px', fontSize: '0.88rem' }}
+                            >
+                              {sharingNotes ? 'Generating...' : 'Generate Share Link'}
+                            </button>
+                          </form>
+
+                          {generatedShareLink && (
+                            <div style={{ marginTop: 16, background: 'var(--bg-elevated)', borderRadius: 8, padding: 12, border: '1px solid var(--border-strong)' }}>
+                              <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+                                <input
+                                  type="text"
+                                  readOnly
+                                  value={generatedShareLink}
+                                  className="form-input"
+                                  style={{ flex: 1, minWidth: 240, background: 'var(--bg-base)', padding: '6px 10px', fontSize: '0.82rem', fontFamily: 'monospace' }}
+                                />
+                                <button className="btn btn-secondary btn-sm" onClick={handleCopyLink}>
+                                  📋 Copy Link
+                                </button>
+                              </div>
+                              <p style={{ margin: '8px 0 0', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                Anyone with this link can view your cheat note — no login required.
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Re-analyze option */}
           <div style={{ textAlign: 'center', padding: '24px 0', borderTop: '1px solid var(--border-subtle)' }}>

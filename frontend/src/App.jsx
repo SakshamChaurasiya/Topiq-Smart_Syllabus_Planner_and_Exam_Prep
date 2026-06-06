@@ -9,6 +9,7 @@ import Layout from './components/layout/Layout';
 import Landing      from './pages/Landing';
 import Login        from './pages/Login';
 import Register     from './pages/Register';
+import SharedCheatNote from './pages/SharedCheatNote';
 import Dashboard    from './pages/Dashboard';
 import Subjects     from './pages/Subjects';
 import SyllabusPage from './pages/SyllabusPage';
@@ -43,6 +44,7 @@ function App() {
           <Route path="/"        element={<Landing />} />
           <Route path="/login"   element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/shared/cheatnote/:shareToken" element={<SharedCheatNote />} />
 
           {/* Protected — all inside the app layout */}
           <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>

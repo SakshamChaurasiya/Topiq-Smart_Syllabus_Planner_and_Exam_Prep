@@ -56,6 +56,7 @@ const studyPlanRoutes    = require("./routes/studyPlan.routes");
 const missionRoutes      = require("./routes/mission.routes");
 const notificationRoutes = require("./routes/notification.routes");
 const dashboardRoutes    = require("./routes/dashboard.routes");
+const flashcardRoutes    = require("./routes/flashcard.routes");
 
 app.use("/api/auth",          authRoutes);
 app.use("/api/subjects",      subjectRoutes);
@@ -65,6 +66,7 @@ app.use("/api/study-plan",    studyPlanRoutes);
 app.use("/api/missions",      missionRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/dashboard",     dashboardRoutes);
+app.use("/api",               flashcardRoutes);
 
 // ============================================
 // HEALTH CHECK

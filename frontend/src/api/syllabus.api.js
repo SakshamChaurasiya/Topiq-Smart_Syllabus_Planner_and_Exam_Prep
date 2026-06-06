@@ -13,4 +13,12 @@ export const syllabusAPI = {
     axiosInstance.post(`/syllabus/${syllabusId}/pyq-upload`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     }),
+  generateFlashcards: (syllabusId) =>
+    axiosInstance.post(`/syllabus/${syllabusId}/flashcards/generate`),
+  getFlashcards: (syllabusId) =>
+    axiosInstance.get(`/syllabus/${syllabusId}/flashcards`),
+  shareFlashcards: (setId, shareTitle) =>
+    axiosInstance.post(`/flashcards/${setId}/share`, { shareTitle }),
+  getPublicCheatNote: (shareToken) =>
+    axiosInstance.get(`/public/cheatnote/${shareToken}`),
 };
