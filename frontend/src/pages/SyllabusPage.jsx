@@ -20,6 +20,8 @@ const SyllabusPage = () => {
   const [analyzing, setAnalyzing] = useState(false);
   const [expandedUnits, setExpandedUnits] = useState({});
   const fileInputRef = useRef(null);
+  const [pyqUploading, setPyqUploading] = useState(false);
+  const pyqFileInputRef = useRef(null);
 
   const fetchData = async () => {
     try {
@@ -93,6 +95,25 @@ const SyllabusPage = () => {
       await syllabusAPI.markTopic(syllabus._id, topicId, !currentStatus);
       fetchData();
     } catch { toast.error('Failed to update topic.'); }
+  };
+
+  // Upload and analyze PYQ PDF
+  const handlePyqUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPyqUploading(true);
+    const fd = new FormData();
+    fd.append('file', file);
+    try {
+      await syllabusAPI.uploadPYQ(syllabus._id, fd);
+      toast.success('Past Year Papers analyzed successfully! ✨');
+      fetchData();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'PYQ Upload and analysis failed.');
+    } finally {
+      setPyqUploading(false);
+      if (pyqFileInputRef.current) pyqFileInputRef.current.value = '';
+    }
   };
 
   if (loading) return <LoadingScreen text="Loading syllabus..." />;
@@ -321,16 +342,48 @@ const SyllabusPage = () => {
                   </div>
 
                   {/* Column B: From Your PYQs */}
-                  <div style={{ opacity: 0.5, pointerEvents: 'none' }}>
-                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
-                      From Your PYQs
+                  {syllabus.pyqAnalysis && syllabus.pyqAnalysis.uploadedAt ? (
+                    <div>
+                      <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--success)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+                        From Your PYQs (Evidence)
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {syllabus.pyqAnalysis.pyqSuggestedTopics && syllabus.pyqAnalysis.pyqSuggestedTopics.length > 0 ? (
+                          syllabus.pyqAnalysis.pyqSuggestedTopics.map((topicObj, i) => (
+                            <div key={i} style={{ display: 'flex', flexDirection: 'column', padding: '10px 12px', background: 'var(--surface2)', borderRadius: 8, border: '1px solid var(--border)', gap: 4 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                                <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)' }}>{topicObj.topic}</span>
+                                <span className="badge" style={{ textTransform: 'none', background: 'rgba(16,185,129,0.12)', color: 'var(--success)', border: '1px solid rgba(16,185,129,0.25)', flexShrink: 0, fontSize: '0.7rem', padding: '2px 6px', borderRadius: 4 }}>
+                                  {topicObj.frequency}x
+                                </span>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 2 }}>
+                                <span>Years: {topicObj.yearsAppeared.join(', ')}</span>
+                                {topicObj.estimatedMarks > 0 && (
+                                  <span style={{ color: 'var(--warning)', fontWeight: 600 }}>~{topicObj.estimatedMarks} marks</span>
+                                )}
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 80, padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, border: '1px dashed var(--border-default)', textAlign: 'center' }}>
+                            <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)' }}>No PYQ topics extracted.</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 80, padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, border: '1px dashed var(--border-default)', textAlign: 'center' }}>
-                      <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
-                        Upload past year papers in the Syllabus tab to populate this column.
-                      </p>
+                  ) : (
+                    <div style={{ opacity: 0.6 }}>
+                      <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+                        From Your PYQs
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 80, padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, border: '1px dashed var(--border-strong)', textAlign: 'center' }}>
+                        <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                          Upload past year papers in the Syllabus tab to populate this column.
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
             )}
@@ -340,6 +393,168 @@ const SyllabusPage = () => {
               <div style={{ marginTop: 12, padding: '12px', background: 'var(--bg-base)', borderRadius: 8, border: '1px solid var(--border-subtle)' }}>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>📌 Study Strategy</div>
                 <p style={{ fontSize: '0.85rem', margin: 0, lineHeight: 1.6 }}>{syllabus.aiAnalysis.studyStrategy}</p>
+              </div>
+            )}
+          </div>
+
+          {/* PYQ Evidence Engine Section */}
+          <div className="card" style={{ marginBottom: 20, borderColor: syllabus.pyqAnalysis?.uploadedAt ? 'rgba(99,102,241,0.25)' : 'var(--border-subtle)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
+              <div>
+                <h3 style={{ fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  📁 PYQ Analysis & Exam Alignment
+                </h3>
+                <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  Upload past year papers to cross-reference AI-suggested syllabus topics with historical exam data.
+                </p>
+              </div>
+              {syllabus.pyqAnalysis?.uploadedAt && (
+                <button 
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => pyqFileInputRef.current?.click()}
+                  disabled={pyqUploading}
+                >
+                  {pyqUploading ? 'Analyzing...' : '🔄 Re-upload past papers'}
+                </button>
+              )}
+            </div>
+
+            <input 
+              ref={pyqFileInputRef} 
+              type="file" 
+              accept=".pdf" 
+              onChange={handlePyqUpload} 
+              style={{ display: 'none' }} 
+              id="pyq-file-input" 
+            />
+
+            {!syllabus.pyqAnalysis?.uploadedAt ? (
+              <div
+                onClick={() => !pyqUploading && pyqFileInputRef.current?.click()}
+                style={{
+                  border: '2px dashed var(--border-strong)', 
+                  borderRadius: 12,
+                  padding: '32px', 
+                  textAlign: 'center', 
+                  cursor: pyqUploading ? 'default' : 'pointer',
+                  background: 'var(--bg-elevated)', 
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={e => {
+                  if (!pyqUploading) e.currentTarget.style.borderColor = 'var(--primary)';
+                }}
+                onMouseLeave={e => {
+                  if (!pyqUploading) e.currentTarget.style.borderColor = 'var(--border-strong)';
+                }}
+              >
+                {pyqUploading ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+                    <LoadingSpinner />
+                    <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 600 }}>Analyzing Past Year Papers PDF...</p>
+                    <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)' }}>Extracting topics, mapping frequencies, and matching with syllabus</p>
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ fontSize: '2rem', marginBottom: 8 }}>📄</div>
+                    <div style={{ fontWeight: 700, marginBottom: 4, fontSize: '0.9rem' }}>
+                      Upload Previous Year Questions (PYQs) PDF
+                    </div>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                      Supports exam paper PDFs up to 10MB
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div>
+                <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: 16 }}>
+                  Analysis complete! Last updated: <strong>{new Date(syllabus.pyqAnalysis.uploadedAt).toLocaleString()}</strong>. Below is the triple-alignment breakdown.
+                </p>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
+                  
+                  {/* Card 1: Overlap Topics */}
+                  <div style={{ 
+                    background: 'rgba(16,185,129,0.04)', 
+                    border: '1px solid rgba(16,185,129,0.2)', 
+                    borderRadius: 12, 
+                    padding: 16 
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                      <span style={{ fontSize: '1.2rem' }}>🎯</span>
+                      <div>
+                        <h4 style={{ margin: 0, fontSize: '0.88rem', fontWeight: 700, color: 'var(--success)' }}>Overlap Topics</h4>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>High reliability (Both AI & PYQs)</span>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {syllabus.pyqAnalysis.overlapTopics && syllabus.pyqAnalysis.overlapTopics.length > 0 ? (
+                        syllabus.pyqAnalysis.overlapTopics.map((topic, i) => (
+                          <div key={i} style={{ fontSize: '0.8rem', padding: '6px 10px', background: 'rgba(255,255,255,0.03)', borderRadius: 6, border: '1px solid rgba(16,185,129,0.1)' }}>
+                            {topic}
+                          </div>
+                        ))
+                      ) : (
+                        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontStyle: 'italic', padding: 8 }}>None detected.</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Card 2: PYQ-Only Topics */}
+                  <div style={{ 
+                    background: 'rgba(239,68,68,0.04)', 
+                    border: '1px solid rgba(239,68,68,0.2)', 
+                    borderRadius: 12, 
+                    padding: 16 
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                      <span style={{ fontSize: '1.2rem' }}>⚠️</span>
+                      <div>
+                        <h4 style={{ margin: 0, fontSize: '0.88rem', fontWeight: 700, color: 'var(--danger)' }}>PYQ-Only (Potential Gaps)</h4>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Tested in exams but not in core syllabus</span>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {syllabus.pyqAnalysis.pyqOnlyTopics && syllabus.pyqAnalysis.pyqOnlyTopics.length > 0 ? (
+                        syllabus.pyqAnalysis.pyqOnlyTopics.map((topic, i) => (
+                          <div key={i} style={{ fontSize: '0.8rem', padding: '6px 10px', background: 'rgba(255,255,255,0.03)', borderRadius: 6, border: '1px solid rgba(239,68,68,0.1)' }}>
+                            {topic}
+                          </div>
+                        ))
+                      ) : (
+                        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontStyle: 'italic', padding: 8 }}>None detected.</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Card 3: AI-Only Topics */}
+                  <div style={{ 
+                    background: 'rgba(99,102,241,0.04)', 
+                    border: '1px solid rgba(99,102,241,0.2)', 
+                    borderRadius: 12, 
+                    padding: 16 
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                      <span style={{ fontSize: '1.2rem' }}>💡</span>
+                      <div>
+                        <h4 style={{ margin: 0, fontSize: '0.88rem', fontWeight: 700, color: 'var(--primary-light)' }}>AI-Only Topics</h4>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>In syllabus list but never seen in PYQs</span>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {syllabus.pyqAnalysis.aiOnlyTopics && syllabus.pyqAnalysis.aiOnlyTopics.length > 0 ? (
+                        syllabus.pyqAnalysis.aiOnlyTopics.map((topic, i) => (
+                          <div key={i} style={{ fontSize: '0.8rem', padding: '6px 10px', background: 'rgba(255,255,255,0.03)', borderRadius: 6, border: '1px solid rgba(99,102,241,0.1)' }}>
+                            {topic}
+                          </div>
+                        ))
+                      ) : (
+                        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontStyle: 'italic', padding: 8 }}>None detected.</div>
+                      )}
+                    </div>
+                  </div>
+
+                </div>
               </div>
             )}
           </div>

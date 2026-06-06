@@ -9,4 +9,8 @@ export const syllabusAPI = {
   getBySubject:(subjectId)=> axiosInstance.get(`/syllabus/${subjectId}`),
   markTopic:   (syllabusId, topicId, isCompleted) =>
     axiosInstance.put(`/syllabus/${syllabusId}/topic/${topicId}/complete`, { isCompleted }),
+  uploadPYQ:   (syllabusId, formData) =>
+    axiosInstance.post(`/syllabus/${syllabusId}/pyq-upload`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
 };

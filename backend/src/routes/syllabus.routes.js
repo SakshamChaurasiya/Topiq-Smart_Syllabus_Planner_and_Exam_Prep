@@ -11,6 +11,7 @@ const {
     analyzeSyllabus,
     getSyllabus,
     markTopicComplete,
+    uploadPYQ,
 } = require("../controllers/syllabus.controller");
 const { protect } = require("../middleware/auth.middleware");
 const upload = require("../middleware/upload.middleware");
@@ -22,6 +23,9 @@ router.post("/upload", upload.single("file"), uploadSyllabus);
 
 // Submit plain text syllabus
 router.post("/text", submitTextSyllabus);
+
+// Upload past year paper PDF for analysis
+router.post("/:syllabusId/pyq-upload", upload.single("file"), uploadPYQ);
 
 // Get syllabus for a subject
 router.get("/:subjectId", getSyllabus);

@@ -6,4 +6,6 @@ export const plannerAPI = {
   getPlan:        (subjectId) => axiosInstance.get(`/planner/${subjectId}`),
   markDayComplete:(planId, dayIndex) =>
     axiosInstance.put(`/planner/day/${planId}/${dayIndex}/complete`),
+  exportICS:      (planId) =>
+    axiosInstance.get(`/study-plan/${planId}/export/ics`, { responseType: 'blob' }),
 };

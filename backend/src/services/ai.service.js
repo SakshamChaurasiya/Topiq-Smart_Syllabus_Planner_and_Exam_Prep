@@ -265,6 +265,57 @@ Create an EXAM SURVIVAL CHEAT CODE. Return JSON:
 };
 
 // ============================================================
+// 4. ANALYZE PYQ (Past Year Question Papers)
+// Identifies high-frequency topics from past exam papers
+// ============================================================
+const analyzePYQ = async (pyqText, existingTopics = []) => {
+    try {
+        const systemPrompt = `You are an expert academic exam pattern analyzer.
+Your job is to analyze past year question papers and identify which topics/concepts appear most frequently.
+Be specific about topic names. Match them to syllabus topics when possible. Return valid JSON only.`;
+
+        const userPrompt = `Analyze the following past year question paper(s) and identify the most frequently tested topics/concepts.
+
+Known syllabus topics for reference:
+${JSON.stringify(existingTopics, null, 2)}
+
+Past Year Question Papers:
+${pyqText}
+
+Return a JSON object with this exact structure:
+{
+  "pyqSuggestedTopics": [
+    {
+      "topic": "Topic/concept name (use syllabus topic names when they match)",
+      "frequency": <number of papers this topic appeared in>,
+      "yearsAppeared": ["2024", "2023", "2022"],
+      "estimatedMarks": <estimated total marks across appearances>
+    }
+  ]
+}
+
+Rules:
+- Identify at least 5 and at most 15 topics
+- Sort by frequency (highest first)
+- Use the exact syllabus topic name if the PYQ topic matches one
+- If a year/paper identifier is visible, include it in yearsAppeared
+- If marks are visible on questions, sum them for estimatedMarks
+- Be conservative — only include topics you are reasonably confident about`;
+
+        const result = await callAI(systemPrompt, userPrompt);
+
+        if (!result) {
+            return getMockPYQAnalysis();
+        }
+
+        return JSON.parse(result);
+    } catch (error) {
+        console.warn("[AI Service] analyzePYQ failed — returning mock response. Error:", error.message);
+        return getMockPYQAnalysis();
+    }
+};
+
+// ============================================================
 // MOCK RESPONSES — Used when Gemini key is not configured
 // ============================================================
 
@@ -347,4 +398,13 @@ const getMockCheatCode = (daysRemaining, subjectName) => ({
     expectedScore: { minimum: 35, expected: 55, maximum: 75 },
 });
 
-module.exports = { analyzeSyllabus, generateStudyPlan, generateCheatCode };
+const getMockPYQAnalysis = () => ({
+    pyqSuggestedTopics: [
+        { topic: "Primary Algorithms", frequency: 4, yearsAppeared: ["2024", "2023", "2022", "2021"], estimatedMarks: 20 },
+        { topic: "Data Structures", frequency: 3, yearsAppeared: ["2024", "2023", "2022"], estimatedMarks: 15 },
+        { topic: "Applied Methods", frequency: 3, yearsAppeared: ["2024", "2022", "2021"], estimatedMarks: 12 },
+        { topic: "Complexity Analysis", frequency: 2, yearsAppeared: ["2023", "2021"], estimatedMarks: 10 },
+    ],
+});
+
+module.exports = { analyzeSyllabus, generateStudyPlan, generateCheatCode, analyzePYQ };

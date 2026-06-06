@@ -325,4 +325,168 @@ const markDayComplete = async (req, res) => {
     }
 };
 
-module.exports = { generatePlan, generateCheatCode, getPlan, markDayComplete };
+// -------------------------------------------
+// @route   GET /api/study-plan/:planId/export/ics
+// @desc    Export a study plan as an .ics calendar file
+// @access  Protected
+// -------------------------------------------
+const exportStudyPlanToIcs = async (req, res) => {
+    try {
+        const { planId } = req.params;
+        const plan = await StudyPlan.findById(planId).populate("subjectId");
+
+        if (!plan) {
+            return sendError(res, 404, "Study plan not found.");
+        }
+
+        // Verify ownership
+        if (plan.userId.toString() !== req.user._id.toString()) {
+            return sendError(res, 403, "Not authorized to export this study plan.");
+        }
+
+        const subjectName = plan.subjectId ? plan.subjectId.name : "Subject";
+        const sanitizedSubjectName = subjectName.replace(/[^a-zA-Z0-9-_]/g, "_");
+        const filename = `${sanitizedSubjectName}-study-plan.ics`;
+
+        const now = new Date();
+        const dtstamp = now.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+
+        const escapeIcsText = (str) => {
+            if (!str) return '';
+            return str
+                .replace(/\\/g, '\\\\')
+                .replace(/;/g, '\\;')
+                .replace(/,/g, '\\,')
+                .replace(/\n/g, '\\n')
+                .replace(/\r/g, '');
+        };
+
+        const formatDuration = (hours) => {
+            const h = Math.floor(hours);
+            const m = Math.round((hours - h) * 60);
+            if (h > 0 && m > 0) {
+                return `PT${h}H${m}M`;
+            } else if (h > 0) {
+                return `PT${h}H`;
+            } else if (m > 0) {
+                return `PT${m}M`;
+            } else {
+                return `PT1H`;
+            }
+        };
+
+        const foldLine = (line) => {
+            if (line.length <= 75) return line;
+            let result = '';
+            let curr = line;
+            while (curr.length > 75) {
+                result += curr.substring(0, 75) + '\r\n ';
+                curr = curr.substring(75);
+            }
+            result += curr;
+            return result;
+        };
+
+        let icsLines = [
+            "BEGIN:VCALENDAR",
+            "VERSION:2.0",
+            "PRODID:-//SmartSyllabusPlanner//SSP//EN",
+            "CALSCALE:GREGORIAN",
+            "METHOD:PUBLISH"
+        ];
+
+        // Process daily plans
+        if (plan.dailyPlans && plan.dailyPlans.length > 0) {
+            plan.dailyPlans.forEach((day, index) => {
+                const dayDate = new Date(day.date);
+                const year = dayDate.getUTCFullYear();
+                const month = String(dayDate.getUTCMonth() + 1).padStart(2, '0');
+                const dateVal = String(dayDate.getUTCDate()).padStart(2, '0');
+                const dtstart = `${year}${month}${dateVal}T090000Z`;
+
+                let summary = `Study: ${subjectName}`;
+                if (day.topics && day.topics.length > 0) {
+                    const firstTopic = day.topics[0].topicName;
+                    if (day.topics.length === 1) {
+                        summary = `Study: ${subjectName} — ${firstTopic}`;
+                    } else {
+                        summary = `Study: ${subjectName} — ${firstTopic} + ${day.topics.length - 1} more topics`;
+                    }
+                }
+
+                let descParts = [];
+                if (day.topics && day.topics.length > 0) {
+                    descParts.push("Topics to study:");
+                    day.topics.forEach((t) => {
+                        descParts.push(`- ${t.topicName} (${t.unitName}) — ${t.estimatedHours || 0} hrs`);
+                    });
+                }
+                descParts.push(`Planned study hours for today: ${day.plannedHours || 0} hrs`);
+                if (day.studyTip) {
+                    descParts.push(`Daily Tip: ${day.studyTip}`);
+                }
+                descParts.push("\n* Note: Time is set to 9:00 AM UTC. Please adjust manually after importing if necessary.");
+
+                const description = descParts.join("\n");
+                const uid = `${plan._id}-day-${index}@smartsyllabusplanner.com`;
+                const duration = formatDuration(day.plannedHours || 1);
+
+                const eventLines = [
+                    "BEGIN:VEVENT",
+                    `UID:${uid}`,
+                    `DTSTAMP:${dtstamp}`,
+                    `DTSTART:${dtstart}`,
+                    `DURATION:${duration}`,
+                    `SUMMARY:${escapeIcsText(summary)}`,
+                    `DESCRIPTION:${escapeIcsText(description)}`,
+                    "BEGIN:VALARM",
+                    "TRIGGER:-PT60M",
+                    "ACTION:DISPLAY",
+                    "DESCRIPTION:Reminder",
+                    "END:VALARM",
+                    "END:VEVENT"
+                ];
+
+                icsLines.push(...eventLines);
+            });
+        }
+
+        // Add exam event if examDate exists
+        if (plan.examDate) {
+            const examDateObj = new Date(plan.examDate);
+            const examYear = examDateObj.getUTCFullYear();
+            const examMonth = String(examDateObj.getUTCMonth() + 1).padStart(2, '0');
+            const examDateVal = String(examDateObj.getUTCDate()).padStart(2, '0');
+            const examDtStart = `${examYear}${examMonth}${examDateVal}T090000Z`;
+            const examUid = `${plan._id}-exam@smartsyllabusplanner.com`;
+
+            const examEventLines = [
+                "BEGIN:VEVENT",
+                `UID:${examUid}`,
+                `DTSTAMP:${dtstamp}`,
+                `DTSTART:${examDtStart}`,
+                `DURATION:PT3H`,
+                `SUMMARY:EXAM: ${escapeIcsText(subjectName)}`,
+                "TRANSP:OPAQUE",
+                "CATEGORIES:EXAM",
+                "END:VEVENT"
+            ];
+            icsLines.push(...examEventLines);
+        }
+
+        icsLines.push("END:VCALENDAR");
+
+        // Format and fold all lines
+        const icsContent = icsLines.map(foldLine).join("\r\n");
+
+        res.setHeader("Content-Type", "text/calendar; charset=utf-8");
+        res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+        return res.status(200).send(icsContent);
+
+    } catch (error) {
+        console.error("[Planner] Export ICS error:", error.message);
+        return sendError(res, 500, "Failed to export study plan to calendar.");
+    }
+};
+
+module.exports = { generatePlan, generateCheatCode, getPlan, markDayComplete, exportStudyPlanToIcs };

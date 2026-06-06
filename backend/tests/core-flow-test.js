@@ -139,6 +139,25 @@ Unit 5: Graphs
   assert("Analyze syllabus → 200", analRes.status === 200);
   assert("Syllabus is analyzed", analRes.data?.data?.totalTopics > 0);
 
+  // 6c. PYQ Upload and Analysis Flow
+  console.log("🔹 6c. PYQ Upload and Analysis Flow");
+  const pyqFileContent = "Question 1: What is a Binary Search Tree and its complexity?\nQuestion 2: Explain Dijkstra's algorithm and AVL tree rotations.";
+  const pyqBlob = new Blob([pyqFileContent], { type: "application/pdf" });
+  const pyqFormData = new FormData();
+  pyqFormData.append("file", pyqBlob, "pyq_paper.pdf");
+  
+  const pyqRes = await fetch(`${BASE}/syllabus/${SYLLABUS_ID}/pyq-upload`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${TOKEN}` },
+    body: pyqFormData
+  });
+  const pyqData = await pyqRes.json();
+  assert("PYQ Upload status → 200", pyqRes.status === 200);
+  assert("PYQ has overlapTopics", Array.isArray(pyqData.data?.overlapTopics));
+  assert("PYQ has pyqSuggestedTopics", Array.isArray(pyqData.data?.pyqSuggestedTopics));
+  assert("PYQ has pyqOnlyTopics", Array.isArray(pyqData.data?.pyqOnlyTopics));
+  assert("PYQ has aiOnlyTopics", Array.isArray(pyqData.data?.aiOnlyTopics));
+
   // 6b. Generate Study Plan
   console.log("🔹 6b. Generate Study Plan");
   const planRes = await post("/planner/generate", {

@@ -26,6 +26,7 @@ const PlannerPage = () => {
   const [loading,  setLoading]  = useState(true);
   const [generating, setGenerating] = useState(false);
   const [expandedDay, setExpandedDay] = useState(null);
+  const [exporting, setExporting] = useState(false);
 
   const [form, setForm] = useState({
     examDate: '',
@@ -78,6 +79,35 @@ const PlannerPage = () => {
       toast.success('Day marked complete! 🎉');
       fetchData();
     } catch { toast.error('Failed to update day.'); }
+  };
+
+  const handleExportICS = async () => {
+    if (!plan?._id) return;
+    setExporting(true);
+    try {
+      const res = await plannerAPI.exportICS(plan._id);
+      const blob = new Blob([res.data], { type: 'text/calendar;charset=utf-8' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const contentDisposition = res.headers['content-disposition'];
+      let filename = `${subject?.name || 'subject'}-study-plan.ics`;
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="?([^"]+)"?/);
+        if (match && match[1]) filename = match[1];
+      }
+      link.href = url;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      toast.success('Calendar file downloaded! Import it into your calendar app.');
+    } catch (err) {
+      console.error('Failed to export calendar:', err);
+      toast.error('Failed to export calendar. Please try again.');
+    } finally {
+      setExporting(false);
+    }
   };
 
   if (loading) return <LoadingScreen text="Loading planner..." />;
@@ -227,6 +257,28 @@ const PlannerPage = () => {
                   <div style={{ fontWeight: 800, color: 'var(--text-primary)' }}>{plan.targetGoal}</div></div>
                 <div><div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Exam</div>
                   <div style={{ fontWeight: 800, color: 'var(--text-primary)' }}>{format(new Date(plan.examDate), 'dd MMM')}</div></div>
+              </div>
+
+              {/* Export to Calendar section */}
+              <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--border-subtle)' }}>
+                <button
+                  onClick={handleExportICS}
+                  disabled={exporting}
+                  className="btn btn-secondary btn-sm"
+                  style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+                >
+                  {exporting ? (
+                    <>
+                      <div className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} />
+                      Exporting...
+                    </>
+                  ) : (
+                    <>📅 Export to Calendar</>
+                  )}
+                </button>
+                <p style={{ margin: '8px 0 0', fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                  Downloads an .ics file. Import into Google Calendar, Apple Calendar, or Outlook. Times are set to 9 AM — adjust after import to fit your schedule.
+                </p>
               </div>
             </div>
 

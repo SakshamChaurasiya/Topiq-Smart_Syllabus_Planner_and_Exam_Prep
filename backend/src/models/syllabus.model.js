@@ -171,6 +171,34 @@ const syllabusSchema = new mongoose.Schema(
             },
         },
 
+        // PYQ (Past Year Question) Analysis Results
+        pyqAnalysis: {
+            uploadedAt: {
+                type: Date,
+                default: null,
+            },
+            pyqSuggestedTopics: [
+                {
+                    topic: { type: String },
+                    frequency: { type: Number, default: 1 },
+                    yearsAppeared: { type: [String], default: [] },
+                    estimatedMarks: { type: Number, default: 0 },
+                },
+            ],
+            overlapTopics: {
+                type: [String],
+                default: [],
+            },
+            pyqOnlyTopics: {
+                type: [String],
+                default: [],
+            },
+            aiOnlyTopics: {
+                type: [String],
+                default: [],
+            },
+        },
+
         // Total topic count across all units
         totalTopics: {
             type: Number,
