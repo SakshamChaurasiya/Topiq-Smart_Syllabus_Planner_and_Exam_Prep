@@ -204,6 +204,32 @@ const syllabusSchema = new mongoose.Schema(
             type: Number,
             default: 0,
         },
+
+        // ── Cache Key for AI Analysis ────────────────────────────────────────
+        // Keyed on hash(rawContent + institution + targetGoal) so any change
+        // to the syllabus content OR user context invalidates the cache.
+        analysisCache: {
+            key:         { type: String, default: null },
+            cachedAt:    { type: Date, default: null },
+            institution: { type: String, default: '' },
+            targetGoal:  { type: String, default: '' },
+        },
+
+        // ── Spaced Repetition Progress ───────────────────────────────────────
+        // Tracks per-topic study history for generating revision missions
+        // on the scientifically-backed SM-2 schedule (1 → 3 → 7 → 14 → 30 days).
+        topicProgress: [
+            {
+                topicName:      { type: String },
+                lastStudiedAt:  { type: Date },
+                nextReviewDate: { type: Date },
+                intervalIndex:  { type: Number, default: 0 },
+                rating: {
+                    type: String,
+                    enum: ['got-it', 'shaky', 'no-idea'],
+                },
+            },
+        ],
     },
     {
         timestamps: true,

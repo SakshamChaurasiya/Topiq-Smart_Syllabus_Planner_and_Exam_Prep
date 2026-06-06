@@ -137,6 +137,125 @@ Parse only what is above. Do not add anything that is not in that text.`;
 };
 
 // ============================================================
+// 1b. ANALYZE SYLLABUS FROM IMAGE / SCANNED PDF (Gemini Vision)
+// ============================================================
+/**
+ * analyzeSyllabusFromImage(imageBuffer, mimeType, subjectName, institution)
+ * Uses Gemini Vision multimodal API to extract + analyze a syllabus from an
+ * image file (JPG, PNG, WEBP) or a scanned/image-based PDF.
+ *
+ * @param {Buffer} imageBuffer - raw file buffer
+ * @param {string} mimeType    - 'image/jpeg' | 'image/png' | 'image/webp' | 'application/pdf'
+ * @param {string} subjectName
+ * @param {string} institution
+ */
+const analyzeSyllabusFromImage = async (
+    imageBuffer,
+    mimeType,
+    subjectName,
+    institution = ""
+) => {
+    try {
+        if (!genAI) return getMockSyllabusAnalysis(subjectName);
+
+        const model = genAI.getGenerativeModel({
+            model: "gemini-3.5-flash",
+            generationConfig: { temperature: 0.2 },
+        });
+
+        const institutionLine = institution
+            ? `Institution context (for difficulty calibration only, do NOT add topics from general knowledge): ${institution}`
+            : "";
+
+        const prompt = `You are analyzing a syllabus document provided as an image or scanned PDF.
+
+${institutionLine}
+
+VISION INSTRUCTIONS:
+1. Read ALL visible text in the image carefully, including headers, sub-headings, and bullet points.
+2. Identify unit headings, topic names, sub-topics, and any marks/weightage visible.
+3. If text is partially cut off at edges, infer only if the meaning is unambiguous.
+4. If the image quality is poor, extract what is legible and set imageReadability to "poor".
+5. Do NOT add any topic that is not visibly written in the image.
+
+STRICT RULES:
+- Extract ONLY units and topics visible in this image. Do NOT use general knowledge of "${subjectName}".
+- Use exact text as written in the image for topic names.
+- estimatedHours = realistic study time per topic for a student.
+- marksWeightage must sum to 100 across ALL topics combined.
+- Return valid raw JSON only (no markdown fences).
+
+Return this exact JSON:
+{
+  "summary": "2-3 sentences describing the subject based only on what is visible in the image",
+  "overallDifficulty": "easy|medium|hard|very-hard",
+  "totalEstimatedHours": <sum of all topic estimatedHours>,
+  "studyStrategy": "Approach based on this specific syllabus structure",
+  "difficultyBreakdown": { "easy": <percent>, "medium": <percent>, "hard": <percent> },
+  "imageReadability": "clear|partial|poor",
+  "units": [
+    {
+      "unitNumber": <number>,
+      "unitName": "<exact name visible in image>",
+      "topics": [
+        {
+          "name": "<exact topic name from image>",
+          "importance": "critical|high|medium|low",
+          "difficulty": "easy|medium|hard",
+          "estimatedHours": <number>,
+          "marksWeightage": <number>,
+          "summary": "One sentence on what to focus on"
+        }
+      ]
+    }
+  ],
+  "topPriorityTopics": ["<exact topic names>"],
+  "examLikelyTopics": ["<exact topic names>"],
+  "studyTips": ["<specific tip based on this syllabus>"]
+}
+
+Subject name: "${subjectName}"`;
+
+        const result = await model.generateContent({
+            contents: [
+                {
+                    role: "user",
+                    parts: [
+                        { text: prompt },
+                        {
+                            inlineData: {
+                                mimeType: mimeType,
+                                data: imageBuffer.toString("base64"),
+                            },
+                        },
+                    ],
+                },
+            ],
+        });
+
+        const text = result.response.text();
+        console.log("[AI Service] Image syllabus response (first 300):", text.slice(0, 300));
+
+        const cleaned = text
+            .replace(/^```(?:json)?\s*/i, "")
+            .replace(/\s*```$/i, "")
+            .trim();
+
+        const parsed = JSON.parse(cleaned);
+
+        if (parsed.imageReadability === "poor") {
+            console.warn("[AI Service] Image syllabus: poor readability reported by Gemini");
+        }
+
+        return parsed;
+
+    } catch (error) {
+        console.error("[AI Service] analyzeSyllabusFromImage failed:", error?.message);
+        return getMockSyllabusAnalysis(subjectName);
+    }
+};
+
+// ============================================================
 // 2. GENERATE SMART STUDY PLAN
 // ============================================================
 const generateStudyPlan = async ({
@@ -745,6 +864,7 @@ If you could not read anything at all, return: { "pyqSuggestedTopics": [], "read
 
 module.exports = {
     analyzeSyllabus,
+    analyzeSyllabusFromImage,
     generateStudyPlan,
     generateCheatCode,
     analyzePYQ,

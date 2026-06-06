@@ -12,8 +12,10 @@ const {
     markDayComplete,
 } = require("../controllers/planner.controller");
 const { protect } = require("../middleware/auth.middleware");
+const { streakSync } = require("../middleware/streakSync");
 
 router.use(protect);
+router.use(streakSync);
 
 // Generate a full personalized study plan
 router.post("/generate", generatePlan);

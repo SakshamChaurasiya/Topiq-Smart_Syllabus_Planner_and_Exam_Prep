@@ -8,6 +8,8 @@ const Mission = require("../models/mission.model");
 const StudyPlan = require("../models/studyPlan.model");
 const Notification = require("../models/notification.model");
 const { sendSuccess, sendError } = require("../utils/responseHelper");
+const { syncExamNotifications } = require("../utils/examNotifications");
+const { syncRevisionMissions } = require("../utils/spacedRepetition");
 
 // -------------------------------------------
 // @route   GET /api/dashboard
@@ -19,18 +21,10 @@ const getDashboard = async (req, res) => {
         const user = req.user;
         const userId = user._id;
 
-        // Check if streak was broken (neither active today nor yesterday)
-        const todayStr = new Date().toISOString().split("T")[0];
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayStr = yesterday.toISOString().split("T")[0];
-
-        if (user.lastActiveDate !== todayStr && user.lastActiveDate !== yesterdayStr) {
-            if (user.streak > 0) {
-                user.streak = 0;
-                await user.save();
-            }
-        }
+        // Sync exam countdown notifications on dashboard view
+        await syncExamNotifications(userId);
+        // Sync spaced repetition revision missions
+        await syncRevisionMissions(userId);
 
         const today = new Date();
         const todayStart = new Date(today.setHours(0, 0, 0, 0));

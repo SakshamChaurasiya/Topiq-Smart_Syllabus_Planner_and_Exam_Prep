@@ -5,7 +5,9 @@
 
 const Mission = require("../models/mission.model");
 const Subject = require("../models/subject.model");
+const Syllabus = require("../models/syllabus.model");
 const { sendSuccess, sendError } = require("../utils/responseHelper");
+const { syncRevisionMissions, calculateSpacedRepetition } = require("../utils/spacedRepetition");
 
 // -------------------------------------------
 // @route   GET /api/missions
@@ -14,6 +16,7 @@ const { sendSuccess, sendError } = require("../utils/responseHelper");
 // -------------------------------------------
 const getMissions = async (req, res) => {
     try {
+        await syncRevisionMissions(req.user._id);
         const { subjectId, status, date } = req.query;
         const filter = { userId: req.user._id };
 
@@ -47,6 +50,7 @@ const getMissions = async (req, res) => {
 // -------------------------------------------
 const getTodayMissions = async (req, res) => {
     try {
+        await syncRevisionMissions(req.user._id);
         const today = new Date();
         const start = new Date(today.setHours(0, 0, 0, 0));
         const end = new Date(today.setHours(23, 59, 59, 999));
@@ -129,22 +133,40 @@ const updateMissionStatus = async (req, res) => {
                 leveledUp = true;
             }
 
-            // 3. Update Streak
-            const todayStr = new Date().toISOString().split("T")[0];
-            const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-            const yesterdayStr = yesterday.toISOString().split("T")[0];
-
-            if (user.lastActiveDate === yesterdayStr) {
-                user.streak += 1;
-                user.lastActiveDate = todayStr;
-            } else if (user.lastActiveDate !== todayStr) {
-                // Was not active today, nor yesterday
-                user.streak = 1;
-                user.lastActiveDate = todayStr;
-            }
-
+            // 3. Update last active date
+            user.lastActiveDate = new Date();
             await user.save();
+
+            // 4. Update Spaced Repetition Progress
+            if ((mission.type === "study" || mission.type === "revision") && mission.topicName) {
+                const syllabus = await Syllabus.findOne({ subjectId: mission.subjectId, userId: user._id });
+                if (syllabus) {
+                    const rating = req.body.rating || "got-it"; // 'got-it' | 'shaky' | 'no-idea'
+                    
+                    let progressEntry = syllabus.topicProgress.find(
+                        tp => tp.topicName.toLowerCase().trim() === mission.topicName.toLowerCase().trim()
+                    );
+                    
+                    const currentInterval = progressEntry ? progressEntry.intervalIndex : 0;
+                    const calculated = calculateSpacedRepetition(currentInterval, rating);
+                    
+                    if (!progressEntry) {
+                        syllabus.topicProgress.push({
+                            topicName: mission.topicName,
+                            lastStudiedAt: new Date(),
+                            nextReviewDate: calculated.nextReviewDate,
+                            intervalIndex: calculated.intervalIndex,
+                            rating: rating
+                        });
+                    } else {
+                        progressEntry.lastStudiedAt = new Date();
+                        progressEntry.nextReviewDate = calculated.nextReviewDate;
+                        progressEntry.intervalIndex = calculated.intervalIndex;
+                        progressEntry.rating = rating;
+                    }
+                    await syllabus.save();
+                }
+            }
 
             // Update subject's completed topics count when a study mission is done
             if (mission.type === "study" && mission.topicName) {

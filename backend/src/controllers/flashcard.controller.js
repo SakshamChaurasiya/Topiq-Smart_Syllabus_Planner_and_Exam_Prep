@@ -127,6 +127,8 @@ const shareFlashcards = async (req, res) => {
         }
 
         flashcardSet.isShareable = true;
+        flashcardSet.isPublic = true;
+        flashcardSet.sharedAt = new Date();
         flashcardSet.shareTitle = shareTitle || "OS Exam — Last Minute Guide";
         await flashcardSet.save();
 
@@ -139,6 +141,32 @@ const shareFlashcards = async (req, res) => {
     }
 };
 
+// @route   POST /api/flashcards/:setId/revoke
+// @desc    Revoke sharing of a flashcard set (make it private)
+// @access  Protected
+const revokeShareLink = async (req, res) => {
+    try {
+        const { setId } = req.params;
+
+        const flashcardSet = await FlashcardSet.findOne({ _id: setId, userId: req.user._id });
+        if (!flashcardSet) {
+            return sendError(res, 404, "Flashcard set not found.");
+        }
+
+        flashcardSet.isShareable = false;
+        flashcardSet.isPublic = false;
+        flashcardSet.shareToken = null;
+        flashcardSet.sharedAt = null;
+        await flashcardSet.save();
+
+        return sendSuccess(res, 200, "Flashcard share link revoked successfully.");
+
+    } catch (error) {
+        console.error("[Flashcard Controller] Revoke error:", error.message);
+        return sendError(res, 500, "Failed to revoke share link.");
+    }
+};
+
 // @route   GET /api/public/cheatnote/:shareToken
 // @desc    Get a public shared flashcard cheat note
 // @access  Public (No Auth)
@@ -146,8 +174,10 @@ const getPublicCheatNote = async (req, res) => {
     try {
         const { shareToken } = req.params;
 
-        const flashcardSet = await FlashcardSet.findOne({ shareToken, isShareable: true })
-            .populate("subjectId", "name code");
+        const flashcardSet = await FlashcardSet.findOne({
+            shareToken,
+            $or: [{ isPublic: true }, { isShareable: true }]
+        }).populate("subjectId", "name code");
 
         if (!flashcardSet) {
             return sendError(res, 404, "Shared cheat note not found or is no longer public.");
@@ -170,5 +200,6 @@ module.exports = {
     generateFlashcards,
     getFlashcardSet,
     shareFlashcards,
+    revokeShareLink,
     getPublicCheatNote
 };

@@ -15,19 +15,21 @@ const {
 } = require("../controllers/syllabus.controller");
 const { protect } = require("../middleware/auth.middleware");
 const upload = require("../middleware/upload.middleware");
-const { createAIRateLimit } = require("../middleware/aiRateLimit.middleware");
+const { createRateLimiter } = require("../middleware/rateLimiter");
 
-// Syllabus analysis: 3 re-runs per hour per user
-const syllabusAnalysisLimiter = createAIRateLimit({
+// Syllabus analysis: 3 re-runs per hour per user (MongoDB-backed, survives restarts)
+const syllabusAnalysisLimiter = createRateLimiter({
+    max: 3,
     windowMs: 60 * 60 * 1000,
-    maxRequests: 3,
+    keyPrefix: "syllabus_analyze",
     message: "You can run AI analysis up to 3 times per hour. Use forceRerun: true only when needed.",
 });
 
-// PYQ upload: 5 uploads per hour per user  
-const pyqUploadLimiter = createAIRateLimit({
+// PYQ upload: 5 uploads per hour per user (MongoDB-backed)
+const pyqUploadLimiter = createRateLimiter({
+    max: 5,
     windowMs: 60 * 60 * 1000,
-    maxRequests: 5,
+    keyPrefix: "pyq_upload",
     message: "You can upload PYQs up to 5 times per hour.",
 });
 

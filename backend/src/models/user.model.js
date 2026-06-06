@@ -64,9 +64,9 @@ const userSchema = new mongoose.Schema(
             default: 0,
         },
 
-        // Last date the user was active / completed a mission (YYYY-MM-DD)
+        // Last date the user was active / completed a mission
         lastActiveDate: {
-            type: String,
+            type: Date,
             default: null,
         },
 

@@ -6,6 +6,7 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
 const { sendSuccess, sendError } = require("../utils/responseHelper");
+const { syncExamNotifications } = require("../utils/examNotifications");
 
 // -------------------------------------------
 // Helper: Generate a signed JWT token
@@ -100,6 +101,9 @@ const login = async (req, res) => {
 
         // Generate token
         const token = generateToken(user._id);
+
+        // Sync exam countdown notifications on login
+        await syncExamNotifications(user._id);
 
         return sendSuccess(res, 200, "Login successful! Welcome back.", {
             token,

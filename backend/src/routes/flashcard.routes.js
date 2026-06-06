@@ -9,6 +9,7 @@ const {
     generateFlashcards,
     getFlashcardSet,
     shareFlashcards,
+    revokeShareLink,
     getPublicCheatNote
 } = require("../controllers/flashcard.controller");
 const { protect } = require("../middleware/auth.middleware");
@@ -21,6 +22,9 @@ router.post("/syllabus/:syllabusId/flashcards/generate", protect, generateFlashc
 
 // Enable sharing
 router.post("/flashcards/:setId/share", protect, shareFlashcards);
+
+// Revoke sharing
+router.post("/flashcards/:setId/revoke", protect, revokeShareLink);
 
 // Public unauthenticated access to shared cheat notes
 router.get("/public/cheatnote/:shareToken", getPublicCheatNote);

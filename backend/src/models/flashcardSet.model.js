@@ -48,9 +48,18 @@ const flashcardSetSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        // isPublic is the canonical field; isShareable kept for backwards compat
+        isPublic: {
+            type: Boolean,
+            default: false,
+        },
         shareTitle: {
             type: String,
             default: "",
+        },
+        sharedAt: {
+            type: Date,
+            default: null,
         },
     },
     {

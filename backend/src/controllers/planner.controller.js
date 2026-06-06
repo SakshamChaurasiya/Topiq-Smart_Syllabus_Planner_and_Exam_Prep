@@ -505,7 +505,7 @@ const rescheduleMissedDays = async (req, res) => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        // Filter missed days and remaining days
+        // Filter missed days (past days that are not completed / not already rescheduled)
         const missedDays = plan.dailyPlans.filter(day => {
             const dayDate = new Date(day.date);
             dayDate.setHours(0, 0, 0, 0);
@@ -529,47 +529,67 @@ const rescheduleMissedDays = async (req, res) => {
             return sendError(res, 400, "No remaining days to reschedule into. Consider activating Crisis Mode.");
         }
 
-        // Collect missed topics
-        const missedTopics = [];
-        missedDays.forEach(day => {
-            if (day.topics && day.topics.length > 0) {
-                missedTopics.push(...day.topics);
-            }
-        });
+        // ── IDEMPOTENCY GUARD ────────────────────────────────────────────────
+        // Build a set of all topic names already present in future days.
+        // If a missed topic already appears in a future day, skip it — don't duplicate.
+        const topicsAlreadyInFuture = new Set(
+            remainingDays.flatMap(day => day.topics.map(t => t.topicName))
+        );
+
+        // Only collect topics that are NOT already redistributed
+        const missedTopics = missedDays
+            .flatMap(day => (day.topics || []))
+            .filter(topic => !topicsAlreadyInFuture.has(topic.topicName));
+
+        if (missedTopics.length === 0) {
+            // All missed topics already exist in future days — already rescheduled
+            // Mark missed days as completed/rescheduled without adding duplicates
+            missedDays.forEach(day => {
+                day.isCompleted = true;
+                day.rescheduled = true;
+            });
+            const completedDaysCount = plan.dailyPlans.filter(d => d.isCompleted).length;
+            plan.completionPercentage = Math.round((completedDaysCount / plan.dailyPlans.length) * 100);
+            await plan.save();
+            return sendSuccess(res, 200, "Already rescheduled — no duplicates added.", {
+                rescheduledTopicCount: 0,
+                affectedDays: []
+            });
+        }
+        // ── END IDEMPOTENCY GUARD ────────────────────────────────────────────
 
         const affectedDaysSet = new Set();
 
-        if (missedTopics.length > 0) {
-            let remainingIdx = 0;
-            missedTopics.forEach(topic => {
-                const targetDay = remainingDays[remainingIdx];
-                
-                targetDay.topics.push({
-                    topicName: topic.topicName,
-                    unitName: topic.unitName,
-                    estimatedHours: topic.estimatedHours,
-                    importance: topic.importance
-                });
+        // Distribute missed topics round-robin across remaining days
+        let remainingIdx = 0;
+        missedTopics.forEach(topic => {
+            const targetDay = remainingDays[remainingIdx];
 
-                // Update estimated hours (plannedHours)
-                targetDay.plannedHours = targetDay.topics.reduce((sum, t) => sum + (t.estimatedHours || 0), 0);
-
-                // Add note to day tip
-                const note = "⚠ Includes rescheduled topics from missed days.";
-                if (!targetDay.studyTip) {
-                    targetDay.studyTip = note;
-                } else if (!targetDay.studyTip.includes(note)) {
-                    targetDay.studyTip = `${targetDay.studyTip.trim()} ${note}`;
-                }
-
-                affectedDaysSet.add(targetDay.date.toISOString());
-
-                // Move to next remaining day round-robin
-                remainingIdx = (remainingIdx + 1) % remainingDays.length;
+            targetDay.topics.push({
+                topicName: topic.topicName,
+                unitName: topic.unitName,
+                estimatedHours: topic.estimatedHours,
+                importance: topic.importance
             });
-        }
 
-        // Mark missed days completed and rescheduled
+            // Update estimated hours (plannedHours)
+            targetDay.plannedHours = targetDay.topics.reduce((sum, t) => sum + (t.estimatedHours || 0), 0);
+
+            // Add note to day tip
+            const note = "⚠ Includes rescheduled topics from missed days.";
+            if (!targetDay.studyTip) {
+                targetDay.studyTip = note;
+            } else if (!targetDay.studyTip.includes(note)) {
+                targetDay.studyTip = `${targetDay.studyTip.trim()} ${note}`;
+            }
+
+            affectedDaysSet.add(targetDay.date.toISOString());
+
+            // Move to next remaining day round-robin
+            remainingIdx = (remainingIdx + 1) % remainingDays.length;
+        });
+
+        // Mark missed days as completed and rescheduled
         missedDays.forEach(day => {
             day.isCompleted = true;
             day.rescheduled = true;
