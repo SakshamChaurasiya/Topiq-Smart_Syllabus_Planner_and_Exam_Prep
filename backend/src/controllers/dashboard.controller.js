@@ -16,7 +16,22 @@ const { sendSuccess, sendError } = require("../utils/responseHelper");
 // -------------------------------------------
 const getDashboard = async (req, res) => {
     try {
-        const userId = req.user._id;
+        const user = req.user;
+        const userId = user._id;
+
+        // Check if streak was broken (neither active today nor yesterday)
+        const todayStr = new Date().toISOString().split("T")[0];
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split("T")[0];
+
+        if (user.lastActiveDate !== todayStr && user.lastActiveDate !== yesterdayStr) {
+            if (user.streak > 0) {
+                user.streak = 0;
+                await user.save();
+            }
+        }
+
         const today = new Date();
         const todayStart = new Date(today.setHours(0, 0, 0, 0));
         const todayEnd = new Date(today.setHours(23, 59, 59, 999));
@@ -87,8 +102,12 @@ const getDashboard = async (req, res) => {
 
         return sendSuccess(res, 200, "Dashboard data fetched.", {
             user: {
-                name: req.user.name,
-                targetGoal: req.user.targetGoal,
+                name: user.name,
+                targetGoal: user.targetGoal,
+                xp: user.xp,
+                level: user.level,
+                streak: user.streak,
+                targetXP: user.level * 250,
             },
             overview: {
                 totalSubjects,

@@ -57,7 +57,7 @@ const Dashboard = () => {
 
   if (loading) return <LoadingScreen text="Loading your study command center..." />;
 
-  const { overview = {}, todayStats = {}, todayMissions = [], upcomingExams = [], weakSubjects = [], activePlans = [], subjects = [] } = data || {};
+  const { user: dashboardUser = {}, overview = {}, todayStats = {}, todayMissions = [], upcomingExams = [], weakSubjects = [], activePlans = [], subjects = [] } = data || {};
 
   const avgProgress = overview.avgProgress || 0;
   const readiness = getReadinessMsg(avgProgress);
@@ -110,8 +110,8 @@ const Dashboard = () => {
 
       {/* ── GAMIFICATION BAR ── */}
       <div style={{ display: 'flex', gap: 16, marginBottom: 32, flexWrap: 'wrap' }}>
-        <XPProgressBar currentXP={2450} targetXP={3000} level={12} />
-        <StreakBadge streak={7} />
+        <XPProgressBar currentXP={dashboardUser.xp || 0} targetXP={dashboardUser.targetXP || 250} level={dashboardUser.level || 1} />
+        <StreakBadge streak={dashboardUser.streak || 0} />
       </div>
 
       {/* ── STAT CARDS ── */}

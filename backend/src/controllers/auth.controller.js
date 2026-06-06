@@ -57,6 +57,10 @@ const register = async (req, res) => {
                 email: user.email,
                 targetGoal: user.targetGoal,
                 avatar: user.avatar,
+                xp: user.xp,
+                level: user.level,
+                streak: user.streak,
+                targetXP: user.level * 250,
             },
         });
     } catch (error) {
@@ -103,6 +107,10 @@ const login = async (req, res) => {
                 email: user.email,
                 targetGoal: user.targetGoal,
                 avatar: user.avatar,
+                xp: user.xp,
+                level: user.level,
+                streak: user.streak,
+                targetXP: user.level * 250,
             },
         });
     } catch (error) {
@@ -127,6 +135,10 @@ const getMe = async (req, res) => {
             email: user.email,
             targetGoal: user.targetGoal,
             avatar: user.avatar,
+            xp: user.xp,
+            level: user.level,
+            streak: user.streak,
+            targetXP: user.level * 250,
             createdAt: user.createdAt,
         });
     } catch (error) {
@@ -156,6 +168,10 @@ const updateProfile = async (req, res) => {
             email: updatedUser.email,
             targetGoal: updatedUser.targetGoal,
             avatar: updatedUser.avatar,
+            xp: updatedUser.xp,
+            level: updatedUser.level,
+            streak: updatedUser.streak,
+            targetXP: updatedUser.level * 250,
         });
     } catch (error) {
         console.error("[Auth] UpdateProfile error:", error.message);

@@ -83,6 +83,9 @@ const ProfilePage = () => {
               { label: 'Email', value: user?.email, icon: '📧' },
               { label: 'Member Since', value: user?.createdAt ? format(new Date(user.createdAt), 'dd MMMM yyyy') : '—', icon: '📅' },
               { label: 'Study Goal', value: currentGoal?.label, icon: '🎯' },
+              { label: 'Level', value: `Level ${user?.level || 1}`, icon: '⭐' },
+              { label: 'Experience', value: `${user?.xp || 0} / ${user?.targetXP || 250} XP`, icon: '⚡' },
+              { label: 'Current Streak', value: `${user?.streak || 0} Day(s)`, icon: '🔥' },
             ].map(info => (
               <div key={info.label} style={{ display: 'flex', gap: 12, padding: '12px', background: 'var(--bg-elevated)', borderRadius: 10, border: '1px solid var(--border-subtle)' }}>
                 <span style={{ fontSize: '1.1rem' }}>{info.icon}</span>

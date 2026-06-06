@@ -41,11 +41,12 @@ const callAI = async (systemPrompt, userPrompt) => {
 // Takes raw syllabus text and returns structured units/topics
 // ============================================================
 const analyzeSyllabus = async (syllabusText, subjectName) => {
-    const systemPrompt = `You are an expert academic advisor and syllabus analyzer.
+    try {
+        const systemPrompt = `You are an expert academic advisor and syllabus analyzer.
 Your job is to analyze a student's syllabus and extract structured information.
 Always respond in valid JSON format exactly matching the schema provided.`;
 
-    const userPrompt = `Analyze this syllabus for the subject "${subjectName}" and return a JSON object with this exact structure:
+        const userPrompt = `Analyze this syllabus for the subject "${subjectName}" and return a JSON object with this exact structure:
 
 {
   "summary": "Brief 2-3 sentence overview of the subject",
@@ -77,14 +78,18 @@ Always respond in valid JSON format exactly matching the schema provided.`;
 Syllabus content:
 ${syllabusText}`;
 
-    const result = await callAI(systemPrompt, userPrompt);
+        const result = await callAI(systemPrompt, userPrompt);
 
-    if (!result) {
-        // MOCK response when no API key
+        if (!result) {
+            // MOCK response when no API key
+            return getMockSyllabusAnalysis(subjectName);
+        }
+
+        return JSON.parse(result);
+    } catch (error) {
+        console.warn("[AI Service] analyzeSyllabus failed — returning mock response. Error:", error.message);
         return getMockSyllabusAnalysis(subjectName);
     }
-
-    return JSON.parse(result);
 };
 
 // ============================================================
@@ -99,18 +104,19 @@ const generateStudyPlan = async ({
     targetGoal,
     daysRemaining,
 }) => {
-    const systemPrompt = `You are a smart academic planner AI. 
+    try {
+        const systemPrompt = `You are a smart academic planner AI. 
 Create realistic, achievable study plans that maximize student performance.
 Always prioritize high-importance topics. Return valid JSON only.`;
 
-    const topicsStr = syllabusUnits
-        .map((u) =>
-            `Unit ${u.unitNumber}: ${u.unitName}\n` +
-            u.topics.map((t) => `  - ${t.name} (${t.importance}, ${t.estimatedHours}h)`).join("\n")
-        )
-        .join("\n");
+        const topicsStr = syllabusUnits
+            .map((u) =>
+                `Unit ${u.unitNumber}: ${u.unitName}\n` +
+                u.topics.map((t) => `  - ${t.name} (${t.importance}, ${t.estimatedHours}h)`).join("\n")
+            )
+            .join("\n");
 
-    const userPrompt = `Create a personalized study plan for a student.
+        const userPrompt = `Create a personalized study plan for a student.
 
 Subject: ${subjectName}
 Days Remaining: ${daysRemaining} days
@@ -146,13 +152,17 @@ Return a JSON object with this exact structure:
 
 Create exactly ${Math.min(daysRemaining, 30)} daily plans. Ensure total hours fit within ${availableHoursPerDay} hours/day.`;
 
-    const result = await callAI(systemPrompt, userPrompt);
+        const result = await callAI(systemPrompt, userPrompt);
 
-    if (!result) {
+        if (!result) {
+            return getMockStudyPlan(daysRemaining, availableHoursPerDay, syllabusUnits);
+        }
+
+        return JSON.parse(result);
+    } catch (error) {
+        console.warn("[AI Service] generateStudyPlan failed — returning mock response. Error:", error.message);
         return getMockStudyPlan(daysRemaining, availableHoursPerDay, syllabusUnits);
     }
-
-    return JSON.parse(result);
 };
 
 // ============================================================
@@ -166,23 +176,24 @@ const generateCheatCode = async ({
     targetGoal,
     availableHoursPerDay,
 }) => {
-    const systemPrompt = `You are an exam survival expert AI.
+    try {
+        const systemPrompt = `You are an exam survival expert AI.
 Students come to you desperate — they have very little time before their exam.
 Your job is to tell them EXACTLY what to study to maximize their marks.
 Be ruthless about prioritization. Be specific. Be honest. Return valid JSON only.`;
 
-    const allTopics = syllabusUnits.flatMap((u) =>
-        u.topics.map((t) => ({
-            topic: t.name,
-            unit: u.unitName,
-            importance: t.importance,
-            difficulty: t.difficulty,
-            hours: t.estimatedHours,
-            marks: t.marksWeightage,
-        }))
-    );
+        const allTopics = syllabusUnits.flatMap((u) =>
+            u.topics.map((t) => ({
+                topic: t.name,
+                unit: u.unitName,
+                importance: t.importance,
+                difficulty: t.difficulty,
+                hours: t.estimatedHours,
+                marks: t.marksWeightage,
+            }))
+        );
 
-    const userPrompt = `A student has ${daysRemaining} day(s) left before their ${subjectName} exam.
+        const userPrompt = `A student has ${daysRemaining} day(s) left before their ${subjectName} exam.
 They can study ${availableHoursPerDay} hours/day. Target: ${targetGoal}.
 
 All topics:
@@ -223,13 +234,17 @@ Create an EXAM SURVIVAL CHEAT CODE. Return JSON:
   }
 }`;
 
-    const result = await callAI(systemPrompt, userPrompt);
+        const result = await callAI(systemPrompt, userPrompt);
 
-    if (!result) {
+        if (!result) {
+            return getMockCheatCode(daysRemaining, subjectName);
+        }
+
+        return JSON.parse(result);
+    } catch (error) {
+        console.warn("[AI Service] generateCheatCode failed — returning mock response. Error:", error.message);
         return getMockCheatCode(daysRemaining, subjectName);
     }
-
-    return JSON.parse(result);
 };
 
 // ============================================================

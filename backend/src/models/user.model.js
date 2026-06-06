@@ -45,6 +45,30 @@ const userSchema = new mongoose.Schema(
             enum: ["pass", "good", "excellent"],
             default: "good",
         },
+
+        // XP for gamification
+        xp: {
+            type: Number,
+            default: 0,
+        },
+
+        // Level of the user
+        level: {
+            type: Number,
+            default: 1,
+        },
+
+        // Daily activity streak
+        streak: {
+            type: Number,
+            default: 0,
+        },
+
+        // Last date the user was active / completed a mission (YYYY-MM-DD)
+        lastActiveDate: {
+            type: String,
+            default: null,
+        },
     },
     {
         // Automatically add createdAt and updatedAt fields

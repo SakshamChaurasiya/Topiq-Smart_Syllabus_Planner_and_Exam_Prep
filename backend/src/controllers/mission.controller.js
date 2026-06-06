@@ -111,8 +111,40 @@ const updateMissionStatus = async (req, res) => {
         mission.status = status;
 
         // Set completion timestamp
+        let xpEarned = 0;
+        const user = req.user;
         if (status === "completed") {
             mission.completedAt = new Date();
+            xpEarned = mission.xpReward || 10;
+
+            // 1. Award XP to User
+            user.xp += xpEarned;
+
+            // 2. Check Level Up
+            const getTargetXP = (lvl) => lvl * 250;
+            let leveledUp = false;
+            while (user.xp >= getTargetXP(user.level)) {
+                user.xp -= getTargetXP(user.level);
+                user.level += 1;
+                leveledUp = true;
+            }
+
+            // 3. Update Streak
+            const todayStr = new Date().toISOString().split("T")[0];
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().split("T")[0];
+
+            if (user.lastActiveDate === yesterdayStr) {
+                user.streak += 1;
+                user.lastActiveDate = todayStr;
+            } else if (user.lastActiveDate !== todayStr) {
+                // Was not active today, nor yesterday
+                user.streak = 1;
+                user.lastActiveDate = todayStr;
+            }
+
+            await user.save();
 
             // Update subject's completed topics count when a study mission is done
             if (mission.type === "study" && mission.topicName) {
@@ -135,7 +167,13 @@ const updateMissionStatus = async (req, res) => {
             missionId: mission._id,
             status: mission.status,
             completedAt: mission.completedAt,
-            xpEarned: status === "completed" ? mission.xpReward : 0,
+            xpEarned: status === "completed" ? xpEarned : 0,
+            user: {
+                xp: user.xp,
+                level: user.level,
+                streak: user.streak,
+                targetXP: user.level * 250,
+            },
         });
     } catch (error) {
         console.error("[Mission] UpdateStatus error:", error.message);
