@@ -489,4 +489,107 @@ const exportStudyPlanToIcs = async (req, res) => {
     }
 };
 
-module.exports = { generatePlan, generateCheatCode, getPlan, markDayComplete, exportStudyPlanToIcs };
+// -------------------------------------------
+// @route   POST /api/study-plan/:planId/reschedule
+// @desc    Reschedule uncompleted topics from missed days across remaining days
+// @access  Protected
+// -------------------------------------------
+const rescheduleMissedDays = async (req, res) => {
+    try {
+        const { planId } = req.params;
+        const plan = await StudyPlan.findOne({ _id: planId, userId: req.user._id });
+        if (!plan) {
+            return sendError(res, 404, "Study plan not found.");
+        }
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Filter missed days and remaining days
+        const missedDays = plan.dailyPlans.filter(day => {
+            const dayDate = new Date(day.date);
+            dayDate.setHours(0, 0, 0, 0);
+            return dayDate < today && !day.isCompleted;
+        });
+
+        const remainingDays = plan.dailyPlans.filter(day => {
+            const dayDate = new Date(day.date);
+            dayDate.setHours(0, 0, 0, 0);
+            return dayDate >= today && !day.isCompleted;
+        });
+
+        if (missedDays.length === 0) {
+            return sendSuccess(res, 200, "No missed days detected.", {
+                rescheduledTopicCount: 0,
+                affectedDays: []
+            });
+        }
+
+        if (remainingDays.length === 0) {
+            return sendError(res, 400, "No remaining days to reschedule into. Consider activating Crisis Mode.");
+        }
+
+        // Collect missed topics
+        const missedTopics = [];
+        missedDays.forEach(day => {
+            if (day.topics && day.topics.length > 0) {
+                missedTopics.push(...day.topics);
+            }
+        });
+
+        const affectedDaysSet = new Set();
+
+        if (missedTopics.length > 0) {
+            let remainingIdx = 0;
+            missedTopics.forEach(topic => {
+                const targetDay = remainingDays[remainingIdx];
+                
+                targetDay.topics.push({
+                    topicName: topic.topicName,
+                    unitName: topic.unitName,
+                    estimatedHours: topic.estimatedHours,
+                    importance: topic.importance
+                });
+
+                // Update estimated hours (plannedHours)
+                targetDay.plannedHours = targetDay.topics.reduce((sum, t) => sum + (t.estimatedHours || 0), 0);
+
+                // Add note to day tip
+                const note = "⚠ Includes rescheduled topics from missed days.";
+                if (!targetDay.studyTip) {
+                    targetDay.studyTip = note;
+                } else if (!targetDay.studyTip.includes(note)) {
+                    targetDay.studyTip = `${targetDay.studyTip.trim()} ${note}`;
+                }
+
+                affectedDaysSet.add(targetDay.date.toISOString());
+
+                // Move to next remaining day round-robin
+                remainingIdx = (remainingIdx + 1) % remainingDays.length;
+            });
+        }
+
+        // Mark missed days completed and rescheduled
+        missedDays.forEach(day => {
+            day.isCompleted = true;
+            day.rescheduled = true;
+        });
+
+        // Recalculate completion percentage
+        const completedDaysCount = plan.dailyPlans.filter((d) => d.isCompleted).length;
+        plan.completionPercentage = Math.round((completedDaysCount / plan.dailyPlans.length) * 100);
+
+        await plan.save();
+
+        return sendSuccess(res, 200, "Missed days rescheduled successfully.", {
+            rescheduledTopicCount: missedTopics.length,
+            affectedDays: Array.from(affectedDaysSet)
+        });
+
+    } catch (error) {
+        console.error("[Planner] Reschedule error:", error.message);
+        return sendError(res, 500, "Failed to reschedule missed days.");
+    }
+};
+
+module.exports = { generatePlan, generateCheatCode, getPlan, markDayComplete, exportStudyPlanToIcs, rescheduleMissedDays };

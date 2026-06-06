@@ -27,6 +27,8 @@ const PlannerPage = () => {
   const [generating, setGenerating] = useState(false);
   const [expandedDay, setExpandedDay] = useState(null);
   const [exporting, setExporting] = useState(false);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
+  const [rescheduling, setRescheduling] = useState(false);
 
   const [form, setForm] = useState({
     examDate: '',
@@ -110,10 +112,36 @@ const PlannerPage = () => {
     }
   };
 
+  const handleReschedule = async () => {
+    if (!plan?._id) return;
+    setRescheduling(true);
+    const todayMidnight = new Date(); todayMidnight.setHours(0,0,0,0);
+    const missedDaysCount = plan.dailyPlans.filter(d => new Date(d.date) < todayMidnight && !d.isCompleted).length;
+    try {
+      await plannerAPI.reschedule(plan._id);
+      toast.success(`Topics from ${missedDaysCount} missed days redistributed across your remaining schedule.`);
+      setBannerDismissed(true);
+      fetchData();
+    } catch (err) {
+      console.error('Failed to reschedule:', err);
+      const errMsg = err.response?.data?.message || '';
+      if (errMsg.includes('No remaining days') || err.response?.status === 400) {
+        toast.error('No remaining days to reschedule into. Try Crisis Mode instead.');
+      } else {
+        toast.error(errMsg || 'Failed to reschedule missed days. Please try again.');
+      }
+    } finally {
+      setRescheduling(false);
+    }
+  };
+
   if (loading) return <LoadingScreen text="Loading planner..." />;
 
   const today = new Date(); today.setHours(0,0,0,0);
   const importanceColor = { critical: 'var(--danger)', high: 'var(--warning)', medium: 'var(--primary)', low: 'var(--success)' };
+
+  const missedDays = plan?.dailyPlans?.filter(d => new Date(d.date) < today && !d.isCompleted) || [];
+  const showMissedBanner = plan && missedDays.length > 0 && !bannerDismissed;
 
   return (
     <div className="page-container animate-fade-in">
@@ -314,6 +342,40 @@ const PlannerPage = () => {
               </div>
             )}
 
+            {/* Missed Days Reschedule Banner */}
+            {showMissedBanner && (
+              <div className="card" style={{ marginBottom: 20, background: 'rgba(245,158,11,0.08)', borderColor: 'rgba(245,158,11,0.3)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontSize: '1.2rem' }}>⚠️</span>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ margin: 0, fontSize: '0.88rem', fontWeight: 600, color: 'var(--warning)' }}>
+                      You have {missedDays.length} missed study day(s).
+                    </p>
+                    <p style={{ margin: '2px 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                      Reschedule those topics across your remaining days?
+                    </p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    onClick={handleReschedule}
+                    disabled={rescheduling}
+                    className="btn btn-primary btn-sm"
+                    style={{ background: 'var(--warning)', borderColor: 'var(--warning)', color: '#000', fontWeight: 700 }}
+                  >
+                    {rescheduling ? 'Rescheduling...' : 'Reschedule Now'}
+                  </button>
+                  <button
+                    onClick={() => setBannerDismissed(true)}
+                    disabled={rescheduling}
+                    className="btn btn-secondary btn-sm"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Daily roadmap */}
             {plan.dailyPlans?.length > 0 && (
               <div>
@@ -338,10 +400,15 @@ const PlannerPage = () => {
                             {day.isCompleted ? '✓' : di + 1}
                           </div>
                           <div>
-                            <div style={{ fontWeight: 700, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <div style={{ fontWeight: 700, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                               {day.dayLabel || `Day ${di + 1}`}
                               {isToday && <span className="badge badge-primary">TODAY</span>}
                               {day.isCompleted && <span className="badge badge-success">Done ✓</span>}
+                              {day.rescheduled && (
+                                <span className="badge" style={{ background: 'rgba(245,158,11,0.15)', color: 'var(--warning)', border: '1px solid rgba(245,158,11,0.3)', padding: '2px 8px', fontSize: '0.7rem', borderRadius: 4, fontWeight: 700 }}>
+                                  Includes missed topics
+                                </span>
+                              )}
                             </div>
                             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                               {format(new Date(day.date), 'EEE, dd MMM')} · {day.plannedHours}h · {day.topics?.length} topics

@@ -50,6 +50,12 @@ const dailyPlanSchema = new mongoose.Schema({
         type: String,
         default: "",
     },
+
+    // Whether this day was marked completed because its topics were rescheduled
+    rescheduled: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 // --- Main Study Plan Schema ---

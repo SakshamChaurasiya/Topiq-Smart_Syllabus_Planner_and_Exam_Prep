@@ -8,4 +8,6 @@ export const plannerAPI = {
     axiosInstance.put(`/planner/day/${planId}/${dayIndex}/complete`),
   exportICS:      (planId) =>
     axiosInstance.get(`/study-plan/${planId}/export/ics`, { responseType: 'blob' }),
+  reschedule:     (planId) =>
+    axiosInstance.post(`/study-plan/${planId}/reschedule`),
 };
