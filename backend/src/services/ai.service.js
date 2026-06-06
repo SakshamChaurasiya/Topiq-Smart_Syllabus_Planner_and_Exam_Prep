@@ -19,12 +19,12 @@ const callAI = async (systemPrompt, userPrompt) => {
         return null;
     }
 
+
     try {
         const model = genAI.getGenerativeModel({
-            model: "gemini-1.5-flash",
+            model: "gemini-3.5-flash",
             systemInstruction: systemPrompt,
             generationConfig: {
-                responseMimeType: "application/json",
                 temperature: 0.7,
             },
         });
@@ -42,7 +42,6 @@ const callAI = async (systemPrompt, userPrompt) => {
         return cleaned;
 
     } catch (error) {
-        console.error("[AI Service] callAI HARD ERROR:", error);
         return null;
     }
 };
@@ -125,6 +124,7 @@ SYLLABUS TEXT ENDS HERE.
 Parse only what is above. Do not add anything that is not in that text.`;
 
         const result = await callAI(systemPrompt, userPrompt);
+        console.log("[DEBUG] analyzeSyllabus callAI returned:", result === null ? "NULL" : result?.slice(0, 100));
         if (!result) return getMockSyllabusAnalysis(subjectName);
         return JSON.parse(result);
     } catch (error) {
@@ -248,6 +248,7 @@ Do not repeat the same topic on multiple days unless it is explicitly marked
 and note the split in the studyTip.`;
 
         const result = await callAI(systemPrompt, userPrompt);
+        console.log("[DEBUG] analyzeSyllabus callAI returned:", result === null ? "NULL" : result?.slice(0, 100));
         if (!result)
             return getMockStudyPlan(daysRemaining, availableHoursPerDay, syllabusUnits);
         return JSON.parse(result);
@@ -365,6 +366,7 @@ Return this exact JSON:
 }`;
 
         const result = await callAI(systemPrompt, userPrompt);
+        console.log("[DEBUG] analyzeSyllabus callAI returned:", result === null ? "NULL" : result?.slice(0, 100));
         if (!result) return getMockCheatCode(daysRemaining, subjectName);
         return JSON.parse(result);
     } catch (error) {
@@ -434,6 +436,7 @@ Minimum 1 topic, maximum equal to the number of topics in the syllabus list.
 Do not include topics with frequency 0.`;
 
         const result = await callAI(systemPrompt, userPrompt);
+        console.log("[DEBUG] analyzeSyllabus callAI returned:", result === null ? "NULL" : result?.slice(0, 100));
         if (!result) return getMockPYQAnalysis();
         return JSON.parse(result);
     } catch (error) {
@@ -594,11 +597,149 @@ Return this exact JSON format:
 }
 `;
         const result = await callAI(systemPrompt, userPrompt);
+        console.log("[DEBUG] analyzeSyllabus callAI returned:", result === null ? "NULL" : result?.slice(0, 100));
         if (!result) return null;
         return JSON.parse(result);
     } catch (error) {
         console.warn("[AI Service] generateFlashcards failed:", error.message);
         return null;
+    }
+};
+
+const analyzePYQFromFile = async (pdfBuffer, existingTopics = []) => {
+    try {
+        if (!genAI) return getMockPYQAnalysis();
+
+        console.log("[DEBUG] PYQ topics received:", existingTopics.length, existingTopics.slice(0, 3));
+
+        const topicList = existingTopics.map((t, i) => `${i + 1}. "${t}"`).join("\n");
+
+        //         const prompt = `You are analyzing a past year exam question paper (which may be a scanned PDF image).
+
+        // Your job is to identify which topics from the syllabus list below appear as questions in this paper.
+
+        // KNOWN SYLLABUS TOPICS (return ONLY topics from this exact list, using exact names):
+        // ${topicList}
+
+        // INSTRUCTIONS:
+        // 1. Read every question visible in the document.
+        // 2. Match each question to the closest syllabus topic from the list above.
+        // 3. If a question does not clearly match any topic in the list, ignore it.
+        // 4. Count how many different years/papers each topic appeared in.
+        // 5. Note the year if visible anywhere in the document.
+        // 6. Estimate marks per topic if marks are printed, otherwise use 0.
+
+        // Return this exact JSON (no markdown fences, no explanation, raw JSON only):
+        // {
+        //   "pyqSuggestedTopics": [
+        //     {
+        //       "topic": "<exact topic name from syllabus list>",
+        //       "frequency": <number>,
+        //       "yearsAppeared": ["<year if visible, else 'Unknown'>"],
+        //       "estimatedMarks": <number or 0>
+        //     }
+        //   ]
+        // }
+
+        // Sort by frequency descending. Only include topics that actually appear in this document.`;
+
+        // ✅ Correct contents format for @google/generative-ai SDK
+
+        const prompt = `You are analyzing a past year exam question paper. This PDF may be:
+- A scanned image with no text layer (use vision to read it)
+- Low quality or blurry (do your best to read questions)
+- In Hindi, English, or a mix of both languages
+
+IMPORTANT READING INSTRUCTIONS:
+1. This is a VISUAL task. Read the document as an image, not as text.
+2. If text is blurry, infer the most likely question topic from context.
+3. If the paper is in Hindi, translate questions mentally to match the English topic names below.
+4. If the paper mixes Hindi and English, handle both.
+5. Do NOT give up if quality is poor — make your best match attempt.
+
+KNOWN SYLLABUS TOPICS (return ONLY topics from this exact list, using exact names):
+${topicList}
+
+MATCHING RULES:
+- Match each visible/inferable question to the closest topic in the list above.
+- For Hindi papers: mentally translate the question, then match to the English topic name.
+- For blurry text: use surrounding context (unit numbers, keywords) to infer the topic.
+- If a question is completely unreadable and uninferable, skip it.
+- If a question partially matches a topic, include it with frequency 1.
+- Use EXACT topic names from the list — no synonyms, no translations in output.
+
+Return this exact JSON (raw JSON only, no markdown, no explanation):
+{
+  "pyqSuggestedTopics": [
+    {
+      "topic": "<exact topic name from syllabus list above>",
+      "frequency": <number of papers/years this appeared>,
+      "yearsAppeared": ["<year if visible, else 'Unknown'>"],
+      "estimatedMarks": <marks if visible, else 0>
+    }
+  ],
+  "readabilityNote": "<one line — was the PDF clear, blurry, Hindi, scanned, etc.>"
+}
+
+Sort by frequency descending.
+Only include topics that actually appear in this document.
+If you could not read anything at all, return: { "pyqSuggestedTopics": [], "readabilityNote": "Could not read document" }`;
+
+        const model = genAI.getGenerativeModel({
+            model: "gemini-3.5-flash",
+            generationConfig: {
+                temperature: 0.1,
+            },
+        });
+
+        const result = await model.generateContent({
+            contents: [
+                {
+                    role: "user",
+                    parts: [
+                        { text: prompt },
+                        {
+                            inlineData: {
+                                mimeType: "application/pdf",
+                                data: pdfBuffer.toString("base64"),
+                            },
+                        },
+                    ],
+                },
+            ],
+        });
+
+        const text = result.response.text();
+        console.log("[AI Service] PYQ raw response (first 300):", text.slice(0, 300));
+
+        const cleaned = text
+            .replace(/^```(?:json)?\s*/i, "")
+            .replace(/\s*```$/i, "")
+            .trim();
+
+        const parsed = JSON.parse(cleaned);
+
+        // Log what Gemini saw
+        console.log("[AI Service] PYQ readability:", parsed?.readabilityNote);
+        console.log("[AI Service] PYQ topics found:", parsed?.pyqSuggestedTopics?.length ?? 0);
+
+        // If Gemini explicitly said it couldn't read anything
+        if (!parsed.pyqSuggestedTopics || parsed.pyqSuggestedTopics.length === 0) {
+            console.warn("[AI Service] PYQ returned 0 topics — poor quality or unreadable PDF");
+            // Return a special response so frontend can show a helpful message
+            return {
+                pyqSuggestedTopics: [],
+                readabilityNote: parsed.readabilityNote || "Could not extract questions from this PDF",
+                unreadable: true,
+            };
+        }
+
+        return parsed;
+
+    } catch (error) {
+        console.error("[AI Service] analyzePYQFromFile failed:", error?.message);
+        console.error("[AI Service] Full PYQ error:", JSON.stringify(error, null, 2));
+        return getMockPYQAnalysis();
     }
 };
 
@@ -608,4 +749,5 @@ module.exports = {
     generateCheatCode,
     analyzePYQ,
     generateFlashcards,
+    analyzePYQFromFile,
 };

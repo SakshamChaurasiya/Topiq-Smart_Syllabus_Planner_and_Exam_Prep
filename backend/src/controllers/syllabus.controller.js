@@ -162,6 +162,31 @@ const analyzeSyllabus = async (req, res) => {
             return sendError(res, 400, "Syllabus content is empty. Cannot analyze.");
         }
 
+        // --- CACHE CHECK ---
+        const forceRerun = req.body?.forceRerun === true;
+
+        if (syllabus.isAnalyzed && syllabus.units?.length > 0 && !forceRerun) {
+            // Return cached result without calling Gemini
+            console.log("[Syllabus] Returning cached analysis for syllabus:", syllabus._id);
+
+            const aiAnalysisObj = syllabus.aiAnalysis?.toObject
+                ? syllabus.aiAnalysis.toObject()
+                : { ...syllabus.aiAnalysis };
+
+            aiAnalysisObj.aiSuggestedFocusAreas = aiAnalysisObj.examLikelyTopics || [];
+            delete aiAnalysisObj.examLikelyTopics;
+
+            return sendSuccess(res, 200, "Returning saved analysis. Use forceRerun: true to re-analyze.", {
+                syllabusId: syllabus._id,
+                totalUnits: syllabus.units.length,
+                totalTopics: syllabus.totalTopics,
+                aiAnalysis: aiAnalysisObj,
+                units: syllabus.units,
+                fromCache: true,
+            });
+        }
+        // --- END CACHE CHECK ---
+
         // Call AI service for analysis
         const analysisResult = await aiService.analyzeSyllabus(
             syllabus.rawContent,
@@ -329,7 +354,7 @@ const uploadPYQ = async (req, res) => {
             if (req.file) {
                 try {
                     fs.unlinkSync(req.file.path);
-                } catch (unlinkErr) {}
+                } catch (unlinkErr) { }
             }
             return sendError(res, 404, "Syllabus not found.");
         }
@@ -338,7 +363,7 @@ const uploadPYQ = async (req, res) => {
             if (req.file) {
                 try {
                     fs.unlinkSync(req.file.path);
-                } catch (unlinkErr) {}
+                } catch (unlinkErr) { }
             }
             return sendError(res, 400, "Please analyze your syllabus first before uploading past year papers.");
         }
@@ -352,38 +377,37 @@ const uploadPYQ = async (req, res) => {
         if (!isPdf) {
             try {
                 fs.unlinkSync(req.file.path);
-            } catch (unlinkErr) {}
+            } catch (unlinkErr) { }
             return sendError(res, 400, "Only PDF files are supported for past year question papers.");
         }
 
-        let rawContent = await extractPdfText(req.file.path);
-        
-        // Fallback: if pdf-parse failed (e.g. invalid PDF structure in test mock), try reading as text
-        if (!rawContent || rawContent.trim().length < 20) {
-            try {
-                const textFallback = fs.readFileSync(req.file.path, "utf8");
-                if (textFallback && textFallback.trim().length >= 20) {
-                    rawContent = textFallback;
-                }
-            } catch (fallbackErr) {}
-        }
+        // Read PDF file as buffer for Gemini Vision
+        const pdfBuffer = fs.readFileSync(req.file.path);
 
-        // Clean up the uploaded file since we've extracted the text and don't need it on disk
+        // Clean up temp file immediately after reading
         try {
             fs.unlinkSync(req.file.path);
         } catch (unlinkError) {
             console.error("[Syllabus] Failed to delete temp PYQ file:", unlinkError.message);
         }
 
-        if (!rawContent || rawContent.trim().length < 20) {
-            return sendError(res, 400, "Could not extract sufficient text from the PDF. Please ensure the file is not empty or scanned as images.");
-        }
-
-        // Get existing syllabus topics
+        // Get existing syllabus topics to cross-reference
         const existingTopics = syllabus.units.flatMap(u => u.topics.map(t => t.name));
 
-        // Call Gemini to analyze PYQ text and match with existing topics
-        const analysisResult = await aiService.analyzePYQ(rawContent, existingTopics);
+        if (existingTopics.length === 0) {
+            return sendError(res, 400, "No topics found in syllabus. Please re-run AI analysis first.");
+        }
+
+        // Send PDF directly to Gemini Vision — works for both text and scanned PDFs
+        const analysisResult = await aiService.analyzePYQFromFile(pdfBuffer, existingTopics);
+
+        // Handle unreadable PDF gracefully
+        if (analysisResult.unreadable) {
+            return sendError(res, 422,
+                `Could not extract questions from this PDF. Reason: ${analysisResult.readabilityNote}. ` +
+                `Please try a clearer scan or a text-based PDF.`
+            );
+        }
 
         const pyqSuggestedTopics = (analysisResult.pyqSuggestedTopics || []).map(topicObj => ({
             topic: topicObj.topic,
@@ -437,7 +461,7 @@ const uploadPYQ = async (req, res) => {
         if (req.file && fs.existsSync(req.file.path)) {
             try {
                 fs.unlinkSync(req.file.path);
-            } catch (unlinkError) {}
+            } catch (unlinkError) { }
         }
         return sendError(res, 500, "Failed to analyze PYQs. Please try again.");
     }

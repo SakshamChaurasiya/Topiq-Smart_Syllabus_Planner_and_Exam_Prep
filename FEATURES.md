@@ -30,7 +30,7 @@ Welcome to the **Smart Syllabus Planner (SSP)** project! This application is des
 ### 3. AI-Powered Syllabus Analysis
 * **Multiple Import Channels:** Students can upload a **PDF syllabus file**, an **image snapshot** (JPG, PNG, WEBP), or paste **raw text syllabus content**.
 * **Text Extraction:** Uses the `pdf-parse` library on the Node.js backend to extract text.
-* **Gemini AI Integration:** Utilizes Google Gemini's `gemini-1.5-flash` model with `responseMimeType: "application/json"` (and incorporates their registered College/University context to optimize study recommendations based on specific institutional patterns) to generate structured data containing:
+* **Gemini AI Integration:** Utilizes Google Gemini's `gemini-3.5-flash` model with `responseMimeType: "application/json"` (and incorporates their registered College/University context to optimize study recommendations based on specific institutional patterns) to generate structured data containing:
   * **Units & Topics:** Nested list mapping importance levels (`critical`, `high`, `medium`, `low`), difficulty levels (`easy`, `medium`, `hard`), estimated study hours, weightage marks, and clear topic-focus tips.
   * **Top Priority Topics:** Focus subjects recommended for immediate study.
   * **Exam-Likely Topics:** High probability questions prediction.
@@ -38,6 +38,8 @@ Welcome to the **Smart Syllabus Planner (SSP)** project! This application is des
   * **Study Tips & Strategy:** General tips tailored for the subject.
 * **Topic Progress Tracking:** Checkboxes beside each parsed topic allow students to complete them, updating progress rings in real time.
 * **Resilience & Graceful Degradation:** The AI analysis and planning engines are designed to gracefully degrade. If the Gemini API key is missing or calls fail/rate-limit, the system returns mock syllabus structures so the application remains fully usable.
+* **Token Caching & Forced Re-Runs:** In order to save Google Gemini tokens, the system caches analysis results when syllabus content is unchanged. Users can click "Re-run Analysis" to explicitly bypass the cache and force a new Gemini parse.
+* **Per-User AI Rate Limiting:** Implements in-memory rate limiting (3 syllabus analysis requests/hour and 5 PYQ uploads/hour per user) to protect backend API quotas.
 
 ### 4. Smart Study Planner (Normal Mode)
 * **Tailored Schedule Generation:** Takes exam date, daily available study hours, and target goal as inputs.
@@ -71,7 +73,8 @@ Welcome to the **Smart Syllabus Planner (SSP)** project! This application is des
 * **Revision Radar:** Lists subjects displaying $<30\%$ progress with upcoming exams.
 
 ### 9. PYQ Analysis & Exam Alignment (Triple Topic Output)
-* **Past Paper Integration:** Students can upload a PDF containing previous year question papers alongside the syllabus.
+* **Past Paper Integration (Gemini Vision):** Students can upload previous year question paper PDFs. Powered by Gemini Vision, the system reads both text-based and scanned/photo exam papers natively (handling blurry text, Hindi/English mix, and visual formats).
+* **Readability Graceful Handling:** If a PDF is completely unreadable or has poor visual scanning quality, the system responds gracefully with a diagnostic readability warning (422 status) instead of an empty text error.
 * **Evidence-Based Insights:** The system parses exam questions and provides a detailed triple-alignment topic breakdown:
   * **Overlap Topics:** Topics appearing in both the syllabus AI analysis and past papers (highest priority).
   * **PYQ-Only Topics:** Topics seen in past papers but missing from the parsed syllabus (potential study gaps).
@@ -103,7 +106,7 @@ Welcome to the **Smart Syllabus Planner (SSP)** project! This application is des
 | **Subjects** | Subject Manager | Register, update, and manage subjects. | Express Router, Mongoose |
 | | Progress Ring | Shows subject completion based on completed topics. | SVG ProgressRing, CSS transitions |
 | **Syllabus** | Multi-uploader | Import syllabus via PDF, Image, or plain text. | Multer, PDF-Parse, Express |
-| | AI Parser | Generates detailed topics list, hours estimate, difficulty levels. | Google Gemini AI (`gemini-1.5-flash`) |
+| | AI Parser | Generates detailed topics list, hours estimate, difficulty levels. | Google Gemini AI (`gemini-3.5-flash`) |
 | | Topic Checklist | Mark topics completed to raise subject progress. | Mongoose Nested Schemas, React |
 | **Syllabus / PYQ** | PYQ Alignment | Cross-reference past papers to output Overlap, PYQ-Only, and AI-Only topic divisions. | Multer, PDF-Parse, Gemini AI |
 | **Planner** | Normal Planner | AI day-by-day roadmap fitting remaining timeline. | Google Gemini AI, date-fns |

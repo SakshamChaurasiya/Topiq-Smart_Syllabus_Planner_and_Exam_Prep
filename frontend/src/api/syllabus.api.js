@@ -5,7 +5,7 @@ export const syllabusAPI = {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
   submitText:  (data)     => axiosInstance.post('/syllabus/text', data),
-  analyze:     (id)       => axiosInstance.post(`/syllabus/${id}/analyze`),
+  analyze:     (id, data) => axiosInstance.post(`/syllabus/${id}/analyze`, data),
   getBySubject:(subjectId)=> axiosInstance.get(`/syllabus/${subjectId}`),
   markTopic:   (syllabusId, topicId, isCompleted) =>
     axiosInstance.put(`/syllabus/${syllabusId}/topic/${topicId}/complete`, { isCompleted }),

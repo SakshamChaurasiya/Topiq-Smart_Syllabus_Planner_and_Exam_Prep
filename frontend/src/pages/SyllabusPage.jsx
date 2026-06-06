@@ -33,6 +33,12 @@ const SyllabusPage = () => {
   const [shareTitleInput, setShareTitleInput] = useState('');
   const [generatedShareLink, setGeneratedShareLink] = useState('');
 
+  // Rate limiting & Caching state
+  const [rateLimitMessage, setRateLimitMessage] = useState('');
+  const [rateLimitReset, setRateLimitReset] = useState(0);
+  const [isRateLimited, setIsRateLimited] = useState(false);
+  const [cachedNotice, setCachedNotice] = useState(false);
+
   const fetchData = async () => {
     try {
       const [subRes, sylRes] = await Promise.allSettled([
@@ -107,15 +113,37 @@ const SyllabusPage = () => {
   };
 
   // Run AI analysis
-  const handleAnalyze = async () => {
+  const handleAnalyze = async (forceRerun = false) => {
     if (!syllabus) return;
     setAnalyzing(true);
+    setCachedNotice(false);
+    setIsRateLimited(false);
+    setRateLimitMessage('');
     try {
-      await syllabusAPI.analyze(syllabus._id);
-      toast.success('AI analysis complete! ✨');
+      const res = await syllabusAPI.analyze(syllabus._id, { forceRerun });
+      
+      if (res.data?.data?.fromCache) {
+        setCachedNotice(true);
+        toast('Showing saved analysis. Click "Re-run Analysis" to generate a fresh one.', {
+          icon: 'ℹ️',
+          duration: 5000
+        });
+      } else {
+        toast.success('AI analysis complete! ✨');
+      }
+      
       fetchData();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Analysis failed. Try again.');
+      if (err.response?.status === 429) {
+        const msg = err.response.data?.message || 'Too many requests.';
+        const minutes = err.response.data?.resetInMinutes || 60;
+        setIsRateLimited(true);
+        setRateLimitMessage(msg);
+        setRateLimitReset(minutes);
+        toast.error(`${msg} Please wait ${minutes} minutes before trying again.`);
+      } else {
+        toast.error(err.response?.data?.message || 'Analysis failed. Try again.');
+      }
     } finally { setAnalyzing(false); }
   };
 
@@ -332,14 +360,25 @@ const SyllabusPage = () => {
                 Ready for AI analysis. Click the button to extract units and topics.
               </p>
             </div>
-            <button className="btn btn-primary btn-lg" onClick={handleAnalyze} disabled={analyzing}>
-              {analyzing ? (
-                <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} />
-                  Analyzing...
-                </span>
-              ) : '🤖 Run AI Analysis'}
-            </button>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+              <button 
+                className="btn btn-primary btn-lg" 
+                onClick={() => handleAnalyze(false)} 
+                disabled={analyzing || isRateLimited}
+              >
+                {analyzing ? (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} />
+                    Analyzing...
+                  </span>
+                ) : '🤖 Run AI Analysis'}
+              </button>
+              {isRateLimited && (
+                <div style={{ marginTop: 8, padding: '8px 12px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: 8, color: 'var(--danger)', fontSize: '0.8rem', textAlign: 'right' }}>
+                  ⚠️ {rateLimitMessage} (Resets in {rateLimitReset} minutes)
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Preview raw content */}
@@ -362,6 +401,21 @@ const SyllabusPage = () => {
       {/* Syllabus analyzed — show results */}
       {syllabus?.isAnalyzed && (
         <>
+          {cachedNotice && (
+            <div style={{ marginBottom: 16, padding: '12px 16px', background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+              <span style={{ fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
+                ℹ️ Showing saved analysis. Click "Re-run Analysis" to generate a fresh one.
+              </span>
+              <button 
+                className="btn btn-secondary btn-sm" 
+                onClick={() => handleAnalyze(true)} 
+                disabled={analyzing || isRateLimited}
+              >
+                {analyzing ? '⏳ Re-analyzing...' : '🔄 Re-run Analysis'}
+              </button>
+            </div>
+          )}
+
           {/* AI Analysis Summary */}
           <div className="card" style={{ marginBottom: 20, borderColor: 'rgba(16,185,129,0.3)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
@@ -995,9 +1049,18 @@ const SyllabusPage = () => {
           {/* Re-analyze option */}
           <div style={{ textAlign: 'center', padding: '24px 0', borderTop: '1px solid var(--border-subtle)' }}>
             <p style={{ marginBottom: 12, fontSize: '0.85rem' }}>Want to update the syllabus?</p>
-            <button className="btn btn-secondary btn-sm" onClick={handleAnalyze} disabled={analyzing}>
+            <button 
+              className="btn btn-secondary btn-sm" 
+              onClick={() => handleAnalyze(true)} 
+              disabled={analyzing || isRateLimited}
+            >
               {analyzing ? '⏳ Analyzing...' : '🔄 Re-run AI Analysis'}
             </button>
+            {isRateLimited && (
+              <p style={{ color: 'var(--danger)', fontSize: '0.78rem', marginTop: 8 }}>
+                {rateLimitMessage} (Resets in {rateLimitReset} minutes)
+              </p>
+            )}
           </div>
         </>
       )}
