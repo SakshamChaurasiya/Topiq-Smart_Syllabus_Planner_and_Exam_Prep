@@ -1,6 +1,7 @@
-// Topbar.jsx — Motivational top bar with Lucide icons
+// Topbar.jsx — Motivational top bar with Lucide icons + theme toggle + hamburger
 import { useAuth } from '../../context/AuthContext';
-import { Trophy, Target, CheckCircle, Zap } from 'lucide-react';
+import { useTheme } from '../../contexts/ThemeContext';
+import { Trophy, Target, CheckCircle, Zap, Sun, Moon, Menu } from 'lucide-react';
 
 const motivationalMessages = [
   'Keep the streak going!',
@@ -13,12 +14,13 @@ const motivationalMessages = [
 
 const goalMeta = {
   excellent: { label: 'Topper Mode', color: '#f59e0b', Icon: Trophy },
-  good:      { label: 'Score Mode',  color: '#6366f1', Icon: Target },
-  pass:      { label: 'Pass Mode',   color: '#10b981', Icon: CheckCircle },
+  good:      { label: 'Score Mode',  color: '#6C47FF', Icon: Target },
+  pass:      { label: 'Pass Mode',   color: '#22c55e', Icon: CheckCircle },
 };
 
-const Topbar = ({ title, subtitle }) => {
+const Topbar = ({ title, subtitle, onMenuClick }) => {
   const { user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   const hour = new Date().getHours();
   const greeting =
@@ -33,6 +35,17 @@ const Topbar = ({ title, subtitle }) => {
 
   return (
     <header className="topbar">
+      {/* Mobile: hamburger button */}
+      {onMenuClick && (
+        <button
+          className="topbar-hamburger"
+          onClick={onMenuClick}
+          aria-label="Open navigation"
+        >
+          <Menu size={20} strokeWidth={1.75} />
+        </button>
+      )}
+
       <div className="topbar-left">
         {title ? (
           <>
@@ -57,11 +70,21 @@ const Topbar = ({ title, subtitle }) => {
           <span style={{ color: goalColor }}>{goalLabel}</span>
         </div>
 
-        {/* Brand chip */}
+        {/* Brand chip (hidden on mobile) */}
         <div className="topbar-brand-chip">
           <Zap size={12} strokeWidth={2.5} />
           <span>SSP</span>
         </div>
+
+        {/* Theme toggle */}
+        <button
+          onClick={toggleTheme}
+          className="theme-toggle"
+          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
+        >
+          {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+        </button>
       </div>
     </header>
   );

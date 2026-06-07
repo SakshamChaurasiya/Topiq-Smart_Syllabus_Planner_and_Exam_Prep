@@ -7,6 +7,7 @@ import { notificationAPI } from '../../api/notification.api';
 
 const Layout = () => {
   const [unreadCount, setUnreadCount] = useState(0);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   useEffect(() => {
     const fetchUnread = async () => {
@@ -24,9 +25,13 @@ const Layout = () => {
 
   return (
     <div className="app-layout">
-      <Sidebar unreadCount={unreadCount} />
+      <Sidebar
+        unreadCount={unreadCount}
+        mobileOpen={mobileNavOpen}
+        onClose={() => setMobileNavOpen(false)}
+      />
       <div className="main-content">
-        <Topbar />
+        <Topbar onMenuClick={() => setMobileNavOpen(true)} />
         <Outlet />
       </div>
     </div>

@@ -4,16 +4,20 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { plannerAPI } from '../api/planner.api';
 import { subjectAPI } from '../api/subject.api';
 import { syllabusAPI } from '../api/syllabus.api';
-import { LoadingScreen, LoadingSpinner } from '../components/ui/LoadingSpinner';
+import { LoadingScreen } from '../components/ui/LoadingSpinner';
 import Badge from '../components/ui/Badge';
 import EmptyState from '../components/ui/EmptyState';
-import { format } from 'date-fns';
+import { format, isPast } from 'date-fns';
 import toast from 'react-hot-toast';
+import {
+  ArrowLeft, CalendarDays, AlertTriangle, Target, Zap, Lightbulb,
+  Clock, Download, ChevronRight, Check, Sparkles, RefreshCw, BookOpen
+} from 'lucide-react';
 
 const goalOptions = [
-  { value: 'pass',      label: '✅ Pass',    desc: 'Score 40%+',  color: '#10b981' },
-  { value: 'good',      label: '🎯 Score',   desc: 'Score 65%+',  color: '#6366f1' },
-  { value: 'excellent', label: '🏆 Topper',  desc: 'Score 85%+',  color: '#f59e0b' },
+  { value: 'pass',      label: 'Pass Mode',    desc: 'Score 40%+',  color: 'var(--success)' },
+  { value: 'good',      label: 'Score Mode',   desc: 'Score 65%+',  color: 'var(--accent)' },
+  { value: 'excellent', label: 'Topper Mode',  desc: 'Score 85%+',  color: 'var(--warning)' },
 ];
 
 const PlannerPage = () => {
@@ -46,7 +50,6 @@ const PlannerPage = () => {
       if (subRes.status  === 'fulfilled') setSubject(subRes.value.data.data);
       if (sylRes.status  === 'fulfilled') setSyllabus(sylRes.value.data.data);
       if (planRes.status === 'fulfilled') setPlan(planRes.value.data.data);
-      // Pre-fill exam date if on subject
       if (subRes.status === 'fulfilled' && subRes.value.data.data?.examDate) {
         setForm(f => ({ ...f, examDate: subRes.value.data.data.examDate.split('T')[0] }));
       }
@@ -138,7 +141,7 @@ const PlannerPage = () => {
   if (loading) return <LoadingScreen text="Loading planner..." />;
 
   const today = new Date(); today.setHours(0,0,0,0);
-  const importanceColor = { critical: 'var(--danger)', high: 'var(--warning)', medium: 'var(--primary)', low: 'var(--success)' };
+  const importanceColor = { critical: 'var(--danger)', high: 'var(--warning)', medium: 'var(--accent)', low: 'var(--success)' };
 
   const missedDays = plan?.dailyPlans?.filter(d => new Date(d.date) < today && !d.isCompleted) || [];
   const showMissedBanner = plan && missedDays.length > 0 && !bannerDismissed;
@@ -147,45 +150,50 @@ const PlannerPage = () => {
     <div className="page-container animate-fade-in">
       {/* Header */}
       <div className="page-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-          <button className="btn btn-ghost btn-sm" onClick={() => navigate('/subjects')}>← Back</button>
-          <div style={{ width: 40, height: 40, borderRadius: 10, background: subject?.color || '#6366f1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: '#fff' }}>
+        <div className="planner-header-flex">
+          <button className="btn btn-ghost btn-sm" onClick={() => navigate('/subjects')}>
+            <ArrowLeft size={16} style={{ marginRight: 4 }} /> Back
+          </button>
+          <div className="planner-subject-avatar" style={{ background: subject?.color || 'var(--accent)' }}>
             {subject?.name?.charAt(0)}
           </div>
           <div>
             <h1 style={{ fontSize: '1.5rem' }}>{subject?.name} — Smart Planner</h1>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button className="btn btn-secondary btn-sm" onClick={() => navigate(`/subjects/${subjectId}/syllabus`)}>📋 Syllabus</button>
-          <button className="btn btn-primary btn-sm" onClick={() => navigate(`/subjects/${subjectId}/planner`)}>🗺️ Planner</button>
-          <button className="btn btn-secondary btn-sm" onClick={() => navigate(`/subjects/${subjectId}/cheatcode`)}>⚡ Cheat Code</button>
+        <div className="flex gap-2 flex-wrap" style={{ marginTop: 12 }}>
+          <button className="btn btn-secondary btn-sm" onClick={() => navigate(`/subjects/${subjectId}/syllabus`)}>Syllabus</button>
+          <button className="btn btn-primary btn-sm" onClick={() => navigate(`/subjects/${subjectId}/planner`)}>Planner</button>
+          <button className="btn btn-secondary btn-sm" onClick={() => navigate(`/subjects/${subjectId}/cheatcode`)}>Cheat Code</button>
         </div>
       </div>
 
       {/* Syllabus not analyzed warning */}
       {(!syllabus || !syllabus.isAnalyzed) && (
-        <div className="card" style={{ borderColor: 'rgba(245,158,11,0.4)', marginBottom: 24 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-            <div>
-              <div style={{ fontWeight: 700, color: 'var(--warning)', marginBottom: 4 }}>⚠️ Syllabus Required</div>
-              <p style={{ margin: 0, fontSize: '0.88rem' }}>
-                {!syllabus ? 'No syllabus uploaded yet.' : 'Syllabus uploaded but not analyzed yet.'}
-                {' '}You must upload and analyze a syllabus before generating a plan.
-              </p>
+        <div className="card" style={{ borderColor: 'var(--warning-border)', marginBottom: 24 }}>
+          <div className="flex justify-between items-center flex-wrap gap-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="error-page-icon" size={24} style={{ color: 'var(--warning)', marginTop: 2 }} />
+              <div>
+                <div style={{ fontWeight: 700, color: 'var(--warning)', marginBottom: 4 }}>Syllabus Required</div>
+                <p style={{ margin: 0, fontSize: '0.88rem' }}>
+                  {!syllabus ? 'No syllabus uploaded yet.' : 'Syllabus uploaded but not analyzed yet.'}
+                  {' '}You must upload and analyze a syllabus before generating a plan.
+                </p>
+              </div>
             </div>
             <button className="btn btn-primary" onClick={() => navigate(`/subjects/${subjectId}/syllabus`)}>
-              📋 Go to Syllabus
+              Go to Syllabus
             </button>
           </div>
         </div>
       )}
 
       {/* Plan generator form */}
-      <div style={{ display: 'grid', gridTemplateColumns: plan ? '1fr 2fr' : '1fr', gap: 24 }}>
+      <div className={`planner-grid${plan ? ' has-plan' : ''}`}>
         <div className="card">
-          <h3 style={{ fontWeight: 700, marginBottom: 4 }}>🗺️ Generate Study Plan</h3>
-          <p style={{ fontSize: '0.85rem', marginBottom: 20 }}>Customize and generate your AI-powered plan.</p>
+          <h3 style={{ fontWeight: 700, marginBottom: 4 }}>Generate Study Plan</h3>
+          <p style={{ fontSize: '0.85rem', marginBottom: 20, color: 'var(--txt-3)' }}>Customize and generate your AI-powered plan.</p>
 
           <form onSubmit={handleGenerate}>
             <div className="form-group">
@@ -202,14 +210,14 @@ const PlannerPage = () => {
 
             <div className="form-group">
               <label className="form-label">Study Hours Per Day</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div className="range-slider-container">
                 <input
                   type="range" min={1} max={12} step={0.5}
                   value={form.availableHoursPerDay}
                   onChange={e => setForm(f => ({ ...f, availableHoursPerDay: e.target.value }))}
-                  style={{ flex: 1, accentColor: 'var(--primary)' }}
+                  className="range-slider"
                 />
-                <span style={{ fontWeight: 800, color: 'var(--primary-light)', minWidth: 40, textAlign: 'right' }}>
+                <span className="range-slider-value">
                   {form.availableHoursPerDay}h
                 </span>
               </div>
@@ -217,23 +225,24 @@ const PlannerPage = () => {
 
             <div className="form-group">
               <label className="form-label">Target Goal</label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
-                {goalOptions.map(g => (
-                  <button
-                    key={g.value} type="button"
-                    onClick={() => setForm(f => ({ ...f, targetGoal: g.value }))}
-                    style={{
-                      background: form.targetGoal === g.value ? `${g.color}20` : 'var(--bg-elevated)',
-                      border: `2px solid ${form.targetGoal === g.value ? g.color : 'var(--border-default)'}`,
-                      borderRadius: 10, padding: '10px 6px', cursor: 'pointer', textAlign: 'center', transition: 'all 0.15s',
-                    }}
-                  >
-                    <div style={{ fontSize: '1rem', marginBottom: 3 }}>{g.label.split(' ')[0]}</div>
-                    <div style={{ fontSize: '0.7rem', fontWeight: 700, color: form.targetGoal === g.value ? g.color : 'var(--text-muted)' }}>
-                      {g.desc}
-                    </div>
-                  </button>
-                ))}
+              <div className="goal-grid">
+                {goalOptions.map(g => {
+                  const isActive = form.targetGoal === g.value;
+                  return (
+                    <button
+                      key={g.value} type="button"
+                      onClick={() => setForm(f => ({ ...f, targetGoal: g.value }))}
+                      className={`goal-btn goal-${g.value}${isActive ? ' active' : ''}`}
+                    >
+                      <span className="goal-btn-label">
+                        {g.label.split(' ')[0]}
+                      </span>
+                      <div style={{ fontSize: '0.7rem', fontWeight: 600, color: isActive ? 'inherit' : 'var(--txt-3)', marginTop: 4 }}>
+                        {g.desc}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -244,11 +253,11 @@ const PlannerPage = () => {
               style={{ marginTop: 8 }}
             >
               {generating ? (
-                <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span className="flex items-center justify-center gap-2">
                   <div className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} />
-                  AI is building your plan...
+                  Building plan...
                 </span>
-              ) : plan ? '🔄 Regenerate Plan' : '🤖 Generate AI Plan'}
+              ) : plan ? 'Regenerate Plan' : 'Generate AI Plan'}
             </button>
           </form>
         </div>
@@ -257,54 +266,63 @@ const PlannerPage = () => {
         {plan && (
           <div>
             {/* Plan summary */}
-            <div className="card" style={{ marginBottom: 20, borderColor: 'rgba(99,102,241,0.3)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12, marginBottom: 14 }}>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+            <div className="card" style={{ marginBottom: 20 }}>
+              <div className="flex justify-between items-start flex-wrap gap-4" style={{ marginBottom: 14 }}>
+                <div style={{ flex: 1, minWidth: 240 }}>
+                  <div className="flex items-center gap-3" style={{ marginBottom: 8 }}>
                     <h3 style={{ fontWeight: 800, margin: 0 }}>Your Study Roadmap</h3>
                     <Badge type={plan.mode === 'normal' ? 'primary' : 'danger'} label={plan.mode.toUpperCase()} />
                   </div>
-                  <p style={{ margin: 0, fontSize: '0.88rem', lineHeight: 1.6 }}>{plan.planSummary}</p>
+                  <p style={{ margin: 0, fontSize: '0.88rem', lineHeight: 1.6, color: 'var(--txt-2)' }}>{plan.planSummary}</p>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontWeight: 900, fontSize: '2rem', color: 'var(--primary-light)' }}>{plan.completionPercentage}%</div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>complete</div>
+                  <div style={{ fontWeight: 900, fontSize: '2rem', color: 'var(--accent)' }}>{plan.completionPercentage}%</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--txt-3)' }}>complete</div>
                 </div>
               </div>
               <div className="progress-bar" style={{ height: 8 }}>
-                <div className="progress-bar-fill" style={{ width: `${plan.completionPercentage}%` }} />
+                <div className="progress-bar-fill" style={{ width: `${plan.completionPercentage}%`, background: 'var(--accent)' }} />
               </div>
 
               {/* Stats row */}
-              <div style={{ display: 'flex', gap: 24, marginTop: 14, flexWrap: 'wrap' }}>
-                <div><div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Days</div>
-                  <div style={{ fontWeight: 800, color: 'var(--text-primary)' }}>{plan.daysRemaining}</div></div>
-                <div><div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Hours/Day</div>
-                  <div style={{ fontWeight: 800, color: 'var(--text-primary)' }}>{plan.availableHoursPerDay}h</div></div>
-                <div><div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Goal</div>
-                  <div style={{ fontWeight: 800, color: 'var(--text-primary)' }}>{plan.targetGoal}</div></div>
-                <div><div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Exam</div>
-                  <div style={{ fontWeight: 800, color: 'var(--text-primary)' }}>{format(new Date(plan.examDate), 'dd MMM')}</div></div>
+              <div className="flex gap-5" style={{ marginTop: 14, flexWrap: 'wrap' }}>
+                <div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--txt-3)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Days</div>
+                  <div style={{ fontWeight: 800, color: 'var(--txt)' }}>{plan.daysRemaining}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--txt-3)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Hours/Day</div>
+                  <div style={{ fontWeight: 800, color: 'var(--txt)' }}>{plan.availableHoursPerDay}h</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--txt-3)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Goal</div>
+                  <div style={{ fontWeight: 800, color: 'var(--txt)' }}>{plan.targetGoal}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--txt-3)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Exam</div>
+                  <div style={{ fontWeight: 800, color: 'var(--txt)' }}>{format(new Date(plan.examDate), 'dd MMM')}</div>
+                </div>
               </div>
 
               {/* Export to Calendar section */}
-              <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--border-subtle)' }}>
+              <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
                 <button
                   onClick={handleExportICS}
                   disabled={exporting}
                   className="btn btn-secondary btn-sm"
-                  style={{ display: 'flex', alignItems: 'center', gap: 8 }}
                 >
                   {exporting ? (
-                    <>
+                    <span className="flex items-center gap-2">
                       <div className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} />
                       Exporting...
-                    </>
+                    </span>
                   ) : (
-                    <>📅 Export to Calendar</>
+                    <span className="flex items-center gap-2">
+                      <Download size={14} /> Export to Calendar
+                    </span>
                   )}
                 </button>
-                <p style={{ margin: '8px 0 0', fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                <p style={{ margin: '8px 0 0', fontSize: '0.75rem', color: 'var(--txt-3)', lineHeight: 1.4 }}>
                   Downloads an .ics file. Import into Google Calendar, Apple Calendar, or Outlook. Times are set to 9 AM — adjust after import to fit your schedule.
                 </p>
               </div>
@@ -312,11 +330,13 @@ const PlannerPage = () => {
 
             {/* Priority topics */}
             {plan.priorityTopics?.length > 0 && (
-              <div className="card" style={{ marginBottom: 16, background: 'rgba(99,102,241,0.06)', borderColor: 'rgba(99,102,241,0.2)' }}>
-                <div style={{ fontWeight: 700, marginBottom: 10 }}>🎯 Priority Topics</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              <div className="card" style={{ marginBottom: 16, background: 'var(--success-bg)', borderColor: 'var(--success-border)' }}>
+                <div className="flex items-center gap-2" style={{ fontWeight: 700, marginBottom: 10, color: 'var(--success)' }}>
+                  <Target size={16} /> Priority Topics
+                </div>
+                <div className="flex flex-wrap gap-2">
                   {plan.priorityTopics.map((t, i) => (
-                    <span key={i} style={{ background: 'var(--primary-glow)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 100, padding: '4px 14px', fontSize: '0.8rem', color: 'var(--primary-light)', fontWeight: 600 }}>{t}</span>
+                    <span key={i} className="badge badge-success">{t}</span>
                   ))}
                 </div>
               </div>
@@ -324,11 +344,13 @@ const PlannerPage = () => {
 
             {/* Must study topics */}
             {plan.mustStudyTopics?.length > 0 && (
-              <div className="card" style={{ marginBottom: 16, background: 'rgba(239,68,68,0.06)', borderColor: 'rgba(239,68,68,0.25)' }}>
-                <div style={{ fontWeight: 700, color: 'var(--danger)', marginBottom: 10 }}>⚡ Must Study</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              <div className="card" style={{ marginBottom: 16, background: 'var(--danger-bg)', borderColor: 'var(--danger-border)' }}>
+                <div className="flex items-center gap-2" style={{ fontWeight: 700, color: 'var(--danger)', marginBottom: 10 }}>
+                  <Zap size={16} /> Must Study
+                </div>
+                <div className="flex flex-wrap gap-2">
                   {plan.mustStudyTopics.map((t, i) => (
-                    <span key={i} style={{ background: 'var(--danger-bg)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 100, padding: '4px 14px', fontSize: '0.8rem', color: 'var(--danger)', fontWeight: 600 }}>{t}</span>
+                    <span key={i} className="badge badge-danger">{t}</span>
                   ))}
                 </div>
               </div>
@@ -336,27 +358,29 @@ const PlannerPage = () => {
 
             {/* Survival strategy */}
             {plan.survivalStrategy && (
-              <div className="card" style={{ marginBottom: 16, background: 'rgba(245,158,11,0.06)', borderColor: 'rgba(245,158,11,0.25)' }}>
-                <div style={{ fontWeight: 700, color: 'var(--warning)', marginBottom: 6 }}>💡 Study Strategy</div>
-                <p style={{ margin: 0, fontSize: '0.88rem', lineHeight: 1.6 }}>{plan.survivalStrategy}</p>
+              <div className="card" style={{ marginBottom: 16, background: 'var(--info-bg)', borderColor: 'var(--info-border)' }}>
+                <div className="flex items-center gap-2" style={{ fontWeight: 700, color: 'var(--info)', marginBottom: 6 }}>
+                  <Lightbulb size={16} /> Study Strategy
+                </div>
+                <p style={{ margin: 0, fontSize: '0.88rem', lineHeight: 1.6, color: 'var(--txt-2)' }}>{plan.survivalStrategy}</p>
               </div>
             )}
 
             {/* Missed Days Reschedule Banner */}
             {showMissedBanner && (
-              <div className="card" style={{ marginBottom: 20, background: 'rgba(245,158,11,0.08)', borderColor: 'rgba(245,158,11,0.3)', display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontSize: '1.2rem' }}>⚠️</span>
+              <div className="card" style={{ marginBottom: 20, borderColor: 'var(--warning-border)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div className="flex items-center gap-3">
+                  <AlertTriangle size={20} className="error-page-icon" style={{ color: 'var(--warning)', margin: 0 }} />
                   <div style={{ flex: 1 }}>
                     <p style={{ margin: 0, fontSize: '0.88rem', fontWeight: 600, color: 'var(--warning)' }}>
                       You have {missedDays.length} missed study day(s).
                     </p>
-                    <p style={{ margin: '2px 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                    <p style={{ margin: '2px 0 0', fontSize: '0.85rem', color: 'var(--txt-2)' }}>
                       Reschedule those topics across your remaining days?
                     </p>
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: 8 }}>
+                <div className="flex gap-2">
                   <button
                     onClick={handleReschedule}
                     disabled={rescheduling}
@@ -379,7 +403,9 @@ const PlannerPage = () => {
             {/* Daily roadmap */}
             {plan.dailyPlans?.length > 0 && (
               <div>
-                <h4 style={{ fontWeight: 700, marginBottom: 12 }}>📅 Day-by-Day Roadmap</h4>
+                <h4 className="flex items-center gap-2" style={{ fontWeight: 700, marginBottom: 12 }}>
+                  <CalendarDays size={18} /> Day-by-Day Roadmap
+                </h4>
                 {plan.dailyPlans.map((day, di) => {
                   const dayDate = new Date(day.date); dayDate.setHours(0,0,0,0);
                   const isToday = dayDate.getTime() === today.getTime();
@@ -389,60 +415,59 @@ const PlannerPage = () => {
                   return (
                     <div key={di} className={`roadmap-day ${isToday ? 'today' : ''} ${day.isCompleted ? 'completed' : ''}`}>
                       <div className="roadmap-day-header" onClick={() => setExpandedDay(isOpen ? null : di)}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                          <div style={{
-                            width: 36, height: 36, borderRadius: 8, flexShrink: 0,
-                            background: day.isCompleted ? 'var(--success)' : isToday ? 'var(--primary)' : 'var(--bg-base)',
-                            border: `2px solid ${day.isCompleted ? 'var(--success)' : isToday ? 'var(--primary)' : 'var(--border-strong)'}`,
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontWeight: 800, fontSize: '0.8rem', color: (day.isCompleted || isToday) ? '#fff' : 'var(--text-muted)',
-                          }}>
-                            {day.isCompleted ? '✓' : di + 1}
+                        <div className="flex items-center gap-3">
+                          <div className="roadmap-day-avatar">
+                            {day.isCompleted ? <Check size={14} strokeWidth={3} /> : di + 1}
                           </div>
                           <div>
-                            <div style={{ fontWeight: 700, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                            <div className="roadmap-day-title-row">
                               {day.dayLabel || `Day ${di + 1}`}
                               {isToday && <span className="badge badge-primary">TODAY</span>}
-                              {day.isCompleted && <span className="badge badge-success">Done ✓</span>}
+                              {day.isCompleted && <span className="badge badge-success">Done</span>}
                               {day.rescheduled && (
-                                <span className="badge" style={{ background: 'rgba(245,158,11,0.15)', color: 'var(--warning)', border: '1px solid rgba(245,158,11,0.3)', padding: '2px 8px', fontSize: '0.7rem', borderRadius: 4, fontWeight: 700 }}>
+                                <span className="badge badge-warning">
                                   Includes missed topics
                                 </span>
                               )}
                             </div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                            <div className="roadmap-day-subtitle">
                               {format(new Date(day.date), 'EEE, dd MMM')} · {day.plannedHours}h · {day.topics?.length} topics
                             </div>
                           </div>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div className="flex items-center gap-3">
                           {!day.isCompleted && !isPast && (
                             <button
                               className="btn btn-success btn-sm"
                               onClick={(e) => { e.stopPropagation(); markDayComplete(di); }}
-                            >Mark Done</button>
+                            >
+                              <Check size={14} />
+                            </button>
                           )}
-                          <span style={{ color: 'var(--text-muted)', fontSize: '1.2rem', transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'none' }}>▾</span>
+                          <ChevronRight size={16} style={{ color: 'var(--txt-3)', transition: 'transform 0.2s', transform: isOpen ? 'rotate(90deg)' : 'none' }} />
                         </div>
                       </div>
 
                       {isOpen && (
                         <div className="roadmap-day-body">
                           {day.studyTip && (
-                            <div style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 8, padding: '10px 14px', marginBottom: 12 }}>
-                              <span style={{ fontSize: '0.8rem', color: 'var(--primary-light)' }}>💡 {day.studyTip}</span>
+                            <div className="roadmap-day-tip">
+                              <Lightbulb size={14} />
+                              <span>{day.studyTip}</span>
                             </div>
                           )}
                           {day.topics?.map((t, ti) => (
-                            <div key={ti} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 0', borderBottom: '1px solid var(--border-subtle)' }}>
-                              <div style={{ width: 8, height: 8, borderRadius: '50%', background: importanceColor[t.importance] || 'var(--primary)', flexShrink: 0 }} />
-                              <div style={{ flex: 1 }}>
-                                <div style={{ fontWeight: 600, fontSize: '0.88rem' }}>{t.topicName}</div>
-                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t.unitName}</div>
+                            <div key={ti} className="roadmap-topic-row">
+                              <div className="roadmap-topic-indicator" style={{ background: importanceColor[t.importance] || 'var(--primary)' }} />
+                              <div className="roadmap-topic-info">
+                                <div className="roadmap-topic-title">{t.topicName}</div>
+                                <div className="roadmap-topic-sub">{t.unitName}</div>
                               </div>
-                              <div style={{ display: 'flex', gap: 8 }}>
+                              <div className="roadmap-topic-meta">
                                 <Badge type={t.importance} label={t.importance} />
-                                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>⏱ {t.estimatedHours}h</span>
+                                <span className="roadmap-topic-hours">
+                                  <Clock size={12} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 2 }} /> {t.estimatedHours}h
+                                </span>
                               </div>
                             </div>
                           ))}
@@ -460,7 +485,7 @@ const PlannerPage = () => {
         {!plan && syllabus?.isAnalyzed && (
           <div className="card">
             <EmptyState
-              icon="🗺️"
+              icon={<CalendarDays size={40} className="error-page-icon" />}
               title="No study plan yet"
               description="Fill the form and generate your personalized AI study plan."
             />

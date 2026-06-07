@@ -11,7 +11,7 @@
 /* ── Main Content Area ── */
 .main-content {
   margin-left: var(--sidebar-w);
-  min-height: calc(100vh - var(--navbar-h));
+  min-height: 100vh;
   padding: 28px 32px;
   transition: margin-left var(--t);
 }
@@ -117,6 +117,31 @@
     margin-bottom: 20px;
   }
   .topbar-brand-chip { display: none; }
+  .topbar-goal-badge { display: none; }
+}
+
+/* ── Hamburger button (mobile only) ── */
+.topbar-hamburger {
+  display: none;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--txt-2);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--t-fast);
+  flex-shrink: 0;
+  margin-right: 8px;
+}
+.topbar-hamburger:hover {
+  color: var(--txt);
+  border-color: var(--border-2);
+}
+@media (max-width: 768px) {
+  .topbar-hamburger { display: flex; }
 }
 
 /* ── Sidebar Brand ── */
@@ -390,4 +415,35 @@
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+/* ── Theme Toggle Button ── */
+.theme-toggle {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r);
+  border: 1px solid var(--border-2);
+  background: var(--surface);
+  color: var(--txt-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--t-fast);
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  color: var(--txt);
+  border-color: var(--accent);
+}
+
+/* Sidebar variant: full-width row styled like nav links */
+.sidebar-theme-toggle {
+  color: var(--txt-2);
+  margin-bottom: 2px;
+}
+
+.sidebar-theme-toggle:hover {
+  color: var(--txt);
 }

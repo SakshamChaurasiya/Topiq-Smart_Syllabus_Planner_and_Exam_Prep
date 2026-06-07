@@ -5,15 +5,16 @@ import { LoadingScreen } from '../components/ui/LoadingSpinner';
 import Badge from '../components/ui/Badge';
 import EmptyState from '../components/ui/EmptyState';
 import { useNavigate } from 'react-router-dom';
-import { format, isToday, isPast } from 'date-fns';
+import { format, isPast } from 'date-fns';
 import toast from 'react-hot-toast';
+import { BookOpen, RefreshCw, FileText, Edit3, Target, Calendar, Check, SkipForward, ArrowRight, ClipboardList } from 'lucide-react';
 
-const typeIcon = { study: '📖', revision: '🔄', practice: '📝', summary: '✍️', quiz: '🎯' };
-const statusColor = {
-  pending:     'var(--text-muted)',
-  'in-progress': 'var(--warning)',
-  completed:   'var(--success)',
-  skipped:     'var(--danger)',
+const typeIcon = {
+  study:    <BookOpen size={14} />,
+  revision: <RefreshCw size={14} />,
+  practice: <FileText size={14} />,
+  summary:  <Edit3 size={14} />,
+  quiz:     <Target size={14} />,
 };
 
 const MissionsPage = () => {
@@ -80,45 +81,50 @@ const MissionsPage = () => {
 
   if (loading) return <LoadingScreen text="Loading missions..." />;
 
-  const { stats: todayStats, grouped, missions: todayMissions } = data || {};
+  const { stats: todayStats, grouped } = data || {};
 
   return (
     <div className="page-container animate-fade-in">
       {/* Header */}
       <div className="page-header">
-        <h1>🎯 Missions</h1>
+        <h1>Missions</h1>
         <p>Complete daily missions to stay on track and earn XP</p>
       </div>
 
       {/* Stats row */}
       {stats && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 28 }}>
-          {[
-            { label: 'Total',     value: stats.total,      color: 'var(--primary-light)', bg: 'var(--primary-glow)' },
-            { label: 'Completed', value: stats.completed,  color: 'var(--success)',       bg: 'rgba(16,185,129,0.1)' },
-            { label: 'Pending',   value: stats.pending,    color: 'var(--warning)',        bg: 'rgba(245,158,11,0.1)' },
-            { label: 'Rate',      value: `${stats.completionRate}%`, color: 'var(--accent)', bg: 'rgba(6,182,212,0.1)' },
-          ].map(s => (
-            <div key={s.label} className="stat-card" style={{ background: s.bg, border: 'none' }}>
-              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: s.color }}>{s.value}</div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{s.label}</div>
-            </div>
-          ))}
+        <div className="stat-row">
+          <div className="stat-pill">
+            <div className="stat-pill-value">{stats.total}</div>
+            <div className="stat-pill-label">Total</div>
+          </div>
+          <div className="stat-pill">
+            <div className="stat-pill-value" style={{ color: 'var(--success)' }}>{stats.completed}</div>
+            <div className="stat-pill-label">Completed</div>
+          </div>
+          <div className="stat-pill">
+            <div className="stat-pill-value" style={{ color: 'var(--warning)' }}>{stats.pending}</div>
+            <div className="stat-pill-label">Pending</div>
+          </div>
+          <div className="stat-pill">
+            <div className="stat-pill-value" style={{ color: 'var(--accent)' }}>{stats.completionRate}%</div>
+            <div className="stat-pill-label">Rate</div>
+          </div>
         </div>
       )}
 
       {/* Tabs */}
       <div className="tabs" style={{ marginBottom: 24 }}>
         <button className={`tab-btn ${activeTab === 'today' ? 'active' : ''}`} onClick={() => setActiveTab('today')}>
-          📅 Today's Missions
+          Today's Missions
           {todayStats?.pending > 0 && (
-            <span style={{ marginLeft: 8, background: 'rgba(255,255,255,0.25)', borderRadius: 100, padding: '1px 8px', fontSize: '0.72rem', fontWeight: 700 }}>
+            <span style={{ marginLeft: 8, background: 'rgba(255,255,255,0.15)', borderRadius: 100, padding: '1px 8px', fontSize: '0.72rem', fontWeight: 700 }}>
               {todayStats.pending}
             </span>
           )}
         </button>
         <button className={`tab-btn ${activeTab === 'all' ? 'active' : ''}`} onClick={() => setActiveTab('all')}>
-          📋 All Missions
+          All Missions
         </button>
       </div>
 
@@ -128,26 +134,26 @@ const MissionsPage = () => {
           {/* Completion banner */}
           {todayStats?.total > 0 && (
             <div className="card" style={{ marginBottom: 20, padding: '16px 20px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <div className="flex justify-between items-center" style={{ marginBottom: 10 }}>
                 <div>
                   <span style={{ fontWeight: 700 }}>{format(new Date(), 'EEEE, dd MMMM')}</span>
                   <span style={{ marginLeft: 12, fontSize: '0.82rem', color: 'var(--text-muted)' }}>
                     {todayStats.completed}/{todayStats.total} done
                   </span>
                 </div>
-                <span style={{ fontWeight: 900, fontSize: '1.3rem', color: todayStats.completionRate >= 80 ? 'var(--success)' : 'var(--primary-light)' }}>
+                <span style={{ fontWeight: 900, fontSize: '1.3rem', color: todayStats.completionRate >= 80 ? 'var(--success)' : 'var(--accent)' }}>
                   {todayStats.completionRate}%
                 </span>
               </div>
               <div className="progress-bar" style={{ height: 7 }}>
                 <div className="progress-bar-fill" style={{
                   width: `${todayStats.completionRate}%`,
-                  background: todayStats.completionRate === 100 ? 'var(--success)' : 'linear-gradient(90deg, var(--primary), var(--secondary))',
+                  background: todayStats.completionRate === 100 ? 'var(--success)' : 'var(--accent)',
                 }} />
               </div>
               {todayStats.completionRate === 100 && (
                 <div style={{ textAlign: 'center', marginTop: 10, color: 'var(--success)', fontWeight: 700, fontSize: '0.9rem' }}>
-                  🎉 All missions done today! Amazing work!
+                  All missions done today! Amazing work!
                 </div>
               )}
             </div>
@@ -156,27 +162,22 @@ const MissionsPage = () => {
           {/* No missions */}
           {!grouped?.length ? (
             <EmptyState
-              icon="🎯"
+              icon={<Target size={40} className="error-page-icon" />}
               title="No missions today"
               description="Generate a study plan for a subject to get daily missions."
-              action={<button className="btn btn-primary" onClick={() => navigate('/subjects')}>Go to Subjects →</button>}
+              action={<button className="btn btn-primary" onClick={() => navigate('/subjects')}>Go to Subjects <ArrowRight size={14} style={{ marginLeft: 4 }} /></button>}
             />
           ) : (
             /* Missions grouped by subject */
             grouped.map((group) => (
-              <div key={group.subject?._id} className="card" style={{ marginBottom: 16 }}>
+              <div key={group.subject?._id} className="card mission-subject-card">
                 {/* Subject header */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid var(--border-subtle)' }}>
-                  <div style={{
-                    width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-                    background: group.subject?.color || '#6366f1',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontWeight: 800, color: '#fff', fontSize: '0.85rem',
-                  }}>
+                <div className="mission-subject-header">
+                  <div className="mission-subject-avatar" style={{ background: group.subject?.color || 'var(--accent)' }}>
                     {group.subject?.name?.charAt(0)}
                   </div>
-                  <span style={{ fontWeight: 700 }}>{group.subject?.name || 'Unknown Subject'}</span>
-                  <span className="badge badge-primary" style={{ marginLeft: 'auto' }}>
+                  <span className="mission-subject-title">{group.subject?.name || 'Unknown Subject'}</span>
+                  <span className="badge badge-primary mission-subject-badge">
                     {group.missions.filter(m => m.status === 'completed').length}/{group.missions.length}
                   </span>
                 </div>
@@ -202,13 +203,13 @@ const MissionsPage = () => {
           {allLoading ? (
             <LoadingScreen text="Loading all missions..." />
           ) : !allMissions.length ? (
-            <EmptyState icon="📋" title="No missions yet" description="Generate a study plan to create missions." />
+            <EmptyState icon={<ClipboardList size={40} className="error-page-icon" />} title="No missions yet" description="Generate a study plan to create missions." />
           ) : (
             <div className="card">
               {allMissions.map((mission, i) => (
                 <div key={mission._id}>
                   <MissionItem mission={mission} onUpdate={updateStatus} isUpdating={updatingId === mission._id} showDate />
-                  {i < allMissions.length - 1 && <div style={{ height: 1, background: 'var(--border-subtle)', margin: '4px 0' }} />}
+                  {i < allMissions.length - 1 && <div style={{ height: 1, background: 'var(--border)', margin: '4px 0' }} />}
                 </div>
               ))}
             </div>
@@ -225,50 +226,48 @@ const MissionItem = ({ mission, onUpdate, isUpdating, showDate = false }) => {
   const isSkipped   = mission.status === 'skipped';
 
   return (
-    <div style={{
-      display: 'flex', alignItems: 'flex-start', gap: 12,
-      padding: '10px 0', opacity: isCompleted || isSkipped ? 0.55 : 1,
-      transition: 'opacity 0.2s',
-    }}>
+    <div className={`mission-item-container${isCompleted ? ' done' : ''}${isSkipped ? ' skipped' : ''}`}>
       {/* Checkbox */}
-      <div
+      <button
         onClick={() => !isCompleted && !isUpdating && onUpdate(mission._id, 'completed')}
-        style={{
-          width: 22, height: 22, borderRadius: 6, flexShrink: 0, marginTop: 2,
-          border: `2px solid ${isCompleted ? 'var(--success)' : 'var(--border-strong)'}`,
-          background: isCompleted ? 'var(--success)' : 'transparent',
-          cursor: isCompleted ? 'default' : 'pointer',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          transition: 'all 0.15s',
-        }}
+        className={`mission-item-checkbox${isCompleted ? ' checked' : ''}`}
+        disabled={isCompleted || isUpdating}
+        aria-label={isCompleted ? 'Mission completed' : 'Mark mission as completed'}
       >
-        {isCompleted && <span style={{ color: '#fff', fontSize: '0.72rem', fontWeight: 700 }}>✓</span>}
+        {isCompleted && <Check size={12} strokeWidth={3} />}
         {isUpdating && <div className="spinner" style={{ width: 10, height: 10, borderWidth: 1.5 }} />}
-      </div>
+      </button>
 
       {/* Info */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 3 }}>
-          <span style={{ fontSize: '0.9rem' }}>{typeIcon[mission.type] || '📌'}</span>
-          <span style={{
-            fontWeight: 600, fontSize: '0.88rem',
-            textDecoration: isCompleted || isSkipped ? 'line-through' : 'none',
-            color: isCompleted || isSkipped ? 'var(--text-muted)' : 'var(--text-primary)',
-          }}>
+      <div className="mission-item-info">
+        <div className="mission-item-header">
+          <span className="mission-item-icon">{typeIcon[mission.type] || <Target size={14} />}</span>
+          <span className={`mission-item-title${isCompleted || isSkipped ? ' strike' : ''}`}>
             {mission.title}
           </span>
           <Badge type={mission.priority} label={mission.priority} />
         </div>
         {mission.description && (
-          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '2px 0 4px', lineHeight: 1.5 }}>{mission.description}</p>
+          <p className="mission-item-desc">{mission.description}</p>
         )}
-        <div style={{ display: 'flex', gap: 12, fontSize: '0.73rem', color: 'var(--text-disabled)', flexWrap: 'wrap' }}>
-          {mission.topicName && <span>📌 {mission.topicName}</span>}
-          <span>⏱ {mission.estimatedMinutes} min</span>
-          <span>⭐ {mission.xpReward} XP</span>
+        <div className="mission-item-meta">
+          {mission.topicName && (
+            <span className="mission-item-meta-item">
+              <BookOpen size={12} /> {mission.topicName}
+            </span>
+          )}
+          <span className="mission-item-meta-item">
+            <RefreshCw size={12} /> {mission.estimatedMinutes} min
+          </span>
+          <span className="mission-item-meta-item">
+            ⭐ {mission.xpReward} XP
+          </span>
           {showDate && mission.dueDate && (
-            <span style={{ color: isPast(new Date(mission.dueDate)) && !isCompleted ? 'var(--danger)' : 'var(--text-disabled)' }}>
-              📅 {format(new Date(mission.dueDate), 'dd MMM')}
+            <span 
+              className="mission-item-meta-item"
+              style={{ color: isPast(new Date(mission.dueDate)) && !isCompleted ? 'var(--danger)' : 'var(--txt-3)' }}
+            >
+              <Calendar size={12} /> {format(new Date(mission.dueDate), 'dd MMM')}
             </span>
           )}
         </div>
@@ -276,27 +275,30 @@ const MissionItem = ({ mission, onUpdate, isUpdating, showDate = false }) => {
 
       {/* Actions */}
       {!isCompleted && !isSkipped && (
-        <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+        <div className="mission-item-actions">
           <button
             className="btn btn-success btn-sm"
             onClick={() => onUpdate(mission._id, 'completed')}
             disabled={isUpdating}
             title="Mark complete"
-          >✓</button>
+          >
+            <Check size={14} />
+          </button>
           <button
             className="btn btn-ghost btn-sm"
             onClick={() => onUpdate(mission._id, 'skipped')}
             disabled={isUpdating}
             title="Skip"
-            style={{ color: 'var(--text-muted)' }}
-          >⏭</button>
+          >
+            <SkipForward size={14} />
+          </button>
         </div>
       )}
       {isCompleted && (
-        <span style={{ fontSize: '0.78rem', color: 'var(--success)', fontWeight: 600, flexShrink: 0, marginTop: 4 }}>Done ✓</span>
+        <span className="mission-done-text">Done</span>
       )}
       {isSkipped && (
-        <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, flexShrink: 0, marginTop: 4 }}>Skipped</span>
+        <span className="mission-skipped-text">Skipped</span>
       )}
     </div>
   );

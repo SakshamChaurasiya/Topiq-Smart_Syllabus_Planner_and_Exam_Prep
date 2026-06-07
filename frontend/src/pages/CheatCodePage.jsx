@@ -244,27 +244,13 @@ const CheatCodePage = () => {
                       These are rough AI estimates based on topic coverage and time available — not predictions. Actual scores depend on your exam format, professor, and preparation quality.
                     </span>
                     <button
+                      className="dismiss-btn"
                       onClick={() => setShowDisclaimer(false)}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: 'var(--warning)',
-                        cursor: 'pointer',
-                        fontSize: '1.2rem',
-                        fontWeight: 'bold',
-                        padding: '0 4px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        lineHeight: 1,
-                        opacity: 0.8,
-                        transition: 'opacity 0.15s'
-                      }}
-                      onMouseEnter={(e) => e.target.style.opacity = 1}
-                      onMouseLeave={(e) => e.target.style.opacity = 0.8}
+                      aria-label="Dismiss disclaimer"
                     >
                       ×
                     </button>
+
                   </div>
                 )}
 

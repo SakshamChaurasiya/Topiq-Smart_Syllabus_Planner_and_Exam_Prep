@@ -1,65 +1,56 @@
-// Landing.jsx — Premium startup landing page
-import { useEffect, useState } from 'react';
+// Landing.jsx — Redesigned 2025-style landing page
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import {
   Zap, BrainCircuit, Flame, Target, Map,
-  BarChart2, RefreshCcw, Upload, Sparkles, Rocket,
-  ArrowRight, LogIn,
+  BarChart2, RefreshCcw, Upload, Sparkles,
+  ArrowRight, LogIn, Sun, Moon,
 } from 'lucide-react';
-
-/* Animated counter hook */
-const useCounter = (target, duration = 1500) => {
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    let start = 0;
-    const step = target / (duration / 16);
-    const timer = setInterval(() => {
-      start += step;
-      if (start >= target) { setCount(target); clearInterval(timer); }
-      else setCount(Math.floor(start));
-    }, 16);
-    return () => clearInterval(timer);
-  }, [target, duration]);
-  return count;
-};
 
 const features = [
   {
-    Icon: BrainCircuit, color: '#6366f1', bg: 'rgba(99,102,241,0.12)',
+    Icon: BrainCircuit,
     title: 'AI Syllabus Analyzer',
     desc: 'Upload any syllabus PDF. AI extracts every topic, rates difficulty, estimates marks weightage, and builds your priority list — in under 2 minutes.',
     tag: 'Most Popular',
+    size: 'bento-lg',
   },
   {
-    Icon: Zap, color: '#ef4444', bg: 'rgba(239,68,68,0.12)',
+    Icon: Zap,
     title: 'Cheat Code System',
     desc: '1 day left? 3 days? Activate survival mode. AI tells you exactly what to study, what to skip, and your hourly schedule to maximize marks.',
     tag: 'Game Changer',
+    size: 'bento-md',
   },
   {
-    Icon: Target, color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',
+    Icon: Target,
     title: 'Daily Mission Engine',
-    desc: 'No more long timetables. Small, actionable missions: Study Topic 3.1 → Solve 5 questions → Revise notes. Done. Next.',
+    desc: 'Small, actionable missions: Study Topic 3.1 → Solve 5 questions → Revise notes. Done. Next.',
     tag: 'Most Used',
+    size: 'bento-md',
   },
   {
-    Icon: Map, color: '#06b6d4', bg: 'rgba(6,182,212,0.12)',
+    Icon: Map,
     title: 'Smart Study Roadmap',
-    desc: 'AI-generated day-by-day plan based on your exam date, available hours, and target score. Adjusts as you complete topics.',
+    desc: 'AI-generated day-by-day plan based on your exam date and target score.',
     tag: 'AI-Powered',
+    size: 'bento-sm',
   },
   {
-    Icon: BarChart2, color: '#10b981', bg: 'rgba(16,185,129,0.12)',
-    title: 'Exam Readiness Score',
-    desc: 'Know exactly where you stand. Live readiness percentage, weak topic radar, and smart recommendations to close the gap.',
+    Icon: BarChart2,
+    title: 'Readiness Score',
+    desc: 'Know exactly where you stand with live readiness tracking.',
     tag: 'Real-Time',
+    size: 'bento-sm',
   },
   {
-    Icon: RefreshCcw, color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)',
+    Icon: RefreshCcw,
     title: 'Revision Radar',
-    desc: 'AI tracks which topics you completed and schedules revision sessions before you forget. Spaced repetition built-in.',
+    desc: 'Spaced repetition built-in for topics you tend to forget.',
     tag: 'Smart',
+    size: 'bento-sm',
   },
 ];
 
@@ -70,104 +61,120 @@ const testimonials = [
 ];
 
 const steps = [
-  { n: '01', Icon: Upload,      t: 'Upload Syllabus', d: 'PDF, image, or paste text' },
-  { n: '02', Icon: BrainCircuit, t: 'AI Analyzes',   d: 'Topics extracted in seconds' },
-  { n: '03', Icon: Map,         t: 'Get Your Plan',  d: 'Personalized roadmap + missions' },
-  { n: '04', Icon: Sparkles,    t: 'Execute Daily',  d: 'Complete missions, ace exams' },
+  { n: '01', Icon: Upload,       t: 'Upload Syllabus', d: 'PDF, image, or paste text' },
+  { n: '02', Icon: BrainCircuit, t: 'AI Analyzes',     d: 'Topics extracted in seconds' },
+  { n: '03', Icon: Map,          t: 'Get Your Plan',   d: 'Personalized roadmap + missions' },
+  { n: '04', Icon: Sparkles,     t: 'Execute Daily',   d: 'Complete missions, ace exams' },
+];
+
+const modes = [
+  { label: 'Pass Mode',   score: '40%+', color: 'var(--success)', desc: 'Focus only on high-mark topics. Efficient survival strategy for clearing the exam.' },
+  { label: 'Score Mode',  score: '65%+', color: 'var(--accent)',  desc: 'Balanced approach — cover important topics well and aim for a strong result.', popular: true },
+  { label: 'Topper Mode', score: '85%+', color: 'var(--warning)', desc: 'Complete mastery. AI schedules deep dives, revisions, and practice for every unit.' },
 ];
 
 const Landing = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const [visible, setVisible] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     if (isAuthenticated) navigate('/dashboard');
-    const t = setTimeout(() => setVisible(true), 100);
-    return () => clearTimeout(t);
   }, [isAuthenticated, navigate]);
 
-  const c1 = useCounter(12400, 2000);
-  const c2 = useCounter(94, 1800);
-  const c3 = useCounter(2, 1200);
-
   return (
-    <div style={{ background: 'var(--bg-base)', minHeight: '100vh', fontFamily: 'var(--font-family)' }}>
+    <div className="landing-page">
 
       {/* ── NAVBAR ── */}
       <nav className="landing-nav">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--brand-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', boxShadow: 'var(--shadow-glow)' }}>
-            <Zap size={22} strokeWidth={2.5} />
+        <div className="landing-nav-logo">
+          <div className="landing-nav-logo-mark">
+            <Zap size={18} strokeWidth={2.5} />
           </div>
           <div>
-            <div style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>SMART SYLLABUS PLANNER</div>
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Your AI-Powered Exam Survival Assistant</div>
+            <div className="landing-nav-name">SSP</div>
+            <div className="landing-nav-tagline">AI Exam Assistant</div>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <button className="btn btn-ghost" onClick={() => navigate('/login')} style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: 6 }}>
-            <LogIn size={15} strokeWidth={2} /> Sign In
+
+        <div className="landing-nav-actions">
+          {/* Theme toggle */}
+          <button
+            onClick={toggleTheme}
+            className="theme-toggle"
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
           </button>
-          <button className="btn-cta" onClick={() => navigate('/register')} style={{ padding: '12px 28px', fontSize: '0.9rem', borderRadius: 'var(--r-full)', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Rocket size={16} strokeWidth={2} /> Get Started Free
+
+          {/* Sign In — icon always, text hidden on mobile */}
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={() => navigate('/login')}
+          >
+            <LogIn size={15} strokeWidth={1.75} />
+            <span className="landing-nav-signin-text">Sign In</span>
+          </button>
+
+          {/* Get Started */}
+          <button
+            className="btn btn-primary btn-sm"
+            onClick={() => navigate('/register')}
+          >
+            Get Started
           </button>
         </div>
       </nav>
 
       {/* ── HERO ── */}
-      <section className="landing-hero">
-        <div className="hero-blob-1" />
-        <div className="hero-blob-2" />
-        <div className="hero-blob-3" />
+      <section className="landing-hero hero-noise">
+        <div className="hero-content">
+          {/* Accent line */}
+          <div className="hero-accent-line" />
 
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: 900, width: '100%' }}>
-          {/* Pill badge */}
-          <div className="hero-pill">
-            <span className="hero-dot" />
-            🎯 Turn Your Syllabus Into Daily Wins
-          </div>
-
-          {/* Main heading */}
+          {/* Headline */}
           <h1 className="hero-title">
-            <span style={{ display: 'block', color: 'var(--text-primary)' }}>Study Smarter.</span>
-            <span className="hero-title-accent">Score Better.</span>
+            Study Smarter.<br />Score Better.
           </h1>
 
-          {/* Subtitle */}
+          {/* Subheadline */}
           <p className="hero-subtitle">
-            Stop guessing what to study. Let AI break down your syllabus into daily missions, track your progress, and maximize your exam marks.
+            Stop guessing what to study. Let AI break down your syllabus into daily missions,
+            track your progress, and maximize your exam marks.
           </p>
-
-          <p className="hero-tagline">"Complete More, Stress Less"</p>
 
           {/* CTAs */}
           <div className="hero-ctas">
-            <button className="btn-cta" onClick={() => navigate('/register')} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Target size={16} strokeWidth={2} /> Start Planning Free
+            <button
+              className="btn btn-primary btn-lg"
+              onClick={() => navigate('/register')}
+            >
+              <Target size={16} strokeWidth={2} />
+              Start Planning Free
             </button>
-            <button className="btn-outline-primary" onClick={() => navigate('/login')} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <LogIn size={15} strokeWidth={2} /> Sign In
+            <button
+              className="btn btn-secondary btn-lg"
+              onClick={() => navigate('/login')}
+            >
+              <LogIn size={15} strokeWidth={2} />
+              Sign In
             </button>
           </div>
 
-          {/* Animated stats */}
+          {/* Stats row — static numbers */}
           <div className="hero-stats">
             <div className="hero-stat">
-              <div className="hero-stat-value">{c1.toLocaleString()}+</div>
+              <div className="hero-stat-value">12,400+</div>
               <div className="hero-stat-label">Students</div>
             </div>
-            <div style={{ width: 1, height: 48, background: 'var(--border-subtle)' }} />
             <div className="hero-stat">
-              <div className="hero-stat-value">{c2}%</div>
-              <div className="hero-stat-label">Avg Score Improvement</div>
+              <div className="hero-stat-value">94%</div>
+              <div className="hero-stat-label">Avg Improvement</div>
             </div>
-            <div style={{ width: 1, height: 48, background: 'var(--border-subtle)' }} />
             <div className="hero-stat">
-              <div className="hero-stat-value">&lt;{c3} min</div>
-              <div className="hero-stat-label">AI Analysis Time</div>
+              <div className="hero-stat-value">&lt;2 min</div>
+              <div className="hero-stat-label">AI Analysis</div>
             </div>
-            <div style={{ width: 1, height: 48, background: 'var(--border-subtle)' }} />
             <div className="hero-stat">
               <div className="hero-stat-value">3</div>
               <div className="hero-stat-label">Study Modes</div>
@@ -176,132 +183,118 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ── PROBLEM STATEMENT BAND ── */}
-      <section className="section-sm" style={{ background: 'var(--bg-surface)', borderTop: '1px solid var(--border-subtle)', borderBottom: '1px solid var(--border-subtle)' }}>
-        <div className="container-sm" style={{ textAlign: 'center' }}>
-          <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', lineHeight: 1.7, fontStyle: 'italic' }}>
-            Every student knows they need to study. The real problem is — <strong style={{ color: 'var(--text-primary)' }}>they don't know what to study first, which topics matter most, and how to use the time they have.</strong>
-            <br />SSP solves the <strong style={{ color: 'var(--primary-light)' }}>execution problem</strong>, not just the planning problem.
-          </p>
-        </div>
-      </section>
+      <hr className="section-divider" />
 
-      {/* ── FEATURES ── */}
+      {/* ── FEATURES (Bento grid) ── */}
       <section className="section">
         <div className="container">
-          <div style={{ textAlign: 'center', marginBottom: 56 }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 100, padding: '5px 16px', marginBottom: 20 }}>
-              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--primary-light)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Everything You Need</span>
-            </div>
-            <h2 style={{ fontWeight: 900, fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', letterSpacing: '-0.03em', marginBottom: 14, color: 'var(--text-primary)' }}>
-              Your complete exam survival toolkit
-            </h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '1rem', maxWidth: 500, margin: '0 auto' }}>
+          <div style={{ marginBottom: 40 }}>
+            <div className="section-eyebrow">Everything You Need</div>
+            <h2 className="section-title">Your complete exam survival toolkit</h2>
+            <p className="section-desc">
               Six powerful features that work together to turn any syllabus into a winning study strategy.
             </p>
           </div>
 
-          <div className="feature-grid">
+          <div className="bento-grid">
             {features.map((f, i) => (
-              <div key={f.title} className="feature-card animate-slide-up" style={{ animationDelay: `${i * 0.06}s` }}>
-                <div className="feature-icon-wrap" style={{ background: f.bg, color: f.color }}>
-                  <f.Icon size={24} strokeWidth={1.75} />
-                </div>
-                {f.tag && (
-                  <span style={{ fontSize: '0.62rem', fontWeight: 800, color: f.color, textTransform: 'uppercase', letterSpacing: '0.08em', background: f.bg, padding: '2px 10px', borderRadius: 100, display: 'inline-block', marginBottom: 10 }}>
-                    {f.tag}
+              <div
+                key={f.title}
+                className={`bento-card ${f.size} animate-slide-up`}
+                style={{ animationDelay: `${i * 0.06}s` }}
+              >
+                <div className="bento-card-top">
+                  <span className="bento-icon">
+                    <f.Icon size={24} strokeWidth={1.75} />
                   </span>
-                )}
-                <h3 style={{ fontWeight: 800, marginBottom: 10, fontSize: '1.05rem', letterSpacing: '-0.02em' }}>{f.title}</h3>
-                <p style={{ fontSize: '0.875rem', lineHeight: 1.7, color: 'var(--text-secondary)' }}>{f.desc}</p>
+                  {f.tag && <span className="bento-tag">{f.tag}</span>}
+                </div>
+                <div className="bento-card-title">{f.title}</div>
+                <p className="bento-card-desc">{f.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
+
+      <hr className="section-divider" />
 
       {/* ── HOW IT WORKS ── */}
-      <section className="section" style={{ background: 'var(--bg-surface)', borderTop: '1px solid var(--border-subtle)', borderBottom: '1px solid var(--border-subtle)' }}>
+      <section className="section">
         <div className="container-sm">
-          <div style={{ textAlign: 'center', marginBottom: 48 }}>
-            <h2 style={{ fontWeight: 900, fontSize: 'clamp(1.75rem,4vw,2.25rem)', letterSpacing: '-0.03em', marginBottom: 8 }}>
-              From syllabus to success in 4 steps
-            </h2>
-            <p style={{ color: 'var(--text-muted)' }}>No setup needed. No learning curve. Just results.</p>
+          <div style={{ textAlign: 'center', marginBottom: 40 }}>
+            <div className="section-eyebrow">How It Works</div>
+            <h2 className="section-title">From syllabus to success in 4 steps</h2>
+            <p className="section-desc" style={{ margin: '0 auto' }}>
+              No setup needed. No learning curve. Just results.
+            </p>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 0, flexWrap: 'wrap' }}>
-            {steps.map((s, i) => (
-              <div key={s.n} style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
-                <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', borderRadius: 16, padding: '28px 28px', textAlign: 'center', minWidth: 168, transition: 'all 0.2s' }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(99,102,241,0.4)'}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-default)'}
-                >
-                  <div style={{ width: 52, height: 52, borderRadius: 14, background: 'var(--surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px', color: 'var(--primary-light)' }}>
-                    <s.Icon size={24} strokeWidth={1.75} />
-                  </div>
-                  <div style={{ fontSize: '0.62rem', color: 'var(--primary-light)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>Step {s.n}</div>
-                  <div style={{ fontWeight: 800, fontSize: '0.95rem', marginBottom: 4, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>{s.t}</div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{s.d}</div>
-                </div>
-                {i < 3 && <div style={{ width: 36, height: 2, background: 'linear-gradient(90deg, var(--primary), var(--secondary))', flexShrink: 0 }} />}
+
+          <div className="how-grid">
+            {steps.map(s => (
+              <div key={s.n} className="how-step">
+                <div className="how-step-number">{s.n}</div>
+                <div className="how-step-title">{s.t}</div>
+                <p className="how-step-desc">{s.d}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── MOTIVATIONAL MODES ── */}
+      <hr className="section-divider" />
+
+      {/* ── STUDY MODES ── */}
       <section className="section">
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: 40 }}>
-            <h2 style={{ fontWeight: 900, fontSize: 'clamp(1.75rem,4vw,2.25rem)', letterSpacing: '-0.03em', marginBottom: 8 }}>
-              Study at your own pace. Score on your own terms.
-            </h2>
-            <p style={{ color: 'var(--text-muted)' }}>Three modes. One goal — maximizing your marks with the time available.</p>
+            <div className="section-eyebrow">Study Modes</div>
+            <h2 className="section-title">Study at your own pace. Score on your terms.</h2>
+            <p className="section-desc" style={{ margin: '0 auto' }}>
+              Three modes. One goal — maximizing your marks with the time available.
+            </p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
-            {[
-              { emoji: '✅', label: 'Pass Mode', score: '40%+', color: '#10b981', bg: 'rgba(16,185,129,0.08)', border: 'rgba(16,185,129,0.25)', desc: 'Focus only on high-mark topics. Efficient survival strategy for clearing the exam.' },
-              { emoji: '🎯', label: 'Score Mode', score: '65%+', color: '#6366f1', bg: 'rgba(99,102,241,0.08)', border: 'rgba(99,102,241,0.3)', desc: 'Balanced approach — cover important topics well and aim for a strong result.', popular: true },
-              { emoji: '🏆', label: 'Topper Mode', score: '85%+', color: '#f59e0b', bg: 'rgba(245,158,11,0.08)', border: 'rgba(245,158,11,0.25)', desc: 'Complete mastery. AI schedules deep dives, revisions, and practice for every unit.' },
-            ].map(m => (
-              <div key={m.label} style={{ background: m.bg, border: `2px solid ${m.popular ? m.border : 'var(--border-subtle)'}`, borderRadius: 16, padding: '28px 24px', textAlign: 'center', position: 'relative', transition: 'all 0.2s' }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = m.border; e.currentTarget.style.transform = 'translateY(-4px)'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = m.popular ? m.border : 'var(--border-subtle)'; e.currentTarget.style.transform = 'none'; }}
+
+          <div className="modes-grid">
+            {modes.map(m => (
+              <div
+                key={m.label}
+                className={`mode-card${m.popular ? ' mode-popular' : ''}`}
               >
-                {m.popular && <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: 'var(--brand-gradient)', color: '#fff', fontSize: '0.65rem', fontWeight: 800, padding: '3px 14px', borderRadius: 100, textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>Most Popular</div>}
-                <div style={{ fontSize: '2.5rem', marginBottom: 12 }}>{m.emoji}</div>
-                <div style={{ fontWeight: 900, fontSize: '1.15rem', color: m.color, marginBottom: 4, letterSpacing: '-0.02em' }}>{m.label}</div>
-                <div style={{ fontSize: '0.8rem', color: m.color, fontWeight: 700, marginBottom: 14, opacity: 0.8 }}>Target: {m.score}</div>
-                <p style={{ fontSize: '0.83rem', color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>{m.desc}</p>
+                {m.popular && (
+                  <div className="mode-popular-badge">Most Popular</div>
+                )}
+                <div className="mode-score" style={{ color: m.color }}>
+                  {m.score}
+                </div>
+                <div className="mode-label">{m.label}</div>
+                <p className="mode-desc">{m.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
+      <hr className="section-divider" />
+
       {/* ── TESTIMONIALS ── */}
-      <section className="section" style={{ background: 'var(--bg-surface)', borderTop: '1px solid var(--border-subtle)' }}>
+      <section className="section">
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: 40 }}>
-            <h2 style={{ fontWeight: 900, fontSize: 'clamp(1.5rem,3vw,2rem)', letterSpacing: '-0.03em', marginBottom: 8 }}>Students who used SSP — in their own words</h2>
+            <h2 className="section-title">Students who used SSP — in their own words</h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
+
+          <div className="testimonials-grid">
             {testimonials.map(t => (
-              <div key={t.name} style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', borderRadius: 16, padding: '24px', transition: 'all 0.2s' }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(99,102,241,0.3)'}
-                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-subtle)'}
-              >
-                <div style={{ fontSize: '1.1rem', marginBottom: 14, color: '#f59e0b' }}>★★★★★</div>
-                <p style={{ fontSize: '0.875rem', lineHeight: 1.7, color: 'var(--text-secondary)', marginBottom: 16, fontStyle: 'italic' }}>"{t.quote}"</p>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div key={t.name} className="testimonial-card">
+                <div className="testimonial-stars">★★★★★</div>
+                <p className="testimonial-quote">"{t.quote}"</p>
+                <div className="testimonial-footer">
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-primary)' }}>{t.name}</div>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{t.branch}</div>
+                    <div className="testimonial-name">{t.name}</div>
+                    <div className="testimonial-branch">{t.branch}</div>
                   </div>
-                  <div style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.25)', borderRadius: 8, padding: '4px 12px', fontSize: '0.82rem', fontWeight: 800, color: 'var(--success)' }}>
-                    Scored {t.score}
-                  </div>
+                  <div className="testimonial-score">Scored {t.score}</div>
                 </div>
               </div>
             ))}
@@ -309,46 +302,51 @@ const Landing = () => {
         </div>
       </section>
 
+      <hr className="section-divider" />
+
       {/* ── CTA SECTION ── */}
-      <section className="section" style={{ textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, rgba(99,102,241,0.1) 0%, rgba(139,92,246,0.05) 40%, transparent 70%)', pointerEvents: 'none' }} />
-        <div className="container-sm" style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ fontSize: '2.5rem', marginBottom: 16, animation: 'float-blob 4s ease infinite' }}>🚀</div>
-          <h2 style={{ fontWeight: 900, fontSize: 'clamp(1.75rem,4vw,2.5rem)', letterSpacing: '-0.04em', marginBottom: 12 }}>
-            Ready to ace your exams?
-          </h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1rem', marginBottom: 32, lineHeight: 1.7 }}>
-            Join thousands of students who stopped guessing what to study and started winning with AI-powered exam strategy.
+      <section className="cta-section">
+        <div className="container-sm">
+          <h2 className="cta-title">Ready to ace your exams?</h2>
+          <p className="cta-desc">
+            Join thousands of students who stopped guessing what to study and
+            started winning with AI-powered exam strategy.
           </p>
-          <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button className="btn-cta" onClick={() => navigate('/register')} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Target size={16} strokeWidth={2} /> Start Planning Free
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button
+              className="btn btn-primary btn-lg"
+              onClick={() => navigate('/register')}
+            >
+              <Target size={16} strokeWidth={2} />
+              Start Planning Free
             </button>
-            <button className="btn-outline-primary" onClick={() => navigate('/login')} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <ArrowRight size={15} strokeWidth={2} /> Already a member? Sign In
+            <button
+              className="btn btn-secondary btn-lg"
+              onClick={() => navigate('/login')}
+            >
+              <ArrowRight size={15} strokeWidth={2} />
+              Already a member? Sign In
             </button>
           </div>
-          <p style={{ fontSize: '0.78rem', color: 'var(--text-disabled)', marginTop: 20 }}>
-            No credit card required · Works without OpenAI key · Free forever
+          <p className="cta-fine">
+            No credit card required · Free forever
           </p>
         </div>
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="container" style={{ borderTop: '1px solid var(--border-subtle)', padding: '24px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 8, background: 'var(--brand-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+      <footer className="landing-footer">
+        <div className="footer-logo">
+          <div className="footer-logo-mark">
             <Zap size={14} strokeWidth={2.5} />
           </div>
-          <div>
-            <div style={{ fontWeight: 800, fontSize: '0.8rem', color: 'var(--text-primary)' }}>Smart Syllabus Planner</div>
-            <div style={{ fontSize: '0.62rem', color: 'var(--text-muted)' }}>AI Exam Survival Assistant</div>
-          </div>
+          <div className="footer-logo-name">Smart Syllabus Planner</div>
         </div>
-        <p style={{ color: 'var(--text-disabled)', fontSize: '0.75rem', margin: 0 }}>
-          Built for engineering students who want results, not routines.
+        <p className="footer-copy">
+          © {new Date().getFullYear()} Smart Syllabus Planner. All rights reserved.
         </p>
       </footer>
+
     </div>
   );
 };

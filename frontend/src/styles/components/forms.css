@@ -1,57 +1,80 @@
 /* ================================================
-   SSP — Form Styles
+   SSP — Form Styles (2025 redesign)
    ================================================ */
 
 .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
   margin-bottom: 16px;
 }
 
 .form-label {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--txt2);
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--txt-2);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
+/* ── Inputs ── */
 .form-input,
 .form-select,
 .form-textarea {
   width: 100%;
-  padding: 12px 16px;
-  background: var(--bg-input);
-  border: 1.5px solid var(--border);
-  border-radius: var(--r12);
+  padding: 0 12px;
+  height: 42px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r);
   color: var(--txt);
   font-family: var(--font-body);
-  font-size: 0.9rem;
-  transition: all var(--t);
+  font-size: 0.88rem;
+  transition: border-color var(--t-fast);
   outline: none;
+  box-shadow: none;
 }
 
 .form-input:focus,
 .form-select:focus,
 .form-textarea:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(108, 71, 255, 0.15);
+  box-shadow: none;
 }
 
 .form-input::placeholder,
 .form-textarea::placeholder {
-  color: var(--txt3);
+  color: var(--txt-3);
 }
 
 .form-input.error,
 .form-select.error,
 .form-textarea.error {
   border-color: var(--danger);
-  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.12);
 }
 
+/* ── Textarea ── */
+.form-textarea {
+  height: auto;
+  padding: 10px 12px;
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* ── Select ── */
+.form-select {
+  appearance: none;
+  padding-right: 32px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  cursor: pointer;
+}
+
+/* ── Feedback text ── */
 .form-error {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--danger);
+  margin-top: 4px;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -59,24 +82,11 @@
 
 .form-hint {
   font-size: 0.75rem;
-  color: var(--txt3);
+  color: var(--txt-3);
+  margin-top: 4px;
 }
 
-.form-textarea {
-  resize: vertical;
-  min-height: 100px;
-}
-
-.form-select {
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B698A' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 14px center;
-  padding-right: 36px;
-  cursor: pointer;
-}
-
-/* Input with icon */
+/* ── Input with icon ── */
 .input-wrapper {
   position: relative;
   display: flex;
@@ -85,27 +95,28 @@
 
 .input-icon {
   position: absolute;
-  left: 14px;
-  color: var(--txt3);
-  font-size: 1rem;
+  left: 12px;
+  color: var(--txt-3);
   pointer-events: none;
   z-index: 1;
+  display: flex;
 }
 
 .input-wrapper .form-input {
-  padding-left: 42px;
+  padding-left: 36px;
 }
 
 .input-suffix {
   position: absolute;
-  right: 14px;
+  right: 12px;
   cursor: pointer;
-  color: var(--txt3);
-  transition: color var(--t);
+  color: var(--txt-3);
+  transition: color var(--t-fast);
+  display: flex;
 }
-.input-suffix:hover { color: var(--txt); }
+.input-suffix:hover { color: var(--txt-2); }
 
-/* ── Checkbox / Radio ── */
+/* ── Checkbox ── */
 .checkbox-group {
   display: flex;
   align-items: center;
@@ -114,12 +125,15 @@
 }
 
 .checkbox-custom {
-  width: 18px; height: 18px;
-  border: 2px solid var(--border2);
-  border-radius: 5px;
-  background: var(--bg-input);
-  transition: all var(--t);
-  display: flex; align-items: center; justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-sm);
+  background: var(--bg-2);
+  transition: all var(--t-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
 
@@ -128,30 +142,33 @@
   border-color: var(--accent);
 }
 
-/* ── Toggle ── */
+/* ── Toggle switch ── */
 .toggle {
-  width: 44px; height: 24px;
-  background: var(--border2);
+  width: 40px;
+  height: 22px;
+  background: var(--border-2);
   border-radius: var(--r-full);
   cursor: pointer;
   position: relative;
-  transition: background var(--t);
+  transition: background var(--t-fast);
   flex-shrink: 0;
+  border: none;
 }
 .toggle.active { background: var(--accent); }
 .toggle::after {
   content: '';
   position: absolute;
-  width: 18px; height: 18px;
+  width: 16px;
+  height: 16px;
   background: #fff;
   border-radius: 50%;
-  top: 3px; left: 3px;
-  transition: transform var(--t);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  top: 3px;
+  left: 3px;
+  transition: transform var(--t-fast);
 }
-.toggle.active::after { transform: translateX(20px); }
+.toggle.active::after { transform: translateX(18px); }
 
-/* Progress bar */
+/* ── Progress bar ── */
 .progress-bar {
   width: 100%;
   height: 6px;
@@ -161,8 +178,7 @@
 }
 .progress-bar-fill {
   height: 100%;
-  background: var(--grad1);
+  background: var(--accent);
   border-radius: var(--r-full);
   transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: progressFill 0.8s ease both;
 }

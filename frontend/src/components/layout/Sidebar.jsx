@@ -1,131 +1,176 @@
-// Sidebar.jsx — Premium branded sidebar with Lucide icons
+// Sidebar.jsx — Compact app sidebar with mobile drawer support
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import {
-  Zap, LayoutDashboard, BookOpen, Target,
-  Bell, User, LogOut, Sparkles, ArrowRight, Settings,
+  LayoutDashboard, BookOpen, Target,
+  Bell, User, LogOut, Sun, Moon, X, Sparkles, ArrowRight,
 } from 'lucide-react';
 
 const navSections = [
   {
     label: 'Overview',
     items: [
-      { to: '/dashboard', Icon: LayoutDashboard, label: 'Dashboard', desc: 'Your command center' },
+      { to: '/dashboard', Icon: LayoutDashboard, label: 'Dashboard' },
     ],
   },
   {
-    label: 'Study Tools',
+    label: 'Study',
     items: [
-      { to: '/subjects',  Icon: BookOpen, label: 'My Subjects',    desc: 'Manage subjects' },
-      { to: '/missions',  Icon: Target,   label: 'Daily Missions', desc: "Today's tasks" },
+      { to: '/subjects',  Icon: BookOpen, label: 'My Subjects' },
+      { to: '/missions',  Icon: Target,   label: 'Daily Missions' },
     ],
   },
   {
     label: 'Account',
     items: [
-      { to: '/notifications', Icon: Bell,  label: 'Notifications', desc: 'Alerts & reminders', badge: true },
-      { to: '/profile',       Icon: User,  label: 'Profile',       desc: 'Settings & goals' },
+      { to: '/notifications', Icon: Bell,  label: 'Notifications', badge: true },
+      { to: '/profile',       Icon: User,  label: 'Profile' },
     ],
   },
 ];
 
 const goalLabel = {
   excellent: { text: 'Topper Mode', color: '#f59e0b' },
-  good:      { text: 'Score Mode',  color: '#6366f1' },
-  pass:      { text: 'Pass Mode',   color: '#10b981' },
+  good:      { text: 'Score Mode',  color: '#6C47FF' },
+  pass:      { text: 'Pass Mode',   color: '#22c55e' },
 };
 
-const Sidebar = ({ unreadCount = 0 }) => {
+const Sidebar = ({ unreadCount = 0, mobileOpen = false, onClose }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   const goal = goalLabel[user?.targetGoal] || goalLabel.good;
 
+  const initials = user?.name
+    ? user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+    : '?';
+
+  const handleClose = () => { if (onClose) onClose(); };
+
   return (
-    <aside className="sidebar">
-      {/* ── Logo Area ── */}
-      <div className="sidebar-logo-area">
-        <div className="sidebar-brand">
-          <div className="sidebar-icon-logo">
-            <Zap size={18} strokeWidth={2.5} />
-          </div>
-          <div className="sidebar-brand-text">
-            <div className="sidebar-brand-name">Smart Syllabus Planner</div>
-            <div className="sidebar-brand-sub">AI Exam Assistant</div>
-          </div>
-        </div>
-        <div className="sidebar-tagline">Turn Syllabus into Daily Wins</div>
-      </div>
+    <>
+      {/* Mobile overlay */}
+      <div
+        className={`sidebar-overlay${mobileOpen ? ' active' : ''}`}
+        onClick={handleClose}
+        aria-hidden="true"
+      />
 
-      {/* ── Navigation ── */}
-      <nav className="sidebar-nav">
-        {navSections.map(section => (
-          <div key={section.label} className="sidebar-nav-section">
-            <div className="sidebar-section-label">{section.label}</div>
-            {section.items.map(({ to, Icon, label, desc, badge }) => (
-              <NavLink
-                key={to}
-                to={to}
-                className={({ isActive }) => `sidebar-link${isActive ? ' active' : ''}`}
-              >
-                <span className="sidebar-icon">
-                  <Icon size={17} strokeWidth={1.75} />
-                </span>
-                <span className="sidebar-link-text">
-                  <span className="sidebar-link-label">{label}</span>
-                  <span className="sidebar-link-desc">{desc}</span>
-                </span>
-                {badge && unreadCount > 0 && (
-                  <span className="sidebar-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
-                )}
-              </NavLink>
-            ))}
-          </div>
-        ))}
+      <aside className={`sidebar${mobileOpen ? ' open' : ''}`}>
 
-        {/* Motivational promo card */}
-        <div className="sidebar-promo-card">
-          <div className="sidebar-promo-header">
-            <Sparkles size={14} strokeWidth={2} />
-            Study Smarter
-          </div>
-          <p className="sidebar-promo-body">
-            Upload your syllabus to unlock AI-powered study plans and cheat codes.
-          </p>
-          <button
-            onClick={() => navigate('/subjects')}
-            className="sidebar-promo-btn"
-          >
-            Go to Subjects <ArrowRight size={12} strokeWidth={2.5} />
-          </button>
-        </div>
-      </nav>
+        {/* Mobile close button */}
+        <button
+          className="sidebar-mobile-close"
+          onClick={handleClose}
+          aria-label="Close navigation"
+        >
+          <X size={14} />
+        </button>
 
-      {/* ── Footer / User ── */}
-      <div className="sidebar-footer">
-        <NavLink to="/profile" className="sidebar-user-card" style={{ textDecoration: 'none' }}>
-          <div className="sidebar-avatar">
-            {user?.name?.charAt(0)?.toUpperCase() || '?'}
-          </div>
-          <div className="sidebar-user-info">
+        {/* ── User header (avatar + name) ── */}
+        <div className="sidebar-user-header">
+          <div className="sidebar-avatar-circle">{initials}</div>
+          <div className="sidebar-user-meta">
             <div className="sidebar-user-name">{user?.name || 'Student'}</div>
-            <div className="sidebar-user-goal" style={{ color: goal.color }}>
+            <div className="sidebar-user-level" style={{ color: goal.color }}>
               {goal.text}
             </div>
           </div>
-          <Settings size={14} strokeWidth={1.75} className="sidebar-user-settings" />
-        </NavLink>
+        </div>
 
-        <button
-          onClick={() => { logout(); navigate('/'); }}
-          className="sidebar-link sidebar-logout"
-        >
-          <span className="sidebar-icon">
-            <LogOut size={17} strokeWidth={1.75} />
-          </span>
-          <span className="sidebar-link-label">Sign Out</span>
-        </button>
-      </div>
-    </aside>
+        {/* ── Navigation ── */}
+        <nav className="sidebar-nav">
+          {navSections.map(section => (
+            <div key={section.label} className="sidebar-nav-section">
+              <div className="sidebar-section-label">{section.label}</div>
+              {section.items.map(({ to, Icon, label, badge }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  onClick={handleClose}
+                  className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+                >
+                  <span className="nav-icon">
+                    <Icon size={16} strokeWidth={1.75} />
+                  </span>
+                  {label}
+                  {badge && unreadCount > 0 && (
+                    <span className="nav-link-badge">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </NavLink>
+              ))}
+            </div>
+          ))}
+
+          {/* Promo card */}
+          <div className="sidebar-promo-card">
+            <div className="sidebar-promo-header">
+              <Sparkles size={12} strokeWidth={2} />
+              Study Smarter
+            </div>
+            <p className="sidebar-promo-body">
+              Upload your syllabus to unlock AI-powered study plans.
+            </p>
+            <button
+              onClick={() => { navigate('/subjects'); handleClose(); }}
+              className="sidebar-promo-btn"
+            >
+              Go to Subjects <ArrowRight size={11} strokeWidth={2.5} />
+            </button>
+          </div>
+        </nav>
+
+        {/* ── Footer (pinned bottom) ── */}
+        <div className="sidebar-footer">
+          {/* Compact XP bar */}
+          {user?.xp != null && user?.xpToNext != null && (
+            <div className="sidebar-xp-compact" title={`${user.xp} / ${user.xpToNext} XP`}>
+              <div
+                className="sidebar-xp-compact-fill"
+                style={{ width: `${Math.min((user.xp / user.xpToNext) * 100, 100)}%` }}
+              />
+            </div>
+          )}
+
+          {/* Streak */}
+          {user?.streak != null && (
+            <div className="sidebar-streak-line">
+              🔥 {user.streak} day streak
+            </div>
+          )}
+
+          {/* Theme toggle */}
+          <button
+            onClick={toggleTheme}
+            className="sidebar-link sidebar-theme-toggle"
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            <span className="sidebar-icon">
+              {theme === 'dark'
+                ? <Sun size={16} strokeWidth={1.75} />
+                : <Moon size={16} strokeWidth={1.75} />}
+            </span>
+            <span className="sidebar-link-label">
+              {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+            </span>
+          </button>
+
+          {/* Sign out */}
+          <button
+            onClick={() => { logout(); navigate('/'); }}
+            className="sidebar-link sidebar-logout"
+          >
+            <span className="sidebar-icon">
+              <LogOut size={16} strokeWidth={1.75} />
+            </span>
+            <span className="sidebar-link-label">Sign Out</span>
+          </button>
+        </div>
+      </aside>
+    </>
   );
 };
 

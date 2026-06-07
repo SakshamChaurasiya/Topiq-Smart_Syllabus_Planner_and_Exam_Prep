@@ -1,4 +1,4 @@
-// Dashboard.jsx — Premium, motivating, engagement-focused dashboard
+// Dashboard.jsx — 2025 redesign: flat surfaces, stat pills, no inline hover
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dashboardAPI } from '../api/dashboard.api';
@@ -18,21 +18,21 @@ import {
   BookMarked, ChevronRight,
 } from 'lucide-react';
 
-/* Motivational messages keyed to readiness % */
+/* Readiness message — logic unchanged */
 const getReadinessMsg = (pct) => {
-  if (pct >= 90) return { msg: '🏆 Exam Ready! You\'re crushing it.', color: 'var(--success)' };
-  if (pct >= 70) return { msg: '🚀 Great progress! Keep the momentum.', color: '#06b6d4' };
-  if (pct >= 50) return { msg: '🔥 You\'re halfway there — push forward!', color: 'var(--warning)' };
-  if (pct >= 30) return { msg: '⚡ Getting started — every topic counts!', color: 'var(--primary-light)' };
-  return { msg: '📚 Time to begin — your AI plan is ready.', color: 'var(--text-secondary)' };
+  if (pct >= 90) return { msg: 'Exam Ready — keep the momentum.', color: 'var(--success)' };
+  if (pct >= 70) return { msg: 'Great progress! Keep pushing forward.', color: 'var(--info)' };
+  if (pct >= 50) return { msg: "Halfway there — don't stop now.", color: 'var(--warning)' };
+  if (pct >= 30) return { msg: 'Getting started — every topic counts!', color: 'var(--accent)' };
+  return { msg: 'Your AI plan is ready. Begin today.', color: 'var(--txt-2)' };
 };
 
 const getMissionsMsg = (done, total) => {
   if (!total) return null;
-  if (done === total) return '🏆 All missions done today! Amazing!';
-  if (done === 0) return `🎯 ${total} missions waiting — start strong!`;
+  if (done === total) return 'All missions done today!';
+  if (done === 0) return `${total} missions waiting — start strong!`;
   const left = total - done;
-  return `🎯 Only ${left} mission${left > 1 ? 's' : ''} left today — you\'re almost there!`;
+  return `${left} mission${left > 1 ? 's' : ''} left today`;
 };
 
 const Dashboard = () => {
@@ -56,211 +56,191 @@ const Dashboard = () => {
   const completeMission = async (id) => {
     try {
       await missionAPI.updateStatus(id, 'completed');
-      toast.success('✅ Mission complete! Keep going!');
+      toast.success('Mission complete! Keep going!');
       fetchDashboard();
     } catch { toast.error('Failed to update.'); }
   };
 
-  if (loading) return <LoadingScreen text="Loading your study command center..." />;
+  if (loading) return <LoadingScreen text="Loading dashboard..." />;
 
-  const { user: dashboardUser = {}, overview = {}, todayStats = {}, todayMissions = [], upcomingExams = [], weakSubjects = [], activePlans = [], subjects = [] } = data || {};
+  const {
+    user: dashboardUser = {},
+    overview = {},
+    todayStats = {},
+    todayMissions = [],
+    upcomingExams = [],
+    weakSubjects = [],
+    activePlans = [],
+    subjects = [],
+  } = data || {};
 
   const avgProgress = overview.avgProgress || 0;
   const readiness = getReadinessMsg(avgProgress);
   const missionMsg = getMissionsMsg(todayStats.completed || 0, todayStats.total || 0);
 
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 5  ? 'Good night' :
+    hour < 12 ? 'Good morning' :
+    hour < 17 ? 'Good afternoon' :
+                'Good evening';
+  const firstName = dashboardUser?.name?.split(' ')[0] || 'Student';
+
   return (
     <div className="page-container animate-fade-in">
 
-      {/* ── READINESS HERO ── */}
-      <div style={{
-        background: 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(6,182,212,0.06))',
-        border: '1px solid rgba(99,102,241,0.2)',
-        borderRadius: 'var(--r-xl)', padding: '28px 32px',
-        marginBottom: 32, position: 'relative', overflow: 'hidden',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 24,
-      }}>
-        {/* Decorative glow */}
-        <div style={{ position: 'absolute', right: -60, top: -60, width: 220, height: 220, background: 'radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
+      {/* ── PAGE HEADER ── */}
+      <div className="dash-header">
+        <h1 className="dash-greeting">{greeting}, {firstName}</h1>
+        <span className="dash-date">
+          {format(new Date(), 'EEEE, dd MMM yyyy')}
+        </span>
+      </div>
 
-        <div style={{ position: 'relative', zIndex: 1, flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--primary-light)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
-            ⚡ Smart Syllabus Planner — Your Study Command Center
-          </div>
-          <h1 style={{ fontSize: 'clamp(1.4rem,3vw,1.9rem)', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: 6, color: 'var(--text-primary)' }}>
-            {avgProgress > 0
-              ? `You're ${avgProgress}% Exam Ready`
-              : 'Welcome! Let\'s start your study journey'}
-          </h1>
-          <p style={{ margin: 0, fontSize: '0.9rem', color: readiness.color, fontWeight: 600 }}>
-            {readiness.msg}
-          </p>
-          {missionMsg && (
-            <p style={{ margin: '6px 0 0', fontSize: '0.83rem', color: 'var(--text-muted)' }}>{missionMsg}</p>
-          )}
+      {/* ── STAT PILLS ── */}
+      <div className="stat-row">
+        <div className="stat-pill">
+          <div className="stat-pill-value">{overview.totalSubjects || 0}</div>
+          <div className="stat-pill-label">Subjects</div>
         </div>
-
-        {/* Readiness ring */}
-        {avgProgress > 0 && (
-          <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', flexShrink: 0 }}>
-            <ProgressRing
-              percent={avgProgress}
-              size={90}
-              stroke={7}
-              color={avgProgress >= 70 ? 'var(--success)' : avgProgress >= 40 ? 'var(--warning)' : 'var(--primary)'}
-            />
-            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: 6, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Avg Progress</div>
+        <div className="stat-pill">
+          <div className="stat-pill-value">
+            {todayStats.completed || 0}/{todayStats.total || 0}
           </div>
-        )}
+          <div className="stat-pill-label">Missions Today</div>
+        </div>
+        <div className="stat-pill">
+          <div className="stat-pill-value">{avgProgress}%</div>
+          <div className="stat-pill-label">Avg Progress</div>
+        </div>
+        <div className="stat-pill">
+          <div className="stat-pill-value">{upcomingExams.length || 0}</div>
+          <div className="stat-pill-label">Upcoming Exams</div>
+        </div>
       </div>
 
       {/* ── GAMIFICATION BAR ── */}
-      <div style={{ display: 'flex', gap: 16, marginBottom: 32, flexWrap: 'wrap' }}>
-        <XPProgressBar currentXP={dashboardUser.xp || 0} targetXP={dashboardUser.targetXP || 250} level={dashboardUser.level || 1} />
+      <div className="dash-gami-bar">
+        <XPProgressBar
+          currentXP={dashboardUser.xp || 0}
+          targetXP={dashboardUser.targetXP || 250}
+          level={dashboardUser.level || 1}
+        />
         <StreakBadge streak={dashboardUser.streak || 0} />
       </div>
 
-      {/* ── STAT CARDS ── */}
-      <div className="stats-grid" style={{ marginBottom: 32 }}>
-        {[
-          {
-            Icon: BookOpen, label: 'Subjects',
-            value: overview.totalSubjects || 0,
-            color: 'var(--primary-light)', bg: 'rgba(99,102,241,0.1)',
-            sub: 'enrolled',
-          },
-          {
-            Icon: Target, label: 'Missions Today',
-            value: `${todayStats.completed || 0}/${todayStats.total || 0}`,
-            color: todayStats.completionRate >= 80 ? 'var(--success)' : 'var(--warning)',
-            bg: 'rgba(245,158,11,0.1)',
-            sub: `${todayStats.completionRate || 0}% done`,
-          },
-          {
-            Icon: CalendarDays, label: 'Upcoming Exams',
-            value: upcomingExams.length || 0,
-            color: upcomingExams.some(e => e.daysLeft <= 3) ? 'var(--danger)' : 'var(--accent-cyan)',
-            bg: 'rgba(6,182,212,0.1)',
-            sub: upcomingExams[0] ? `Next: ${upcomingExams[0].name}` : 'No exams set',
-          },
-          {
-            Icon: Bell, label: 'Notifications',
-            value: overview.unreadNotifications || 0,
-            color: 'var(--secondary-light)', bg: 'rgba(139,92,246,0.1)',
-            sub: 'unread alerts',
-          },
-        ].map((s, i) => (
-          <div key={s.label} className="stat-card animate-slide-up" style={{ animationDelay: `${i * 0.06}s` }}>
-            <div className="stat-icon" style={{ background: s.bg, color: s.color }}>
-              <s.Icon size={22} strokeWidth={1.75} />
-            </div>
-            <div>
-              <div className="stat-value" style={{ color: s.color }}>{s.value}</div>
-              <div className="stat-label">{s.label}</div>
-              {s.sub && <div style={{ fontSize: '0.68rem', color: 'var(--text-disabled)', marginTop: 3 }}>{s.sub}</div>}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* ── TODAY'S PROGRESS BAR ── */}
+      {/* ── TODAY'S PROGRESS ── */}
       {(todayStats.total || 0) > 0 && (
-        <div className="card" style={{ marginBottom: 24, padding: '18px 22px', background: todayStats.completionRate === 100 ? 'rgba(16,185,129,0.06)' : 'var(--bg-card)', borderColor: todayStats.completionRate === 100 ? 'rgba(16,185,129,0.3)' : 'var(--border-subtle)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+        <div className="card dash-progress-card">
+          <div className="dash-progress-header">
             <div>
-              <div style={{ fontWeight: 700, marginBottom: 2, fontSize: '0.95rem' }}>
-                {todayStats.completionRate === 100 ? '🏆 All Missions Complete!' : `📅 ${format(new Date(), 'EEEE, dd MMM')} — Today's Progress`}
+              <div className="dash-progress-label">
+                {format(new Date(), 'EEEE')} — Today's Progress
               </div>
-              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+              <div className="dash-progress-sub">
                 {todayStats.completed}/{todayStats.total} missions completed
+                {missionMsg && ` · ${missionMsg}`}
               </div>
             </div>
-            <div style={{
-              fontWeight: 900, fontSize: '1.5rem',
-              color: todayStats.completionRate === 100 ? 'var(--success)' : 'var(--primary-light)',
-              letterSpacing: '-0.04em',
-            }}>
+            <div className={`dash-progress-pct${todayStats.completionRate === 100 ? ' done' : ''}`}>
               {todayStats.completionRate || 0}%
             </div>
           </div>
-          <div className="progress-bar" style={{ height: 8 }}>
-            <div className="progress-bar-fill" style={{
-              width: `${todayStats.completionRate || 0}%`,
-              background: todayStats.completionRate === 100 ? 'var(--success)' : 'var(--brand-gradient)',
-            }} />
+          <div className="progress-bar">
+            <div
+              className="progress-bar-fill"
+              style={{
+                width: `${todayStats.completionRate || 0}%`,
+                background: todayStats.completionRate === 100 ? 'var(--success)' : 'var(--accent)',
+              }}
+            />
           </div>
           {todayStats.completionRate === 100 && (
-            <div style={{ textAlign: 'center', marginTop: 10, fontSize: '0.88rem', color: 'var(--success)', fontWeight: 700 }} className="animate-celebrate">
-              🎉 Outstanding! You finished all your missions for today!
+            <div className="dash-progress-done-msg">
+              Outstanding! All missions completed for today.
             </div>
           )}
         </div>
       )}
 
-      {/* ── MAIN GRID: Missions + Sidebar ── */}
+      {/* ── MAIN GRID: Missions + Right sidebar ── */}
       <div className="dashboard-grid">
 
         {/* Left: Today's Missions */}
         <div>
-          <div className="card-glow">
+          <div className="card">
             <div className="card-header">
               <div>
-                <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                <Target size={16} strokeWidth={2} style={{ color: 'var(--warning)' }} />
-                Today's Missions
+                <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <Target size={14} strokeWidth={2} style={{ color: 'var(--warning)' }} />
+                  Today's Missions
+                </div>
+                {missionMsg && (
+                  <div style={{ fontSize: '0.72rem', color: 'var(--txt-3)', marginTop: 2 }}>
+                    {missionMsg}
+                  </div>
+                )}
               </div>
-                {missionMsg && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 2 }}>{missionMsg}</div>}
-              </div>
-              <button className="btn btn-secondary btn-sm" onClick={() => navigate('/missions')}>View All</button>
+              <button className="btn btn-secondary btn-sm" onClick={() => navigate('/missions')}>
+                View All
+              </button>
             </div>
 
             {!todayMissions?.length ? (
               <EmptyState
-                icon={<Target size={40} strokeWidth={1} color="var(--text-disabled)" />}
+                icon={<Target size={36} strokeWidth={1} color="var(--txt-3)" />}
                 title="No missions yet today"
-                description="Generate a study plan for any subject to activate daily missions and start your execution streak."
+                description="Generate a study plan for any subject to activate daily missions."
                 action={
-                  <button className="btn btn-primary" onClick={() => navigate('/subjects')}>
-                    <BookOpen size={15} strokeWidth={2} /> Set Up Subjects
+                  <button className="btn btn-primary btn-sm" onClick={() => navigate('/subjects')}>
+                    <BookOpen size={14} strokeWidth={2} /> Set Up Subjects
                   </button>
                 }
               />
             ) : (
               <div>
                 {todayMissions.map((mission, idx) => (
-                  <div key={mission._id} className="mission-card animate-slide-up" style={{ animationDelay: `${idx * 0.04}s` }}>
+                  <div
+                    key={mission._id}
+                    className={`mission-card animate-slide-up${mission.status === 'completed' ? ' completed' : ''}`}
+                    style={{ animationDelay: `${idx * 0.04}s` }}
+                  >
+                    {/* Checkbox */}
                     <div
-                      className={`mission-checkbox ${mission.status === 'completed' ? 'checked' : ''}`}
+                      className={`mission-checkbox${mission.status === 'completed' ? ' checked' : ''}`}
                       onClick={() => mission.status !== 'completed' && completeMission(mission._id)}
                       style={{ cursor: mission.status === 'completed' ? 'default' : 'pointer' }}
                     >
-                      {mission.status === 'completed' && <Check size={13} strokeWidth={3} style={{ color: '#fff' }} />}
+                      {mission.status === 'completed' && (
+                        <Check size={11} strokeWidth={3} style={{ color: '#fff' }} />
+                      )}
                     </div>
 
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3, flexWrap: 'wrap' }}>
-                        <span style={{
-                          fontWeight: 600, fontSize: '0.875rem',
-                          textDecoration: mission.status === 'completed' ? 'line-through' : 'none',
-                          color: mission.status === 'completed' ? 'var(--text-muted)' : 'var(--text-primary)',
-                        }}>
-                          {mission.title}
-                        </span>
+                    {/* Body */}
+                    <div className="mission-body">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
+                        <span className="mission-title">{mission.title}</span>
                         <Badge type={mission.priority} label={mission.priority} />
                       </div>
-                      <div style={{ display: 'flex', gap: 12, fontSize: '0.72rem', color: 'var(--text-disabled)', flexWrap: 'wrap' }}>
-                        {mission.subjectId?.name && <span><BookOpen size={11} strokeWidth={2} style={{ display: 'inline', verticalAlign: 'middle' }} /> {mission.subjectId.name}</span>}
+                      <div className="mission-meta">
+                        {mission.subjectId?.name && (
+                          <span>
+                            <BookOpen size={10} strokeWidth={2} style={{ display: 'inline', verticalAlign: 'middle' }} />{' '}
+                            {mission.subjectId.name}
+                          </span>
+                        )}
                         <span>{mission.estimatedMinutes} min</span>
                         <span>{mission.xpReward} XP</span>
                       </div>
                     </div>
 
-                    <div style={{ color: 'var(--text-muted)' }}>
+                    {/* Type icon */}
+                    <div className="mission-type-icon">
                       {mission.type === 'study'
-                        ? <BookMarked size={16} strokeWidth={1.75} />
+                        ? <BookMarked size={15} strokeWidth={1.75} />
                         : mission.type === 'revision'
-                        ? <RefreshCcw size={16} strokeWidth={1.75} />
-                        : <FileText size={16} strokeWidth={1.75} />}
+                        ? <RefreshCcw size={15} strokeWidth={1.75} />
+                        : <FileText size={15} strokeWidth={1.75} />}
                     </div>
                   </div>
                 ))}
@@ -270,43 +250,49 @@ const Dashboard = () => {
         </div>
 
         {/* Right column */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-          {/* Upcoming Exams */}
-          <div className="card-glow">
+          {/* Exam Countdown */}
+          <div className="card">
             <div className="card-header">
-              <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                <CalendarDays size={16} strokeWidth={2} style={{ color: 'var(--accent-cyan)' }} />
+              <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <CalendarDays size={14} strokeWidth={2} style={{ color: 'var(--info)' }} />
                 Exam Countdown
               </div>
-              <button className="btn btn-ghost btn-sm" onClick={() => navigate('/subjects')} style={{ fontSize: '0.72rem' }}>+ Add</button>
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={() => navigate('/subjects')}
+              >
+                + Add
+              </button>
             </div>
             {!upcomingExams?.length ? (
-              <p style={{ fontSize: '0.83rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+              <p style={{ fontSize: '0.82rem', color: 'var(--txt-3)', lineHeight: 1.55, margin: 0 }}>
                 Set exam dates on your subjects to see the countdown here.
               </p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div>
                 {upcomingExams.slice(0, 4).map(exam => (
-                  <div key={exam.subjectId} style={{
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    background: 'var(--bg-elevated)', borderRadius: 10, padding: '10px 12px',
-                    border: `1px solid ${exam.daysLeft <= 3 ? 'rgba(239,68,68,0.3)' : exam.daysLeft <= 7 ? 'rgba(245,158,11,0.2)' : 'var(--border-subtle)'}`,
-                    transition: 'all 0.15s', cursor: 'pointer',
-                  }}
+                  <div
+                    key={exam.subjectId}
+                    className={`exam-row${exam.daysLeft <= 3 ? ' urgent' : exam.daysLeft <= 7 ? ' warning' : ''}`}
                     onClick={() => navigate(`/subjects/${exam.subjectId}/cheatcode`)}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: exam.color || '#6366f1', flexShrink: 0 }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div className="exam-dot" style={{ background: exam.color || 'var(--accent)' }} />
                       <div>
-                        <div style={{ fontSize: '0.83rem', fontWeight: 600, color: 'var(--text-primary)' }}>{exam.name}</div>
-                        <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{format(new Date(exam.examDate), 'dd MMM yyyy')}</div>
+                        <div className="exam-name">{exam.name}</div>
+                        <div className="exam-date">{format(new Date(exam.examDate), 'dd MMM yyyy')}</div>
                       </div>
                     </div>
-                    <div style={{
-                      fontWeight: 800, fontSize: '0.9rem', minWidth: 36, textAlign: 'center',
-                      color: exam.daysLeft <= 3 ? 'var(--danger)' : exam.daysLeft <= 7 ? 'var(--warning)' : 'var(--text-secondary)',
-                    }}>
+                    <div
+                      className="exam-days"
+                      style={{
+                        color: exam.daysLeft <= 3 ? 'var(--danger)'
+                          : exam.daysLeft <= 7 ? 'var(--warning)'
+                          : 'var(--txt-2)',
+                      }}
+                    >
                       {exam.daysLeft}d
                     </div>
                   </div>
@@ -315,29 +301,34 @@ const Dashboard = () => {
             )}
           </div>
 
-          {/* ⚠️ Weak Subjects — Revision Alert */}
+          {/* Revision Radar — weak subjects */}
           {weakSubjects?.length > 0 && (
-            <div className="card-glow" style={{ borderColor: 'rgba(239,68,68,0.2)', background: 'rgba(239,68,68,0.03)' }}>
+            <div className="card" style={{ borderColor: 'var(--danger-border)' }}>
               <div className="card-header">
-                <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 7, color: 'var(--danger)' }}>
-                  <AlertTriangle size={16} strokeWidth={2} />
+                <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--danger)' }}>
+                  <AlertTriangle size={14} strokeWidth={2} />
                   Revision Radar
                 </div>
                 <span className="badge badge-danger">{weakSubjects.length} low</span>
               </div>
-              <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: 10, margin: '0 0 10px' }}>
+              <p style={{ fontSize: '0.78rem', color: 'var(--txt-3)', marginBottom: 10, lineHeight: 1.5 }}>
                 These subjects need attention before your exams.
               </p>
               {weakSubjects.map(sub => (
-                <div key={sub.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--border-subtle)', cursor: 'pointer' }}
-                  onClick={() => navigate(`/subjects/${sub.id}/cheatcode`)}>
+                <div
+                  key={sub.id}
+                  className="weak-subject-row"
+                  onClick={() => navigate(`/subjects/${sub.id}/cheatcode`)}
+                >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <div style={{ width: 6, height: 6, borderRadius: '50%', background: sub.color || 'var(--danger)', flexShrink: 0 }} />
-                    <span style={{ fontSize: '0.83rem', fontWeight: 600 }}>{sub.name}</span>
+                    <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--txt)' }}>{sub.name}</span>
                   </div>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.78rem', color: 'var(--danger)', fontWeight: 800 }}>{sub.progress}%</span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: '0.68rem', color: 'var(--primary-light)', fontWeight: 600 }}><Zap size={10} strokeWidth={2.5} /> Cheat Code</span>
+                    <span style={{ fontSize: '0.78rem', color: 'var(--danger)', fontWeight: 700 }}>{sub.progress}%</span>
+                    <span style={{ fontSize: '0.68rem', color: 'var(--accent)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 3 }}>
+                      <Zap size={10} strokeWidth={2.5} /> Cheat Code
+                    </span>
                   </div>
                 </div>
               ))}
@@ -346,23 +337,34 @@ const Dashboard = () => {
 
           {/* Active Plans */}
           {activePlans?.length > 0 && (
-            <div className="card-glow">
+            <div className="card">
               <div className="card-header">
-                <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                  <Map size={16} strokeWidth={2} style={{ color: 'var(--accent-cyan)' }} />
+                <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <Map size={14} strokeWidth={2} style={{ color: 'var(--info)' }} />
                   Active Plans
                 </div>
               </div>
               {activePlans.slice(0, 3).map(plan => (
-                <div key={plan._id} style={{ marginBottom: 10, cursor: 'pointer' }} onClick={() => navigate(`/subjects/${plan.subjectId?._id}/planner`)}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
-                    <span style={{ fontSize: '0.83rem', fontWeight: 600 }}>{plan.subjectId?.name}</span>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{plan.daysRemaining}d left</span>
+                <div
+                  key={plan._id}
+                  style={{ marginBottom: 12, cursor: 'pointer' }}
+                  onClick={() => navigate(`/subjects/${plan.subjectId?._id}/planner`)}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                    <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--txt)' }}>
+                      {plan.subjectId?.name}
+                    </span>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--txt-3)' }}>
+                      {plan.daysRemaining}d left
+                    </span>
                   </div>
-                  <div className="progress-bar" style={{ height: 5 }}>
-                    <div className="progress-bar-fill" style={{ width: `${plan.completionPercentage}%` }} />
+                  <div className="progress-bar" style={{ height: 4 }}>
+                    <div
+                      className="progress-bar-fill"
+                      style={{ width: `${plan.completionPercentage}%` }}
+                    />
                   </div>
-                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: 3 }}>
+                  <div style={{ fontSize: '0.68rem', color: 'var(--txt-3)', marginTop: 3 }}>
                     {plan.completionPercentage}% complete
                   </div>
                 </div>
@@ -371,105 +373,123 @@ const Dashboard = () => {
           )}
 
           {/* Smart Recommendations */}
-          <div className="card-glow" style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.06), rgba(6,182,212,0.04))' }}>
+          <div className="card">
             <div className="card-header">
-              <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                <Lightbulb size={16} strokeWidth={2} style={{ color: 'var(--warning)' }} />
-                Smart Recommendations
+              <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Lightbulb size={14} strokeWidth={2} style={{ color: 'var(--warning)' }} />
+                Recommendations
               </div>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div>
               {[
-                !subjects.length && { Icon: BookOpen, text: 'Add your subjects to get started', action: () => navigate('/subjects'), color: 'var(--primary-light)' },
-                subjects.some(s => !s.hasSyllabus) && { Icon: BookOpen, text: 'Upload syllabuses for AI analysis', action: () => navigate('/subjects'), color: 'var(--accent-cyan)' },
-                !activePlans?.length && subjects.length > 0 && { Icon: Map, text: 'Generate your first study plan', action: () => navigate('/subjects'), color: 'var(--warning)' },
-                weakSubjects?.length > 0 && { Icon: Zap, text: 'Activate Cheat Code for weak subjects', action: () => navigate(`/subjects/${weakSubjects[0]?.id}/cheatcode`), color: 'var(--danger)' },
-                { Icon: Target, text: "Complete today's missions to build streak", action: () => navigate('/missions'), color: 'var(--success)' },
+                !subjects.length && {
+                  Icon: BookOpen, text: 'Add your subjects to get started',
+                  action: () => navigate('/subjects'), color: 'var(--accent)',
+                },
+                subjects.some(s => !s.hasSyllabus) && {
+                  Icon: BookOpen, text: 'Upload syllabuses for AI analysis',
+                  action: () => navigate('/subjects'), color: 'var(--info)',
+                },
+                !activePlans?.length && subjects.length > 0 && {
+                  Icon: Map, text: 'Generate your first study plan',
+                  action: () => navigate('/subjects'), color: 'var(--warning)',
+                },
+                weakSubjects?.length > 0 && {
+                  Icon: Zap, text: 'Activate Cheat Code for weak subjects',
+                  action: () => navigate(`/subjects/${weakSubjects[0]?.id}/cheatcode`),
+                  color: 'var(--danger)',
+                },
+                {
+                  Icon: Target, text: "Complete today's missions to build streak",
+                  action: () => navigate('/missions'), color: 'var(--success)',
+                },
               ].filter(Boolean).slice(0, 3).map((rec, i) => rec && (
-                <button key={i} onClick={rec.action} style={{
-                  display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
-                  background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)',
-                  borderRadius: 10, cursor: 'pointer', textAlign: 'left',
-                  width: '100%', transition: 'all 0.15s', fontFamily: 'var(--font-family)',
-                }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--border-strong)'}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-subtle)'}
-                >
-                  <rec.Icon size={16} strokeWidth={1.75} style={{ color: rec.color, flexShrink: 0 }} />
-                  <span style={{ fontSize: '0.8rem', fontWeight: 600, color: rec.color, lineHeight: 1.3 }}>{rec.text}</span>
-                  <ChevronRight size={14} strokeWidth={2} style={{ marginLeft: 'auto', color: 'var(--text-disabled)', flexShrink: 0 }} />
+                <button key={i} onClick={rec.action} className="rec-btn">
+                  <rec.Icon size={15} strokeWidth={1.75} style={{ color: rec.color, flexShrink: 0 }} />
+                  <span className="rec-btn-text">{rec.text}</span>
+                  <ChevronRight size={13} strokeWidth={2} style={{ color: 'var(--txt-3)', flexShrink: 0 }} />
                 </button>
               ))}
             </div>
           </div>
+
         </div>
       </div>
 
-      {/* ── SUBJECTS GRID (condensed) ── */}
+      {/* ── SUBJECTS GRID ── */}
       {subjects?.length > 0 && (
         <div style={{ marginTop: 28 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-            <h3 style={{ fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <BookOpen size={17} strokeWidth={2} style={{ color: 'var(--primary-light)' }} />
+          <hr className="dash-section-divider" />
+          <div className="dash-subjects-header">
+            <div className="dash-subjects-title">
+              <BookOpen size={15} strokeWidth={2} style={{ color: 'var(--accent)' }} />
               Your Subjects
-            </h3>
-            <button className="btn btn-secondary btn-sm" onClick={() => navigate('/subjects')}>Manage All</button>
+            </div>
+            <button className="btn btn-secondary btn-sm" onClick={() => navigate('/subjects')}>
+              Manage All
+            </button>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(185px, 1fr))', gap: 10 }}>
+          <div className="subject-mini-grid">
             {subjects.map((sub, i) => {
               const prog = sub.progress || 0;
-              const col = prog >= 70 ? 'var(--success)' : prog >= 40 ? 'var(--warning)' : 'var(--primary-light)';
+              const col = prog >= 70 ? 'var(--success)' : prog >= 40 ? 'var(--warning)' : 'var(--accent)';
               return (
-                <div key={sub._id} className="card animate-slide-up"
-                  style={{ padding: '14px', cursor: 'pointer', animationDelay: `${i * 0.04}s` }}
+                <div
+                  key={sub._id}
+                  className="subject-mini-card animate-slide-up"
+                  style={{ animationDelay: `${i * 0.04}s` }}
                   onClick={() => navigate(`/subjects/${sub._id}/syllabus`)}
                 >
-                  <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 10 }}>
-                    <div style={{ width: 34, height: 34, borderRadius: 9, background: sub.color || '#6366f1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, color: '#fff', fontSize: '0.9rem', flexShrink: 0 }}>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 10 }}>
+                    <div
+                      className="subject-mini-icon"
+                      style={{ background: sub.color || 'var(--accent)' }}
+                    >
                       {sub.name.charAt(0)}
                     </div>
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: '0.82rem', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', letterSpacing: '-0.01em' }}>{sub.name}</div>
-                      {sub.code && <div style={{ fontSize: '0.67rem', color: 'var(--text-muted)' }}>{sub.code}</div>}
+                      <div className="subject-mini-name">{sub.name}</div>
+                      {sub.code && <div className="subject-mini-code">{sub.code}</div>}
                     </div>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
-                    <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{sub.completedTopics}/{sub.totalTopics} topics</span>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 800, color: col }}>{prog}%</span>
+                  <div className="subject-mini-progress-row">
+                    <span style={{ fontSize: '0.68rem', color: 'var(--txt-3)' }}>
+                      {sub.completedTopics}/{sub.totalTopics} topics
+                    </span>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: col }}>
+                      {prog}%
+                    </span>
                   </div>
-                  <div className="progress-bar" style={{ height: 4 }}>
+                  <div className="progress-bar" style={{ height: 3 }}>
                     <div className="progress-bar-fill" style={{ width: `${prog}%`, background: col }} />
                   </div>
                 </div>
               );
             })}
-            {/* Add subject card */}
-            <div
-              style={{ border: '2px dashed var(--border-default)', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 6, cursor: 'pointer', padding: 14, minHeight: 100, transition: 'all 0.15s' }}
-              onClick={() => navigate('/subjects')}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.background = 'rgba(99,102,241,0.05)'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.background = 'transparent'; }}
-            >
-              <Plus size={22} strokeWidth={1.75} style={{ color: 'var(--text-muted)' }} />
-              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>Add Subject</span>
-            </div>
           </div>
-        </div>
-      )}
-
-      {/* Empty state — no subjects at all */}
-      {!subjects?.length && !loading && (
-        <div className="card-glow" style={{ marginTop: 28, textAlign: 'center', padding: '48px' }}>
-          <Rocket size={48} strokeWidth={1.25} style={{ color: 'var(--primary-light)', marginBottom: 16 }} />
-          <h2 style={{ fontWeight: 800, marginBottom: 8, letterSpacing: '-0.03em' }}>Start your study journey</h2>
-          <p style={{ marginBottom: 24, fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-            Add a subject → upload your syllabus → let AI build your personalized roadmap and daily missions.
-          </p>
-          <button className="btn-cta" onClick={() => navigate('/subjects')}>
-            <BookOpen size={16} strokeWidth={2} /> Add Your First Subject
+          {/* + Add Subject text button (replaces dashed card) */}
+          <button className="add-subject-btn" onClick={() => navigate('/subjects')}>
+            <Plus size={14} strokeWidth={2} /> Add Subject
           </button>
         </div>
       )}
+
+      {/* Empty state — no subjects */}
+      {!subjects?.length && !loading && (
+        <div className="card dash-empty-card">
+          <Rocket size={40} strokeWidth={1.25} style={{ color: 'var(--accent)', marginBottom: 16 }} />
+          <h2 style={{ fontWeight: 800, marginBottom: 8, letterSpacing: '-0.03em', fontSize: '1.15rem' }}>
+            Start your study journey
+          </h2>
+          <p style={{ marginBottom: 24, fontSize: '0.88rem', color: 'var(--txt-2)', lineHeight: 1.6 }}>
+            Add a subject → upload your syllabus → let AI build your personalized roadmap.
+          </p>
+          <button className="btn btn-primary btn-md" onClick={() => navigate('/subjects')}>
+            <BookOpen size={15} strokeWidth={2} /> Add Your First Subject
+          </button>
+        </div>
+      )}
+
     </div>
   );
 };

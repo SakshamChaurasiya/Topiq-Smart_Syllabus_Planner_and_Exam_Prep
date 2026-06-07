@@ -98,24 +98,17 @@ const Subjects = () => {
             />
           ))}
 
-          {/* Add button card */}
-          <div
+          {/* Add subject button card */}
+          <button
+            className="subjects-add-card"
             onClick={openAdd}
-            style={{
-              background: 'var(--bg-card)', border: '2px dashed var(--border-default)',
-              borderRadius: 'var(--radius-lg)', padding: '24px',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              gap: 12, cursor: 'pointer', minHeight: 200,
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.background = 'var(--primary-glow)'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.background = 'var(--bg-card)'; }}
           >
-            <div style={{ width: 48, height: 48, borderRadius: 12, background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-              <Plus size={24} strokeWidth={1.75} />
+            <div className="subjects-add-card-icon">
+              <Plus size={22} strokeWidth={1.75} />
             </div>
-            <div style={{ fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Add Subject</div>
-          </div>
+            <span className="subjects-add-card-label">Add Subject</span>
+          </button>
+
         </div>
       )}
 

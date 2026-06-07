@@ -1,174 +1,220 @@
 /* ================================================
-   SSP Design System — CSS Variables (Premium Modern)
+   SSP Design System — CSS Variables
+   Dark mode by default; light mode via html.light
    ================================================ */
 
 :root {
-  /* ── Brand Colors ── */
-  --brand-primary: #6366f1;
-  --brand-primary-light: #818cf8;
-  --brand-primary-dark: #4f46e5;
-  --brand-secondary: #8b5cf6;
-  --brand-secondary-light: #a78bfa;
-  --brand-accent: #06b6d4;
-  --brand-accent-light: #22d3ee;
-  --brand-success: #10b981;
-  --brand-warning: #f59e0b;
-  --brand-danger: #ef4444;
-
-  /* ── Legacy compat aliases ── */
-  --accent: #6366f1;
-  --accent2: #8b5cf6;
-  --accent3: #06b6d4;
-  --accent4: #f59e0b;
-  --accent-hover: #818cf8;
-  --primary: #6366f1;
-  --primary-light: #818cf8;
-  --primary-dark: #4f46e5;
-  --primary-glow: rgba(99, 102, 241, 0.2);
-  --primary-glow-strong: rgba(99, 102, 241, 0.35);
-  --secondary: #8b5cf6;
-  --secondary-light: #a78bfa;
-  --secondary-glow: rgba(139, 92, 246, 0.2);
-  --accent-cyan: #06b6d4;
-  --accent-cyan-light: #22d3ee;
-  --accent-emerald: #10b981;
-  --accent-orange: #f59e0b;
-
-  /* ── Backgrounds ── */
-  --bg: #0f0f1a;
-  --bg2: #1a1a2e;
-  --surface: #1a1a2e;
-  --surface2: #1f1f3a;
-  --bg-card: #16162a;
-  --bg-elevated: #1f1f3a;
-  --bg-hover: #252540;
-  --bg-input: #1a1a2e;
-
-  /* ── Legacy compat aliases ── */
-  --bg-base: #0f0f1a;
-  --bg-surface: #1a1a2e;
-  --border-subtle: rgba(255, 255, 255, 0.05);
-  --border-default: rgba(255, 255, 255, 0.12);
-  --border-strong: rgba(255, 255, 255, 0.2);
+  /* ── Core Palette ── */
+  --bg:        #0a0a0a;
+  --bg-2:      #111111;
+  --bg-3:      #1a1a1a;
+  --surface:   #1f1f1f;
+  --surface-2: #252525;
+  --border:    #2a2a2a;
+  --border-2:  #333333;
 
   /* ── Text ── */
-  --txt: #ffffff;
-  --txt2: #e5e5e5;
-  --txt3: #a1a1aa;
-  --text-primary: #ffffff;
-  --text-secondary: #a1a1aa;
-  --text-muted: #71717a;
-  --text-disabled: #52525b;
+  --txt:   #f0f0f0;
+  --txt-2: #a0a0a0;
+  --txt-3: #666666;
 
-  /* ── Status Colors ── */
-  --success: #10b981;
-  --success-bg: rgba(16, 185, 129, 0.1);
-  --success-border: rgba(16, 185, 129, 0.3);
+  /* ── Accent ── */
+  --accent:   #6C47FF;
+  --accent-2: #8B6FFF;
+
+  /* ── Semantic ── */
+  --success: #22c55e;
   --warning: #f59e0b;
-  --warning-bg: rgba(245, 158, 11, 0.1);
-  --warning-border: rgba(245, 158, 11, 0.3);
-  --danger: #ef4444;
-  --danger-bg: rgba(239, 68, 68, 0.1);
-  --danger-border: rgba(239, 68, 68, 0.3);
-  --info: #06b6d4;
-  --info-bg: rgba(6, 182, 212, 0.1);
-  --info-border: rgba(6, 182, 212, 0.3);
+  --danger:  #ef4444;
+  --info:    #06b6d4;
 
-  /* ── Gradients ── */
-  --grad1: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
-  --grad2: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
-  --grad3: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
-  --grad4: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
-  --brand-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
-  --brand-gradient-subtle: linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(139,92,246,0.1) 100%);
-  --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
-  --gradient-secondary: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
-  --gradient-success: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
-  --gradient-warm: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+  --success-bg:     rgba(34,  197, 94,  0.08);
+  --warning-bg:     rgba(245, 158, 11,  0.08);
+  --danger-bg:      rgba(239, 68,  68,  0.08);
+  --info-bg:        rgba(6,   182, 212, 0.08);
 
-  /* ── Borders ── */
-  --border: rgba(255, 255, 255, 0.1);
-  --border2: rgba(255, 255, 255, 0.15);
-  --border-glow: rgba(99, 102, 241, 0.4);
+  --success-border: rgba(34,  197, 94,  0.2);
+  --warning-border: rgba(245, 158, 11,  0.2);
+  --danger-border:  rgba(239, 68,  68,  0.2);
+  --info-border:    rgba(6,   182, 212, 0.2);
 
   /* ── Typography ── */
-  --font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Syne', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
 
-  /* ── Border Radius ── */
-  --r4: 4px;
-  --r8: 8px;
-  --r12: 12px;
-  --r16: 16px;
-  --r20: 20px;
-  --r24: 24px;
-  --r-sm: 8px;
-  --r: 10px;
-  --r-md: 12px;
-  --r-lg: 16px;
-  --r-xl: 24px;
-  --r-2xl: 32px;
+  /* ── Radius ── */
+  --r-sm:   6px;
+  --r:      8px;
+  --r-md:   10px;
+  --r-lg:   14px;
+  --r-xl:   18px;
   --r-full: 9999px;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-  --radius-full: 9999px;
 
-  /* ── Spacing ── */
-  --s1: 4px;  --s2: 8px;  --s3: 12px; --s4: 16px;
-  --s5: 20px; --s6: 24px; --s7: 28px; --s8: 32px;
-  --s10: 40px; --s12: 48px; --s16: 64px;
+  /* ── Spacing (4px base unit) ── */
+  --s1:  4px;
+  --s2:  8px;
+  --s3:  12px;
+  --s4:  16px;
+  --s5:  20px;
+  --s6:  24px;
+  --s7:  28px;
+  --s8:  32px;
+  --s10: 40px;
+  --s12: 48px;
+  --s16: 64px;
 
-  /* ── Shadows ── */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
-  --shadow-xl: 0 16px 64px rgba(0, 0, 0, 0.6);
-  --shadow-glow-primary: 0 0 40px rgba(99, 102, 241, 0.3);
-  --shadow-glow-success: 0 0 20px rgba(16, 185, 129, 0.2);
-  --shadow-glow: 0 0 40px rgba(99, 102, 241, 0.3);
+  /* ── Shadows (used sparingly) ── */
+  --shadow:    0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
 
   /* ── Transitions ── */
-  --t-fast: 150ms ease;
-  --t: 300ms ease;
-  --t-slow: 500ms ease;
-  --transition-fast: 0.15s ease;
-  --transition-normal: 0.3s ease;
-  --transition-slow: 0.5s ease;
+  --t-fast: 0.12s ease;
+  --t:      0.2s ease;
 
   /* ── Layout ── */
-  --sidebar-w: 280px;
-  --navbar-h: 72px;
+  --navbar-h:  56px;
+  --sidebar-w: 220px;
+
+  /* ────────────────────────────────────────────
+     Backward-compat aliases
+     (existing component CSS uses these names)
+     ──────────────────────────────────────────── */
+
+  /* Old bg aliases */
+  --bg2:        var(--bg-2);
+  --bg-base:    var(--bg);
+  --bg-surface: var(--bg-2);
+  --bg-card:    var(--surface);
+  --bg-elevated: var(--surface-2);
+  --bg-hover:   var(--surface-2);
+  --bg-input:   var(--bg-2);
+
+  /* Old surface alias */
+  --surface2: var(--surface-2);
+
+  /* Old text aliases */
+  --txt2: var(--txt-2);
+  --txt3: var(--txt-3);
+  --text-primary:   var(--txt);
+  --text-secondary: var(--txt-2);
+  --text-muted:     var(--txt-3);
+  --text-disabled:  var(--txt-3);
+
+  /* Old border aliases */
+  --border2:       var(--border-2);
+  --border-subtle: var(--border);
+  --border-default: var(--border-2);
+  --border-strong: var(--txt-3);
+  --border-glow:   var(--accent);
+
+  /* Old brand aliases */
+  --brand-primary:       var(--accent);
+  --brand-primary-light: var(--accent-2);
+  --brand-primary-dark:  var(--accent);
+  --brand-secondary:     var(--accent-2);
+  --brand-secondary-light: var(--accent-2);
+  --brand-accent:        var(--info);
+  --brand-accent-light:  var(--info);
+  --brand-success:       var(--success);
+  --brand-warning:       var(--warning);
+  --brand-danger:        var(--danger);
+  --brand-gradient:      linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+  --brand-gradient-subtle: linear-gradient(135deg, rgba(108,71,255,0.15) 0%, rgba(139,111,255,0.1) 100%);
+
+  --primary:       var(--accent);
+  --primary-light: var(--accent-2);
+  --primary-dark:  var(--accent);
+  --primary-glow:  rgba(108, 71, 255, 0.2);
+  --primary-glow-strong: rgba(108, 71, 255, 0.35);
+  --secondary:     var(--accent-2);
+  --secondary-light: var(--accent-2);
+  --secondary-glow: rgba(139, 111, 255, 0.2);
+  --accent-cyan:    var(--info);
+  --accent-cyan-light: var(--info);
+  --accent-emerald: var(--success);
+  --accent-orange:  var(--warning);
+  --accent-hover:  var(--accent-2);
+  --accent2: var(--accent-2);
+  --accent3: var(--info);
+  --accent4: var(--warning);
+
+  /* Old gradient aliases (minimal, non-glassmorphic) */
+  --grad1: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+  --grad2: linear-gradient(135deg, var(--accent-2) 0%, var(--accent) 100%);
+  --grad3: linear-gradient(135deg, var(--success) 0%, var(--info) 100%);
+  --grad4: linear-gradient(135deg, var(--warning) 0%, var(--danger) 100%);
+  --gradient-primary:   linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+  --gradient-secondary: linear-gradient(135deg, var(--accent-2) 0%, var(--accent) 100%);
+  --gradient-success:   linear-gradient(135deg, var(--success) 0%, var(--info) 100%);
+  --gradient-warm:      linear-gradient(135deg, var(--warning) 0%, var(--danger) 100%);
+
+  /* Old shadow aliases */
+  --shadow-sm: var(--shadow);
+  --shadow-lg: var(--shadow-md);
+  --shadow-xl: var(--shadow-md);
+  --shadow-glow:         none;
+  --shadow-glow-primary: none;
+  --shadow-glow-success: none;
+
+  /* Old radius aliases */
+  --r4:        4px;
+  --r8:        8px;
+  --r12:       10px;
+  --r16:       14px;
+  --r20:       18px;
+  --r24:       18px;
+  --r-2xl:     18px;
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
+  --radius-xl: var(--r-xl);
+  --radius-full: var(--r-full);
+
+  /* Old transition aliases */
+  --t-slow:           0.3s ease;
+  --transition-fast:  var(--t-fast);
+  --transition-normal: var(--t);
+  --transition-slow:  0.3s ease;
+
+  /* Old font alias */
+  --font-family: var(--font-body);
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
-/* ── Light Theme ── */
-.light {
-  --bg: #F8F9FF;
-  --bg2: #EEEEF8;
-  --surface: #FFFFFF;
-  --surface2: #F2F2FA;
-  --bg-card: #FFFFFF;
-  --bg-elevated: #F5F5FC;
-  --bg-hover: #EBEBF5;
-  --bg-input: #F5F5FC;
-  --bg-base: #F8F9FF;
-  --bg-surface: #EEEEF8;
+/* ── Light Mode ── */
+html.light {
+  --bg:        #fafafa;
+  --bg-2:      #f4f4f5;
+  --bg-3:      #efefef;
+  --surface:   #ffffff;
+  --surface-2: #f9f9f9;
+  --border:    #e4e4e7;
+  --border-2:  #d4d4d8;
+  --txt:       #09090b;
+  --txt-2:     #52525b;
+  --txt-3:     #a1a1aa;
+  --accent:    #6C47FF;
+  --accent-2:  #5535e0;
 
-  --txt: #0A0A1A;
-  --txt2: #444466;
-  --txt3: #8888AA;
-  --text-primary: #0A0A1A;
-  --text-secondary: #444466;
-  --text-muted: #8888AA;
-  --text-disabled: #BBBBCC;
+  --shadow:    0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
 
-  --border: rgba(0, 0, 0, 0.08);
-  --border2: rgba(0, 0, 0, 0.12);
-  --border-subtle: #E2E2F0;
-  --border-default: #CBCBE0;
-  --border-strong: #AAAAC0;
+  /* Re-declare backward-compat aliases for light mode */
+  --bg2:         var(--bg-2);
+  --surface2:    var(--surface-2);
+  --txt2:        var(--txt-2);
+  --txt3:        var(--txt-3);
+  --border2:     var(--border-2);
+  --bg-base:     var(--bg);
+  --bg-surface:  var(--bg-2);
+  --bg-card:     var(--surface);
+  --bg-elevated: var(--surface-2);
+  --bg-hover:    var(--surface-2);
+  --bg-input:    var(--bg-2);
+  --shadow-sm:   var(--shadow);
+  --shadow-lg:   var(--shadow-md);
+  --shadow-xl:   var(--shadow-md);
+  --border-subtle:  var(--border);
+  --border-default: var(--border-2);
+  --border-strong:  var(--txt-3);
 }

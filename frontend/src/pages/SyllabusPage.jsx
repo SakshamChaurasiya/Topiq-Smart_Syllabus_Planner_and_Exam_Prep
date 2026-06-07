@@ -297,14 +297,8 @@ const SyllabusPage = () => {
             <div>
               <input ref={fileInputRef} type="file" accept={tab === 'pdf' ? '.pdf' : 'image/*'} onChange={handleFileUpload} style={{ display: 'none' }} id="syl-file-input" />
               <div
+                className={`upload-drop-zone${uploading ? ' uploading' : ''}`}
                 onClick={() => fileInputRef.current?.click()}
-                style={{
-                  border: '2px dashed var(--border-strong)', borderRadius: 12,
-                  padding: '48px', textAlign: 'center', cursor: 'pointer',
-                  background: 'var(--bg-elevated)', transition: 'all 0.2s',
-                }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--primary)'}
-                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-strong)'}
               >
                 {uploading ? (
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
@@ -590,22 +584,8 @@ const SyllabusPage = () => {
 
             {!syllabus.pyqAnalysis?.uploadedAt ? (
               <div
+                className={`upload-drop-zone upload-drop-zone-sm${pyqUploading ? ' uploading' : ''}`}
                 onClick={() => !pyqUploading && pyqFileInputRef.current?.click()}
-                style={{
-                  border: '2px dashed var(--border-strong)', 
-                  borderRadius: 12,
-                  padding: '32px', 
-                  textAlign: 'center', 
-                  cursor: pyqUploading ? 'default' : 'pointer',
-                  background: 'var(--bg-elevated)', 
-                  transition: 'all 0.2s',
-                }}
-                onMouseEnter={e => {
-                  if (!pyqUploading) e.currentTarget.style.borderColor = 'var(--primary)';
-                }}
-                onMouseLeave={e => {
-                  if (!pyqUploading) e.currentTarget.style.borderColor = 'var(--border-strong)';
-                }}
               >
                 {pyqUploading ? (
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>

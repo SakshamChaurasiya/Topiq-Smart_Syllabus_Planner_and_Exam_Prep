@@ -4,11 +4,12 @@ import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../api/auth.api';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
+import { User, Edit3, Mail, MapPin, Calendar, Target, Award, Zap, Flame, LogOut } from 'lucide-react';
 
 const goalOptions = [
-  { value: 'pass',      label: '✅ Pass Mode',    desc: 'Focus on clearing exams (40%+)',   color: '#10b981' },
-  { value: 'good',      label: '🎯 Score Mode',   desc: 'Aim for good scores (65%+)',        color: '#6366f1' },
-  { value: 'excellent', label: '🏆 Topper Mode',  desc: 'Go for excellence (85%+)',          color: '#f59e0b' },
+  { value: 'pass',      label: 'Pass Mode',    desc: 'Focus on clearing exams (40%+)',   colorClass: 'goal-pass' },
+  { value: 'good',      label: 'Score Mode',   desc: 'Aim for good scores (65%+)',        colorClass: 'goal-good' },
+  { value: 'excellent', label: 'Topper Mode',  desc: 'Go for excellence (85%+)',          colorClass: 'goal-excellent' },
 ];
 
 const ProfilePage = () => {
@@ -45,7 +46,7 @@ const ProfilePage = () => {
         institution: form.institution.trim()
       });
       updateUser(res.data.data);
-      toast.success('Profile updated! ✅');
+      toast.success('Profile updated!');
       setEditing(false);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Update failed.');
@@ -54,63 +55,48 @@ const ProfilePage = () => {
     }
   };
 
-  const currentGoal = goalOptions.find(g => g.value === user?.targetGoal);
+  const currentGoal = goalOptions.find(g => g.value === user?.targetGoal) || goalOptions[1];
 
   return (
     <div className="page-container animate-fade-in">
       <div className="page-header">
-        <h1>👤 Profile</h1>
+        <h1>Profile</h1>
         <p>Manage your account and study preferences</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, maxWidth: 900 }}>
+      <div className="profile-grid">
         {/* Left: Profile card */}
         <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           {/* Avatar */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
-            <div style={{
-              width: 80, height: 80, borderRadius: 20,
-              background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '2rem', fontWeight: 900, color: '#fff', flexShrink: 0,
-              boxShadow: '0 0 30px var(--primary-glow)',
-            }}>
+          <div className="profile-avatar-wrap">
+            <div className="profile-avatar">
               {user?.name?.charAt(0)?.toUpperCase() || '?'}
             </div>
             <div>
               <div style={{ fontWeight: 800, fontSize: '1.2rem', marginBottom: 4 }}>{user?.name}</div>
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: 6 }}>{user?.email}</div>
-              <div
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  background: `${currentGoal?.color}20`,
-                  border: `1px solid ${currentGoal?.color}50`,
-                  borderRadius: 100, padding: '3px 12px',
-                  fontSize: '0.75rem', fontWeight: 700,
-                  color: currentGoal?.color,
-                }}
-              >
-                {currentGoal?.label}
+              <div style={{ fontSize: '0.85rem', color: 'var(--txt-2)', marginBottom: 6 }}>{user?.email}</div>
+              <div className={`profile-badge-goal ${currentGoal.colorClass}`}>
+                {currentGoal.label}
               </div>
             </div>
           </div>
 
           {/* Info grid */}
-          <div style={{ display: 'grid', gap: 12 }}>
+          <div className="profile-info-list">
             {[
-              { label: 'Email', value: user?.email, icon: '📧' },
-              { label: 'College / University', value: user?.institution || 'Not specified', icon: '🏛️' },
-              { label: 'Member Since', value: user?.createdAt ? format(new Date(user.createdAt), 'dd MMMM yyyy') : '—', icon: '📅' },
-              { label: 'Study Goal', value: currentGoal?.label, icon: '🎯' },
-              { label: 'Level', value: `Level ${user?.level || 1}`, icon: '⭐' },
-              { label: 'Experience', value: `${user?.xp || 0} / ${user?.targetXP || 250} XP`, icon: '⚡' },
-              { label: 'Current Streak', value: `${user?.streak || 0} Day(s)`, icon: '🔥' },
+              { label: 'Email', value: user?.email, icon: <Mail size={14} /> },
+              { label: 'College / University', value: user?.institution || 'Not specified', icon: <MapPin size={14} /> },
+              { label: 'Member Since', value: user?.createdAt ? format(new Date(user.createdAt), 'dd MMMM yyyy') : '—', icon: <Calendar size={14} /> },
+              { label: 'Study Goal', value: currentGoal.label, icon: <Target size={14} /> },
+              { label: 'Level', value: `Level ${user?.level || 1}`, icon: <Award size={14} /> },
+              { label: 'Experience', value: `${user?.xp || 0} / ${user?.targetXP || 250} XP`, icon: <Zap size={14} /> },
+              { label: 'Current Streak', value: `${user?.streak || 0} Day(s)`, icon: <Flame size={14} /> },
             ].map(info => (
-              <div key={info.label} style={{ display: 'flex', gap: 12, padding: '12px', background: 'var(--bg-elevated)', borderRadius: 10, border: '1px solid var(--border-subtle)' }}>
-                <span style={{ fontSize: '1.1rem' }}>{info.icon}</span>
+              <div key={info.label} className="profile-info-item">
+                <span className="profile-info-icon-wrapper">{info.icon}</span>
                 <div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 2 }}>{info.label}</div>
-                  <div style={{ fontSize: '0.88rem', fontWeight: 600 }}>{info.value}</div>
+                  <div className="profile-info-label">{info.label}</div>
+                  <div className="profile-info-value">{info.value}</div>
                 </div>
               </div>
             ))}
@@ -118,7 +104,7 @@ const ProfilePage = () => {
 
           {!editing && (
             <button className="btn btn-primary" onClick={() => setEditing(true)}>
-              ✏️ Edit Profile
+              <Edit3 size={14} style={{ marginRight: 6 }} /> Edit Profile
             </button>
           )}
         </div>
@@ -126,7 +112,7 @@ const ProfilePage = () => {
         {/* Right: Edit form (shown when editing) */}
         {editing ? (
           <div className="card">
-            <h3 style={{ fontWeight: 700, marginBottom: 20 }}>✏️ Update Profile</h3>
+            <h3 style={{ fontWeight: 700, marginBottom: 20 }}>Update Profile</h3>
             <form onSubmit={handleSave}>
               <div className="form-group">
                 <label className="form-label">Full Name</label>
@@ -151,56 +137,56 @@ const ProfilePage = () => {
 
               <div className="form-group">
                 <label className="form-label">Study Goal</label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {goalOptions.map(g => (
-                    <button
-                      key={g.value} type="button"
-                      onClick={() => set('targetGoal', g.value)}
-                      style={{
-                        display: 'flex', alignItems: 'flex-start', gap: 12,
-                        background: form.targetGoal === g.value ? `${g.color}15` : 'var(--bg-elevated)',
-                        border: `2px solid ${form.targetGoal === g.value ? g.color : 'var(--border-default)'}`,
-                        borderRadius: 12, padding: '14px 16px', cursor: 'pointer',
-                        textAlign: 'left', transition: 'all 0.15s',
-                      }}
-                    >
-                      <div style={{ fontSize: '1.2rem', flexShrink: 0 }}>{g.label.split(' ')[0]}</div>
-                      <div>
-                        <div style={{ fontWeight: 700, fontSize: '0.88rem', color: form.targetGoal === g.value ? g.color : 'var(--text-primary)', marginBottom: 2 }}>
-                          {g.label}
+                <div className="goal-grid">
+                  {goalOptions.map(g => {
+                    const isActive = form.targetGoal === g.value;
+                    return (
+                      <button
+                        key={g.value} type="button"
+                        onClick={() => set('targetGoal', g.value)}
+                        className={`goal-btn goal-${g.value}${isActive ? ' active' : ''}`}
+                      >
+                        <span className="goal-btn-label">
+                          {g.label.split(' ')[0]}
+                        </span>
+                        <div style={{ fontSize: '0.7rem', fontWeight: 600, color: isActive ? 'inherit' : 'var(--txt-3)', marginTop: 4 }}>
+                          {g.desc}
                         </div>
-                        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{g.desc}</div>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+              <div className="flex gap-2" style={{ marginTop: 16 }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setEditing(false)}>Cancel</button>
                 <button type="submit" className="btn btn-primary" disabled={saving} style={{ flex: 1 }}>
-                  {saving ? '⏳ Saving...' : '✅ Save Changes'}
+                  {saving ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
             </form>
           </div>
         ) : (
           /* Right panel — tips when not editing */
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div className="card" style={{ background: 'rgba(99,102,241,0.06)', borderColor: 'rgba(99,102,241,0.2)' }}>
-              <div style={{ fontWeight: 700, marginBottom: 12, color: 'var(--primary-light)' }}>🎯 Your Study Mode</div>
-              <div style={{ fontWeight: 800, fontSize: '1.3rem', color: currentGoal?.color, marginBottom: 6 }}>
-                {currentGoal?.label}
+          <div className="flex flex-col gap-4">
+            <div className="card" style={{ background: 'rgba(108, 71, 255, 0.04)', borderColor: 'rgba(108, 71, 255, 0.15)' }}>
+              <div style={{ fontWeight: 700, marginBottom: 12, color: 'var(--accent-2)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Target size={16} /> Your Study Goal
               </div>
-              <p style={{ fontSize: '0.85rem', margin: 0, lineHeight: 1.6 }}>{currentGoal?.desc}</p>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '10px 0 0', lineHeight: 1.5 }}>
+              <div style={{ fontWeight: 800, fontSize: '1.3rem', color: 'var(--txt)', marginBottom: 6 }}>
+                {currentGoal.label}
+              </div>
+              <p style={{ fontSize: '0.85rem', margin: 0, lineHeight: 1.6, color: 'var(--txt-2)' }}>{currentGoal.desc}</p>
+              <p style={{ fontSize: '0.8rem', color: 'var(--txt-3)', margin: '10px 0 0', lineHeight: 1.5 }}>
                 Your study mode affects how AI prioritizes topics and generates plans. Change it anytime.
               </p>
             </div>
 
-            <div className="card" style={{ background: 'rgba(239,68,68,0.05)', borderColor: 'rgba(239,68,68,0.2)' }}>
-              <div style={{ fontWeight: 700, marginBottom: 10, color: 'var(--danger)' }}>🚪 Logout</div>
-              <p style={{ fontSize: '0.85rem', margin: '0 0 16px', lineHeight: 1.5 }}>
+            <div className="card" style={{ background: 'var(--danger-bg)', borderColor: 'var(--danger-border)' }}>
+              <div style={{ fontWeight: 700, marginBottom: 10, color: 'var(--danger)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <LogOut size={16} /> Logout
+              </div>
+              <p style={{ fontSize: '0.85rem', margin: '0 0 16px', lineHeight: 1.5, color: 'var(--txt-2)' }}>
                 You will be signed out and redirected to the home page.
               </p>
               <button

@@ -1,148 +1,160 @@
 /* ================================================
-   SSP — Button Styles
+   SSP — Button Styles (2025 redesign)
    ================================================ */
 
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  border: none;
-  border-radius: var(--r12);
+  gap: 6px;
   font-family: var(--font-body);
   font-weight: 600;
+  border-radius: var(--r);
+  border: 1px solid transparent;
   cursor: pointer;
-  transition: all var(--t);
+  transition: all var(--t-fast);
   white-space: nowrap;
   text-decoration: none;
   position: relative;
-  overflow: hidden;
 }
+
+.btn:active { transform: scale(0.97); }
 
 .btn:disabled,
 .btn.btn-loading {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
   pointer-events: none;
 }
 
 /* ── Sizes ── */
-.btn-sm  { font-size: 0.78rem; padding: 6px 14px; border-radius: var(--r8); }
-.btn-md  { font-size: 0.875rem; padding: 10px 20px; }
-.btn-lg  { font-size: 1rem; padding: 14px 28px; border-radius: var(--r16); }
-.btn-xl  { font-size: 1.1rem; padding: 18px 36px; border-radius: var(--r16); }
+.btn-sm { padding: 6px 12px;  font-size: 0.78rem; }
+.btn-md { padding: 9px 18px;  font-size: 0.85rem; }
+.btn-lg { padding: 12px 24px; font-size: 0.95rem; }
+.btn-xl { padding: 14px 28px; font-size: 1rem; }
 
 /* ── Variants ── */
 .btn-primary {
-  background: var(--gradient-primary);
+  background: var(--accent);
   color: #fff;
-  box-shadow: var(--shadow-md);
+  border-color: var(--accent);
 }
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-glow);
+  background: var(--accent-2);
+  border-color: var(--accent-2);
 }
-.btn-primary:active { transform: translateY(0); }
 
 .btn-secondary {
-  background: var(--surface2);
-  color: var(--txt2);
-  border: 1px solid var(--border);
-}
-.btn-secondary:hover {
-  background: var(--bg-hover);
+  background: var(--surface);
   color: var(--txt);
-  border-color: var(--border2);
-  transform: translateY(-1px);
+  border-color: var(--border-2);
 }
+.btn-secondary:hover { border-color: var(--txt-3); }
 
 .btn-ghost {
   background: transparent;
-  color: var(--txt2);
-  border: 1px solid var(--border);
+  color: var(--txt-2);
+  border-color: transparent;
 }
 .btn-ghost:hover {
   background: var(--surface);
   color: var(--txt);
-  border-color: var(--border2);
 }
 
 .btn-danger {
   background: var(--danger-bg);
   color: var(--danger);
-  border: 1px solid var(--danger-border);
+  border-color: var(--danger-border);
 }
 .btn-danger:hover {
   background: var(--danger);
   color: #fff;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
 }
 
 .btn-success {
   background: var(--success-bg);
   color: var(--success);
-  border: 1px solid var(--success-border);
+  border-color: var(--success-border);
 }
 .btn-success:hover {
   background: var(--success);
   color: #fff;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
 }
 
 .btn-outline {
   background: transparent;
   color: var(--accent);
-  border: 2px solid var(--border);
+  border: 1px solid var(--border-2);
 }
 .btn-outline:hover {
   border-color: var(--accent);
-  background: rgba(6, 182, 212, 0.1);
-  transform: translateY(-1px);
-}
-
-/* ── CTA Hero button ── */
-.btn-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 16px 36px;
-  background: var(--gradient-primary);
-  color: #fff;
-  font-family: var(--font-body);
-  font-size: 1rem;
-  font-weight: 700;
-  border: none;
-  border-radius: var(--r-full);
-  cursor: pointer;
-  box-shadow: var(--shadow-md);
-  transition: all var(--t);
-  text-decoration: none;
-}
-.btn-cta:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-glow);
+  background: rgba(108, 71, 255, 0.06);
 }
 
 /* ── Icon button ── */
 .btn-icon {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   padding: 0;
-  border-radius: var(--r8);
+  border-radius: var(--r);
   background: var(--surface);
-  color: var(--txt2);
+  color: var(--txt-2);
   border: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all var(--t);
+  transition: all var(--t-fast);
+  flex-shrink: 0;
 }
 .btn-icon:hover {
-  background: var(--bg-hover);
+  background: var(--surface-2);
   color: var(--txt);
-  border-color: var(--border2);
+  border-color: var(--border-2);
 }
-.btn-icon.btn-icon-lg { width: 44px; height: 44px; border-radius: var(--r12); }
+.btn-icon.btn-icon-lg { width: 40px; height: 40px; border-radius: var(--r-md); }
+
+/* ── Backward-compat: btn-cta → btn-primary style ── */
+.btn-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 700;
+  border: 1px solid var(--accent);
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: all var(--t-fast);
+  text-decoration: none;
+}
+.btn-cta:hover {
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+}
+.btn-cta:active { transform: scale(0.97); }
+
+/* ── Backward-compat: btn-outline-primary → btn-secondary style ── */
+.btn-outline-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--surface);
+  color: var(--txt);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 700;
+  border: 1px solid var(--border-2);
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: all var(--t-fast);
+  text-decoration: none;
+}
+.btn-outline-primary:hover { border-color: var(--txt-3); }
+.btn-outline-primary:active { transform: scale(0.97); }
