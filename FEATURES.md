@@ -1,204 +1,282 @@
-# Smart Syllabus Planner — Features & Workflow Documentation
+# Topiq — Feature Documentation
 
-Welcome to the **Smart Syllabus Planner (SSP)** project! This application is designed to help students optimize their exam preparation by transforming dense, chaotic syllabus sheets into organized, day-by-day roadmaps, actionable study tasks, and survival timeline strategies powered by Google Gemini AI.
-
----
-
-## 📖 Table of Contents
-1. [Detailed Features List](#-detailed-features-list)
-2. [Features Summary (Table)](#-features-summary-table)
-3. [Step-by-Step User Workflow](#-step-by-step-user-workflow)
-4. [Tech Stack & Architecture](#-tech-stack--architecture)
+> AI-powered exam preparation for students who want results, not routines.
 
 ---
 
-## 🛠️ Detailed Features List
-
-### 1. Secure Authentication & Dynamic User Profile
-* **Registration & Sign Up:** Allows students to create accounts using their name, email, password, and optionally their **College / University**. During signup, they can select a custom target academic goal:
-  * **Pass:** Focuses on passing threshold content (40%+ weightage).
-  * **Good:** Balanced prep targeting standard grading (65%+ weightage).
-  * **Excellent:** In-depth topper-focused coverage (85%+ weightage).
-* **JWT-Based Login:** Protects private endpoints and secures client sessions.
-* **Student profile dashboard:** Allows students to edit credentials, modify their target study goals, update their College / University, and manage basic settings.
-
-### 2. Subject Management Hub
-* **Subject Listing & Creation:** Students can manage individual cards for subjects. Each subject records details such as credit weight, code, exam date, and a custom theme color.
-* **Overall Subject Progress:** An integrated progress bar displays how many topics have been completed for each subject out of the total parsed count.
-* **Clean Deletion:** Deleting a subject recursively cleans up its parsed syllabus, active study plans, and daily missions.
-
-### 3. AI-Powered Syllabus Analysis
-* **Multiple Import Channels:** Students can upload a **PDF syllabus file**, an **image snapshot** (JPG, PNG, WEBP), or paste **raw text syllabus content**.
-* **Text Extraction:** Uses the `pdf-parse` library on the Node.js backend to extract text.
-* **Gemini AI Integration:** Utilizes Google Gemini's `gemini-3.5-flash` model with `responseMimeType: "application/json"` (and incorporates their registered College/University context to optimize study recommendations based on specific institutional patterns) to generate structured data containing:
-  * **Units & Topics:** Nested list mapping importance levels (`critical`, `high`, `medium`, `low`), difficulty levels (`easy`, `medium`, `hard`), estimated study hours, weightage marks, and clear topic-focus tips.
-  * **Top Priority Topics:** Focus subjects recommended for immediate study.
-  * **Exam-Likely Topics:** High probability questions prediction.
-  * **Overall Difficulty:** Dynamic classification (`easy`, `medium`, `hard`, `very-hard`).
-  * **Study Tips & Strategy:** General tips tailored for the subject.
-* **Topic Progress Tracking:** Checkboxes beside each parsed topic allow students to complete them, updating progress rings in real time.
-* **Resilience & Graceful Degradation:** The AI analysis and planning engines are designed to gracefully degrade. If the Gemini API key is missing or calls fail/rate-limit, the system returns mock syllabus structures so the application remains fully usable.
-* **Token Caching & Forced Re-Runs:** In order to save Google Gemini tokens, the system caches analysis results when syllabus content is unchanged. Users can click "Re-run Analysis" to explicitly bypass the cache and force a new Gemini parse.
-* **Per-User AI Rate Limiting:** Implements in-memory rate limiting (3 syllabus analysis requests/hour and 5 PYQ uploads/hour per user) to protect backend API quotas.
-
-### 4. Smart Study Planner (Normal Mode)
-* **Tailored Schedule Generation:** Takes exam date, daily available study hours, and target goal as inputs.
-* **Day-by-Day Roadmap:** Distributes the topics across the remaining days up to the exam date (capped at 30 days max for standard planning). 
-* **Dynamic Content:** Each study day includes:
-  * Specific daily topics to read.
-  * Estimated hours required for that day.
-  * Personalized study/mental health tips.
-* **Day Completion Checkpoints:** Checkboxes to log completion of entire days of study.
-
-### 5. Crisis Mode: Exam Survival "Cheat Codes"
-* **Timeline Presets:** For scenarios where exams are extremely near (1 Day, 3 Days, 7 Days, 15 Days, or Custom timeline).
-* **"Must Study Now" Priorities:** Recommends critical topics, explaining exactly *why* they are essential, their estimated marks weightage, and study duration.
-* **"Skip (For Now)" Checklist:** Safe-to-bypass, low-weightage topics to maximize efficiency when time is short.
-* **Hourly Schedule:** Generates an hour-by-hour timeline plan for today.
-* **Score Simulator:** Predicts expected score brackets (Minimum, Expected, and Best Case).
-
-### 6. Gamification, Leveling & Streaks
-* **Study & Revision Missions:** Study plans dynamically generate daily tasks including Study Sessions, Spaced Revision, and End-of-Day Summaries.
-* **Dynamic XP Engine:** Completing tasks rewards the student with XP. The backend tracks experience progression and triggers level-ups dynamically using the `level * 250` progression curve.
-* **Daily Streaks:** Monitors consecutive active days of study via the database. Streaks increment on consecutive daily activity, persist if active today, and automatically reset to `0` on the dashboard if a calendar day is missed.
-* **Dynamic Badges:** Displays interactive level progression bars and streak badges on the student's Dashboard and Profile page.
-
-### 7. Notification Center
-* Keeps users informed on plan creations, exam countdown milestones, and system updates.
-* Interface to read and clean up alerts.
-
-### 8. Premium Central Dashboard
-* **Readiness Meter:** Visual ring showing the user's average progress across subjects.
-* **Smart Recommendations:** Recommends the next critical step (e.g., "Add Subject", "Upload Syllabus", "Generate Plan", or "Review Cheat Code").
-* **Revision Radar:** Lists subjects displaying $<30\%$ progress with upcoming exams.
-
-### 9. PYQ Analysis & Exam Alignment (Triple Topic Output)
-* **Past Paper Integration (Gemini Vision):** Students can upload previous year question paper PDFs. Powered by Gemini Vision, the system reads both text-based and scanned/photo exam papers natively (handling blurry text, Hindi/English mix, and visual formats).
-* **Readability Graceful Handling:** If a PDF is completely unreadable or has poor visual scanning quality, the system responds gracefully with a diagnostic readability warning (422 status) instead of an empty text error.
-* **Evidence-Based Insights:** The system parses exam questions and provides a detailed triple-alignment topic breakdown:
-  * **Overlap Topics:** Topics appearing in both the syllabus AI analysis and past papers (highest priority).
-  * **PYQ-Only Topics:** Topics seen in past papers but missing from the parsed syllabus (potential study gaps).
-  * **AI-Only Topics:** Syllabus topics that have never appeared in exam questions (lower priority).
-* **Topic Frequency & Marks:** Displays how often a topic was tested, specific exam years, and estimated marks weightage.
-
-### 10. Study Calendar Export (.ics)
-* **Cross-Platform Compatibility:** Allows exporting personalized study plans to Google Calendar, Apple Calendar, Outlook, and other standard calendar clients.
-* **iCalendar Protocol:** Generates a custom `.ics` file containing structured calendar events (VEVENTs) representing the day's subjects, study tasks, and exam dates.
-
-### 11. Auto-Rescheduling of Missed Days
-* **No-Guilt Recovery:** Detects past study days that were not completed.
-* **Smart Redistribution:** Dynamically redistributes topics from missed days across remaining uncompleted days in the plan, recalculating daily study hour averages.
-* **System Warning Alerts:** Displays a session banner highlighting missed days, and marks rescheduled day cards with a clean warning indicator.
-
-### 12. Interactive AI Flashcards & Shareable Cheat Notes
-* **AI Card Generation:** Automatically compiles concise study flashcards for critical and high-importance syllabus topics.
-* **3D Swiper UI:** Premium flip card swiper styled with CSS 3D transforms, allowing students to study questions and flip cards interactively. Includes keyboard navigators (Arrow keys and Spacebar).
-* **Public Cheat Notes:** Enables one-click link generation. Students can publish their flashcards as public, unauthenticated study guides with custom titles and a viral loop footer.
+## Overview
+Topiq is an AI-powered exam preparation platform designed specifically for college and university students facing dense academic curricula and tight deadlines. By transforming raw, unstructured syllabus documents into organized study schedules and active learning materials, the application helps students plan their revision systematically. Unlike generic study trackers that require manual task input and offer no guidance on content prioritization, Topiq uses Google Gemini AI to analyze course structures, prioritize high-value exam topics, and construct daily structured goals. This approach reduces scheduling overhead and aligns study efforts directly with past exam trends and exam weighting.
 
 ---
 
-## 📋 Features Summary (Table)
+## Feature List
 
-| Feature Category | Feature Name | Description | Key Tech / APIs Used |
-| :--- | :--- | :--- | :--- |
-| **User Space** | Authentication | Signup, Login, Profile, and Auth state management. Includes College/University context. | JWT, BcryptJS, Express, React Context |
-| | Goal Settings | Select academic target goals (`pass`, `good`, `excellent`) and College/University field. | MongoDB User Schema, React State |
-| **Subjects** | Subject Manager | Register, update, and manage subjects. | Express Router, Mongoose |
-| | Progress Ring | Shows subject completion based on completed topics. | SVG ProgressRing, CSS transitions |
-| **Syllabus** | Multi-uploader | Import syllabus via PDF, Image, or plain text. | Multer, PDF-Parse, Express |
-| | AI Parser | Generates detailed topics list, hours estimate, difficulty levels. | Google Gemini AI (`gemini-3.5-flash`) |
-| | Topic Checklist | Mark topics completed to raise subject progress. | Mongoose Nested Schemas, React |
-| **Syllabus / PYQ** | PYQ Alignment | Cross-reference past papers to output Overlap, PYQ-Only, and AI-Only topic divisions. | Multer, PDF-Parse, Gemini AI |
-| **Planner** | Normal Planner | AI day-by-day roadmap fitting remaining timeline. | Google Gemini AI, date-fns |
-| | Day Checklist | Progress bar marking days of the study plan complete. | MongoDB StudyPlan Schema |
-| | Calendar Export | Export study plans as `.ics` files for Google, Apple, and Outlook calendars. | String VEVENT compiler, Express |
-| | Auto-Rescheduling | Automatically redistributes missed topics across remaining uncompleted study days. | Mongoose, React State, custom algorithm |
-| **Flashcards** | Swiper Viewer | Generated 3D flip card viewer for critical/high priority topics with filters. | CSS 3D Transforms, Keyboard Events |
-| | Cheat Note Sharing | Generate secure public share links to read study sheets without signing up. | Mongoose, crypto tokens, React |
-| **Cheat Code** | Crisis Planner | Timeline presets (1d, 3d, 7d) for emergency study. | Google Gemini AI |
-| | Topic Offloader | Suggests topics to skip entirely to optimize time. | Mongoose & Gemini AI |
-| **Gamification** | Mission Creator | Generates study, revision, and summary daily tasks. | MongoDB Mission Schema |
-| | XP Engine & Streak | Updates user level, dynamically rewards XP, and tracks consecutive daily streaks. | Mongoose (User model), Express, React |
-| **Alerts** | Notification System | Alerts for exam warnings and system confirmations. | MongoDB Notification Schema |
-| **Dashboard** | Unified Command | Displays countdowns, stats, recommendations, & warnings. | Aggregated API Controller |
+### 1. Secure Authentication & Student Profiles
+**Category:** Core
+**Status:** Implemented
+
+#### What it does
+Students register and authenticate securely to save their academic profile and personal preferences. The student profile tracks metrics like active study goals, institutions, levels, streaks, and experience points (XP).
+
+#### Key capabilities
+- Standard user signup and login with secure credential validation.
+- Profile storage for name, email, college or university, and study preferences.
+- Academic goal selection (Pass, Score, or Topper Mode) that directly structures subsequent AI-generated materials.
+- Interactive profile dashboard tracking gamification status, current streaks, and experience metrics.
+
+#### Technical implementation
+Authentication is powered by JSON Web Tokens (JWT) for session persistence, with password hashing performed via `bcryptjs` on a MongoDB backend using Mongoose models.
 
 ---
 
-## 🧭 Step-by-Step User Workflow
+### 2. Subject Management
+**Category:** Core
+**Status:** Implemented
 
-```mermaid
-graph TD
-    A[1. Sign Up / Login] --> B[2. Add Subject]
-    B --> C[3. Upload Syllabus & optional PYQ PDF]
-    C --> D[4. Run AI Analysis & Alignment]
-    D --> E{Action Path}
-    E -->|Study Plan| F[5A. Generate Day-by-Day Study Plan]
-    E -->|Crisis Prep| G[5B. Activate Crisis Survival Cheat Code]
-    E -->|Flashcards| K[5C. Generate AI Flashcards]
-    F --> L[6A. Optional: Export to Calendar .ics]
-    F --> M[6B. Detect Missed Days -> Auto-Reschedule]
-    K --> N[7. Share Public Cheat Note Link]
-    F --> H[8. Complete Daily Missions & Earn XP]
-    G --> I[9. Follow Hourly Schedule & Skip Topics]
-    H --> J[10. Track Progress on Dashboard]
-    I --> J
-    M --> J
-    N --> J
-```
+#### What it does
+Students create and organize their college subjects within a centralized list. Each subject tracks its exam date, credit hours, and styling preferences, displaying a visual ring representing completed coursework.
 
-### Step 1: Authentication
-1. Go to the landing page and click **Get Started**.
-2. Sign up to create a student profile and select your academic target goal (e.g., *Good*).
-3. Access your secure session and proceed to the central command dashboard.
+#### Key capabilities
+- Create, view, update, and delete subjects with unique subject names, course codes, and theme colors.
+- Visual per-subject progress rings implemented using native SVG to track overall syllabus coverage.
+- Cascade-deletion logic that removes all associated data including syllabus files, generated plans, and daily missions.
 
-### Step 2: Subject Registration
-1. In the Subjects panel, click **Add Subject**.
-2. Enter your subject parameters: Name (e.g. *Operating Systems*), Code (*CS302*), select a card color, credit hours, and exam date, then click **Save**.
-
-### Step 3: Syllabus & Past Papers Upload & Analysis
-1. Select the new subject card and navigate to the **Syllabus** tab.
-2. Select your preferred import method:
-   * **PDF:** Upload a digital file.
-   * **Image:** Upload a screenshot.
-   * **Text:** Paste plaintext details.
-3. Click **Run AI Analysis**. Gemini AI will parse the syllabus and render unit breakdowns, estimated hours, difficulty badges, and study strategy tips.
-4. **Optional (PYQ Upload):** Upload previous year question paper PDFs in the **PYQ Alignment** panel. The system automatically cross-references these papers against syllabus topics to identify top overlap priorities and gaps.
-
-### Step 4: Study Plan Generation & Exporting
-1. Click the **Planner** tab.
-2. The exam date will auto-populate. Adjust the range slider for **Study Hours Per Day** and set your **Target Goal**.
-3. Click **Generate AI Plan**. Gemini will formulate a study roadmap mapping topics to daily time slots and generate corresponding study and revision tasks.
-4. **Export to Calendar:** Click **Export to Calendar** to download an `.ics` file and import your entire exam schedule into Google Calendar, Outlook, or Apple Calendar.
-
-### Step 5: Study Execution, Gamification & Rescheduling
-1. Open the **Dashboard** or **Missions** page to check today's tasks.
-2. Work through the daily topics. Once a study or revision session is completed, check the checkbox next to the mission.
-3. You will receive a success popup, earn XP points, progress towards leveling up, and increase your daily streak.
-4. **Auto-Reschedule:** If you miss any days of study, a banner will appear offering to redistribute missed topics. Click **Reschedule Now** to redistribute them across remaining days.
-
-### Step 6: Interactive Review & Sharing Cheat Notes
-1. Navigate back to the **Syllabus** tab and locate the **Flashcards** section.
-2. Click **Generate Flashcards** to build a high-yield interactive card set for critical and high importance topics.
-3. Navigate the deck using Arrow keys and spacebar, or flip/swipe them on screen.
-4. Input a custom title and click **Generate Share Link** to publish your card set publicly. Send the link to friends so they can access a read-only list without needing an account.
-
-### Step 7: Crisis Management (Last-minute Prep)
-1. If the exam is tomorrow, go to the **Cheat Code** tab.
-2. Select the **1 Day** or **3 Days** preset mode, set your active study capacity, and click **Activate Cheat Code**.
-3. The planner will instantly update your view, highlighting critical topics, providing an hourly timeline, and identifying items to skip to save time.
+#### Technical implementation
+Subject records are stored in MongoDB, with standard RESTful routes handling CRUD operations and Mongoose middleware managing cascading deletions.
 
 ---
 
-## 💻 Tech Stack & Architecture
+### 3. AI Syllabus Analysis
+**Category:** AI-Powered
+**Status:** Implemented
 
-### Backend (Express API Server)
-* **Core:** Node.js, Express.js
-* **Database:** MongoDB, Mongoose (schemas for Users, Subjects, Syllabuses, Plans, Missions, Notifications, and FlashcardSets)
-* **AI Engine:** Google Gemini SDK (`@google/generative-ai`)
-* **Libraries:** `pdf-parse` (text extraction), `bcryptjs` (passwords), `jsonwebtoken` (auth), `multer` (uploads)
+#### What it does
+Students upload their course syllabus to receive a structured breakdown of units, topics, and study suggestions. The system analyzes the syllabus content to categorize topics by importance and difficulty.
 
-### Frontend (React Single Page App)
-* **Core:** React (Vite environment), React Router DOM (protected route layout)
-* **State & Context:** React Hooks, Auth Context, Notification Context, Theme Context
-* **UI/CSS:** Vanilla CSS styled with premium glassmorphism, responsive grids, custom CSS variables, keyframe animations, and 3D perspectives/transforms.
-* **Libraries:** `date-fns` (date management), `react-hot-toast` (dynamic feedback alerts)
+#### Key capabilities
+- Support for multi-format uploads including PDF documents, images (JPG, PNG, WEBP), and raw text copy-paste.
+- Automated extraction of units, topics, marks weightage, estimated hours, difficulty, and study tips.
+- Factual extraction settings to prevent the AI from generating nonexistent topics or course contents.
+- Graceful fallback mechanism to structured mock data if the external AI service is unreachable.
+
+#### Technical implementation
+Text extraction utilizes `pdf-parse` for digital PDFs and Gemini Vision APIs via the Google Gemini SDK for scanned PDFs or images, running at a temperature of 0.1 for deterministic outputs.
+
+---
+
+### 4. Smart Study Planner
+**Category:** Planning
+**Status:** Implemented
+
+#### What it does
+Generates a custom, day-by-day study roadmap from the current date leading up to the subject's exam date. The planner automatically distributes topic coverage based on the student's daily hour availability and chosen target academic goal.
+
+#### Key capabilities
+- Formulates a custom daily calendar roadmap capped at a maximum of 30 days.
+- Filters topic scheduling dynamically based on target goals: 'pass' schedules only critical and high-importance topics, 'good' includes medium-importance, and 'excellent' schedules all topics.
+- Respects exact estimated study hours extracted during syllabus analysis.
+- Automated redistribution of missed study days' topics across remaining calendar days.
+- Calendar subscription export creating an .ics file compatible with major calendar clients.
+
+#### Technical implementation
+The calendar logic maps out available days using `date-fns`, computes scheduling limits in Node.js, and uses `ics` file generation formats to export standard RFC 5545 calendar files.
+
+---
+
+### 5. Crisis Mode — Exam Survival
+**Category:** Planning
+**Status:** Implemented
+
+#### What it does
+Helps students prepare for exams under extreme time constraints by trimming down study materials to absolute essentials. It offers short timeline presets, schedules study hours, and provides an estimated score simulator.
+
+#### Key capabilities
+- Rigid timeline preparation presets ranging from 1 day, 3 days, 7 days, 15 days, or user-defined custom intervals.
+- "Must Study Now" lists that highlight only critical-importance topics and their corresponding marks weights.
+- "Skip Topics" recommendation list identifying low-priority topics safe to ignore to optimize limited preparation time.
+- Hourly study slot timetables starting at 9 AM, capped by the student's daily available hour limit.
+- Simulated exam score output displaying minimum, expected, and maximum scores alongside explicit disclaimer banners.
+
+#### Technical implementation
+The crisis schedule and score simulator are built using custom system prompts processed by Gemini AI (`gemini-2.0-flash`), which returns structured JSON schedules and estimates based on syllabus weightings.
+
+---
+
+### 6. PYQ Analysis — Past Year Paper Alignment
+**Category:** AI-Powered
+**Status:** Implemented
+
+#### What it does
+Students upload previous year question papers to find overlapping patterns and gaps between the actual syllabus list and actual exam trends.
+
+#### Key capabilities
+- Multi-page past year question paper PDF analysis, supporting both scanned images and text-layer documents.
+- Cross-references parsed question concepts against the existing extracted syllabus topic database.
+- Computes a triple-alignment categorization: Overlap Topics (high priority), PYQ-Only Topics (syllabus gaps), and AI-Only Topics (lower priority).
+- Extracts frequency metrics, list of years appeared, and marks weightage per topic.
+
+#### Technical implementation
+Files are sent to Gemini Vision APIs using inline base64 data to process scanned contents, and concepts are matched against syllabus records via standard string matching algorithms in Node.js.
+
+---
+
+### 7. Gamification — XP, Levels, Streaks
+**Category:** Gamification
+**Status:** Implemented
+
+#### What it does
+Motivates students through reward points, level progressions, and consecutive study streaks. Progress is displayed visually across the primary dashboard and profile menus.
+
+#### Key capabilities
+- Grants Experience Points (XP) dynamically upon successful completion of daily study tasks.
+- Automated level calculation utilizing a standardized progression threshold formula.
+- Continuous consecutive-day streak counter that increments on active days and resets to 0 if a student misses a calendar day.
+- Visual progress tracking using linear indicators and streak flame indicators.
+
+#### Technical implementation
+Streak validation and level calculations are managed by backend Mongoose hooks that evaluate update timestamps, recalculating level boundaries as `Level * 250 XP`.
+
+---
+
+### 8. Daily Missions
+**Category:** Gamification
+**Status:** Implemented
+
+#### What it does
+Breaks down active study plans into individual daily tasks known as missions. Completing these missions guides active study habits and directly feeds into gamification metrics.
+
+#### Key capabilities
+- Generates three distinct task types: Study Sessions, Spaced Revisions, and End-of-Day Summaries.
+- Supports tracking, updating, skipping, or completing tasks through the central dashboard.
+- Automatically updates streak indicators and awards XP on task completion.
+- Consolidated mission agenda showing tasks due today across all enrolled subjects.
+
+#### Technical implementation
+Missions are modeled as distinct documents linked to the user and subject, with state updates handled via REST API endpoints and verified by date helper functions.
+
+---
+
+### 9. AI Flashcards & Shareable Cheat Notes
+**Category:** Sharing
+**Status:** Implemented
+
+#### What it does
+Generates study resources from syllabus documents and allows students to publish them as public web links for peers. It includes a 3D flashcard interface with filtering and navigation utilities.
+
+#### Key capabilities
+- Automated creation of interactive questions and answers for critical and high importance syllabus topics.
+- Interactive 3D CSS card flip interface supporting keyboard accessibility controls (Arrow keys for navigation, Spacebar for flip).
+- Generates persistent shareable URLs accessible to external viewers without requiring an account.
+- Public viewport displaying a read-only list of flashcards alongside registration prompts.
+
+#### Technical implementation
+The public routing uses token-based MongoDB query structures, while the deck interface utilizes native CSS 3D transforms (`preserve-3d`, `rotateY`) and standard browser event listeners.
+
+---
+
+### 10. Notification Center
+**Category:** Core
+**Status:** Implemented
+
+#### What it does
+Collects and displays in-app notifications and alerts regarding plan generations, exam reminders, and system updates.
+
+#### Key capabilities
+- Centralized in-app notification inbox showing alerts categorized by urgency and source type.
+- Tracking of read and unread states for individual notification items.
+- Actions to mark individual notifications as read or clear the entire inbox list.
+- Real-time notification badge indicating new unseen items.
+
+#### Technical implementation
+Notifications are stored as user-linked MongoDB documents, fetched on page load, and managed via Express routes.
+
+---
+
+### 11. Rate Limiting & AI Request Caching
+**Category:** Core
+**Status:** Implemented
+
+#### What it does
+Protects external API resources and improves performance by preventing excessive requests and serving cached AI results when possible.
+
+#### Key capabilities
+- Restricts syllabus analysis actions to a maximum of 3 requests per hour per student.
+- Limits past paper analysis to a maximum of 5 file uploads per hour per student.
+- Automatically skips external Gemini AI calls if the syllabus file remains unchanged, returning a cached breakdown.
+- Offers override headers to force a remote update when required.
+
+#### Technical implementation
+Rate limiting is managed in-memory via Node.js Map structures, returning HTTP 429 status codes with time-to-reset metadata, and cache validation utilizes MD5 hashes of file buffers.
+
+---
+
+### 12. Central Dashboard
+**Category:** Core
+**Status:** Implemented
+
+#### What it does
+Provides a unified overview of all subjects, outstanding missions, progress levels, and exam deadlines.
+
+#### Key capabilities
+- Readiness meter showing overall study progress calculated across all subjects.
+- Urgency indicators showing days remaining until upcoming exams.
+- Revision radar highlighting subjects with upcoming exams and progress below 30%.
+- Contextual next-step recommendations that adapt to the student's current state.
+
+#### Technical implementation
+The dashboard aggregates subject, plan, and mission collections using MongoDB aggregation queries to compute overall completion percentages.
+
+---
+
+## User Workflow
+
+1. **Signup & Setup**: The student registers an account and sets up a student profile, selecting a primary academic target goal (Pass Mode, Score Mode, or Topper Mode) that serves as the default configuration for study materials.
+2. **Add Subjects**: The student populates their list of subjects, entering course codes, credit hours, exam dates, and matching color themes.
+3. **Upload Syllabus**: For each subject, the student uploads a syllabus document via text copy-paste, digital PDF upload, or scanned document images.
+4. **Run Analysis**: The student initiates AI analysis. The system parses the document, creating a structured list of units and topics marked by importance and difficulty.
+5. **Upload Past Papers (Optional)**: To align their preparation with actual exam patterns, the student uploads past year question papers. The system cross-references papers against the syllabus to isolate high-frequency overlap areas and curriculum gaps.
+6. **Generate Study Plan**: The student enters their daily study hour limits and generates a customized study plan. The system creates a calendar roadmap leading to the exam date, scheduling only the topics that correspond to the student's target academic goal.
+7. **Export Calendar**: The student exports their generated study plan as an `.ics` file and imports it into external calendar applications (Google Calendar, Apple Calendar, or Outlook).
+8. **Engage Crisis Mode (Alternative)**: Under severe time limitations, the student activates Crisis Mode. The system schedules a high-density, hour-by-hour study plan focusing exclusively on critical topics and displaying simulated test-score estimates.
+9. **Complete Daily Missions**: The student tracks daily study tasks on the dashboard, marking missions as completed to earn experience points (XP) and maintain consecutive-day streaks.
+10. **Study Flashcards**: The student generates interactive revision cards for key topics, studying them using the keyboard-controlled 3D interface.
+11. **Share Cheat Notes**: The student publishes a set of flashcards as a persistent, public web link, sharing it with classmates for group study sessions.
+
+---
+
+## Tech Stack
+
+### Backend
+| Layer | Technology | Purpose |
+| :--- | :--- | :--- |
+| **Runtime & Framework** | Node.js, Express.js | Core server environment and REST API routes handling |
+| **Database & ORM** | MongoDB, Mongoose | Persistent storage, document schemas, and cascading relational cleanup |
+| **AI Integration** | Google Gemini SDK (`@google/generative-ai`) | Core AI orchestrator utilizing the `gemini-2.0-flash` model for analysis and simulation |
+| **Scanned Document AI** | Gemini Vision API | Directly analyzes scanned documents and images through base64 inline buffers |
+| **Text Extraction** | pdf-parse | Parses and extracts plain text from digital text-layer PDF files |
+| **Security** | bcryptjs, jsonwebtoken | Secure password hashing and token-based state authorization |
+| **File Processing** | multer | Middleware handling file uploads and multi-part form data requests |
+| **Utilities** | date-fns, crypto | Date arithmetic operations and secure unique token generation |
+
+### Frontend
+| Layer | Technology | Purpose |
+| :--- | :--- | :--- |
+| **Framework** | React (Vite) | Main client runtime, modular building blocks, and dev server bundler |
+| **Routing** | React Router DOM | Single-page application client routing and protected layouts |
+| **State Management** | React Context API | Global authentication state, light/dark themes, and notification caches |
+| **Styling** | Vanilla CSS | Custom properties, flat layout tokens, and bento styling definitions |
+| **Iconography** | lucide-react | Vector iconography for headers, buttons, and status labels |
+| **Utilities** | date-fns | Formats client calendar dates and calculates relative distance timeframes |
+| **Notifications** | react-hot-toast | Non-blocking visual feedback overlays for system events |
+| **Interactive UI** | CSS 3D Transforms | Hardware-accelerated 3D flashcard flip logic |
+| **Typography** | Syne + DM Sans | Custom display and body fonts imported from Google Fonts |
+
+---
+
+## Architecture Notes
+
+- **AI Prompt System & Temperature Calibration**: AI extraction runs at a temperature of 0.1, ensuring high determinism and eliminating hallucinated coursework topics. Prompts enforce strict output formatting rules, ensuring the AI behaves solely as an extraction parser grounded strictly in the user's uploaded syllabus content.
+- **Graceful Failure & Mock Service Layer**: If the Google Gemini API is unresponsive or rate limits are reached, the system falls back to a mock data generation module. This allows the student to continue testing and generating structural planning elements without frontend errors.
+- **In-Memory Rate Limiting**: Request limits are evaluated using a lightweight, sliding-window rate-limiter built in-memory via Node.js Maps. This limits resource consumption on a per-user basis without adding external dependency overheads like Redis.
+- **Dual PDF Extraction Architecture**: The application separates digital and scanned documents. Standard digital PDFs run through `pdf-parse` to extract text quickly and cheaply, whereas scanned PDFs or images are sent directly to the Gemini Vision API for optical recognition.
+- **Deterministic Syllabus & PYQ Alignment**: The triple-alignment calculation (isolating overlap topics, syllabus gaps, and paper-only concepts) is computed locally in the Node.js backend using exact string-matching and similarity indexing rather than delegating calculations to Gemini, ensuring absolute factual consistency and consistency of output structure.
