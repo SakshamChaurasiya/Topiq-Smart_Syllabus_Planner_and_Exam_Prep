@@ -5,7 +5,7 @@
  * Run: node tests/core-flow-test.js
  */
 
-const BASE = "http://localhost:5001/api";
+const BASE = "http://localhost:5000/api";
 const TS = Date.now();
 const EMAIL = `coretest_${TS}@test.com`;
 const PASSWORD = "test123456";

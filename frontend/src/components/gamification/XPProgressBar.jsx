@@ -9,7 +9,8 @@ const XPProgressBar = ({ currentXP, targetXP, level }) => {
       <div className="xp-icon">⭐</div>
       <div className="xp-info">
         <div className="xp-label">
-          <span className="xp-level">Level {level}</span>
+          <span className="xp-level">Level {level} </span>
+          &nbsp;
           <span>{currentXP.toLocaleString()} / {targetXP.toLocaleString()} XP</span>
         </div>
         <div className="xp-progress">

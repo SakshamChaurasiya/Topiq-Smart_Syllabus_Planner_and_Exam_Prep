@@ -1,8 +1,8 @@
 import axiosInstance from './axiosInstance';
 
 export const plannerAPI = {
-  generate:       (data) => axiosInstance.post('/planner/generate', data),
-  cheatCode:      (data) => axiosInstance.post('/planner/cheatcode', data),
+  generate:       (data) => axiosInstance.post('/planner/generate', data, { timeout: 120000 }),
+  cheatCode:      (data) => axiosInstance.post('/planner/cheatcode', data, { timeout: 120000 }),
   getPlan:        (subjectId) => axiosInstance.get(`/planner/${subjectId}`),
   markDayComplete:(planId, dayIndex) =>
     axiosInstance.put(`/planner/day/${planId}/${dayIndex}/complete`),

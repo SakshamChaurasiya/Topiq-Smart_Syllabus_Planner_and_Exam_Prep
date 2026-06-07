@@ -428,7 +428,7 @@ const exportStudyPlanToIcs = async (req, res) => {
                 descParts.push("\n* Note: Time is set to 9:00 AM UTC. Please adjust manually after importing if necessary.");
 
                 const description = descParts.join("\n");
-                const uid = `${plan._id}-day-${index}@smartsyllabusplanner.com`;
+                const uid = `${plan._id}-day-${index}@topiq.com`;
                 const duration = formatDuration(day.plannedHours || 1);
 
                 const eventLines = [
@@ -458,7 +458,7 @@ const exportStudyPlanToIcs = async (req, res) => {
             const examMonth = String(examDateObj.getUTCMonth() + 1).padStart(2, '0');
             const examDateVal = String(examDateObj.getUTCDate()).padStart(2, '0');
             const examDtStart = `${examYear}${examMonth}${examDateVal}T090000Z`;
-            const examUid = `${plan._id}-exam@smartsyllabusplanner.com`;
+            const examUid = `${plan._id}-exam@topiq.com`;
 
             const examEventLines = [
                 "BEGIN:VEVENT",
