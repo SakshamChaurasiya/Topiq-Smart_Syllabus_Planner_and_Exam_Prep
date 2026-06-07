@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
-import { Zap, Eye, EyeOff, LogIn } from 'lucide-react';
+import { Zap, Eye, EyeOff, LogIn, Home } from 'lucide-react';
 
 const Login = () => {
   const [form, setForm]         = useState({ email: '', password: '' });
@@ -119,8 +119,13 @@ const Login = () => {
           Don't have an account?{' '}
           <Link to="/register" className="auth-link">Create one free →</Link>
         </p>
+        
+        <Link to="/" className="btn btn-ghost btn-sm" style={{ width: '100%', marginTop: 12, gap: 6 }}>
+          <Home size={14} />
+          Go to Home
+        </Link>
 
-        <p className="auth-fine">
+        <p className="auth-fine" style={{ marginTop: 16 }}>
           Free forever · No credit card required
         </p>
 

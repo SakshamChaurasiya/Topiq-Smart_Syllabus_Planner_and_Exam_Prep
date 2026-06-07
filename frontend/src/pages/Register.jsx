@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
-import { Zap, Eye, EyeOff, Check } from 'lucide-react';
+import { Zap, Eye, EyeOff, Check, Home } from 'lucide-react';
 
 const GOALS = [
   {
@@ -188,6 +188,11 @@ const Register = () => {
               Already have an account?{' '}
               <Link to="/login" className="auth-link">Sign in →</Link>
             </p>
+
+            <Link to="/" className="btn btn-ghost btn-sm" style={{ width: '100%', marginTop: 12, gap: 6 }}>
+              <Home size={14} />
+              Go to Home
+            </Link>
           </div>
         )}
 
