@@ -44,7 +44,7 @@ function assert(testName, condition, detail = "") {
 
 async function runTests() {
     console.log("═══════════════════════════════════════");
-    console.log("  AUTH FLOW TESTS — Smart Syllabus Planner");
+    console.log("  AUTH FLOW TESTS — Topiq");
     console.log("═══════════════════════════════════════\n");
 
     // ─── 1. HEALTH CHECK ──────────────────────

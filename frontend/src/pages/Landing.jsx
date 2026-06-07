@@ -57,7 +57,7 @@ const features = [
 const testimonials = [
   { name: 'Priya S.', branch: 'CS Engineering', score: '91%', quote: 'I had 3 days before my DSA exam. Used the Cheat Code — got exactly what to study. Scored 91%. Absolutely wild.' },
   { name: 'Arjun M.', branch: 'Mech Engineering', quote: 'The AI analyzed my 40-page syllabus in 90 seconds. Built my entire plan automatically. Saved me hours of planning.', score: '78%' },
-  { name: 'Sneha K.', branch: 'Electronics', quote: 'Daily missions are genius. Instead of staring at a timetable, I just open SSP and know exactly what to do next.', score: '85%' },
+  { name: 'Sneha K.', branch: 'Electronics', quote: 'Daily missions are genius. Instead of staring at a timetable, I just open Topiq and know exactly what to do next.', score: '85%' },
 ];
 
 const steps = [
@@ -89,11 +89,11 @@ const Landing = () => {
       <nav className="landing-nav">
         <div className="landing-nav-logo">
           <div className="landing-nav-logo-mark">
-            <Zap size={18} strokeWidth={2.5} />
+            T
           </div>
           <div>
-            <div className="landing-nav-name">SSP</div>
-            <div className="landing-nav-tagline">AI Exam Assistant</div>
+            <div className="landing-nav-name">Topiq</div>
+            <div className="landing-nav-tagline">AI Exam Prep</div>
           </div>
         </div>
 
@@ -281,7 +281,7 @@ const Landing = () => {
       <section className="section">
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: 40 }}>
-            <h2 className="section-title">Students who used SSP — in their own words</h2>
+            <h2 className="section-title">Students who used Topiq — in their own words</h2>
           </div>
 
           <div className="testimonials-grid">
@@ -338,12 +338,12 @@ const Landing = () => {
       <footer className="landing-footer">
         <div className="footer-logo">
           <div className="footer-logo-mark">
-            <Zap size={14} strokeWidth={2.5} />
+            T
           </div>
-          <div className="footer-logo-name">Smart Syllabus Planner</div>
+          <div className="footer-logo-name">Topiq</div>
         </div>
         <p className="footer-copy">
-          © {new Date().getFullYear()} Smart Syllabus Planner. All rights reserved.
+          © {new Date().getFullYear()} Topiq. All rights reserved.
         </p>
       </footer>
 

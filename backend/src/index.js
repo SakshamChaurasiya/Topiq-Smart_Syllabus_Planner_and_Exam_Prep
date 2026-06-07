@@ -1,6 +1,6 @@
 /**
- * index.js — SSP Backend Entry Point
- * Smart Syllabus Planner — Node.js + Express Server
+ * index.js — Topiq Backend Entry Point
+ * Topiq — Node.js + Express Server
  *
  * What this file does:
  * 1. Connects to MongoDB
@@ -77,7 +77,7 @@ app.use("/api",               flashcardRoutes);
 app.get("/health", (req, res) => {
     res.status(200).json({
         success: true,
-        message: "SSP Server is healthy 🚀",
+        message: "Topiq server is running.",
         timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV || "development",
     });
@@ -126,7 +126,7 @@ connectDB().then(() => {
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => {
         console.log("========================================");
-        console.log(`🚀 SSP Server running on PORT ${PORT}`);
+        console.log(`🚀 Topiq Server running on PORT ${PORT}`);
         console.log(`📦 Environment: ${process.env.NODE_ENV || "development"}`);
         console.log(`🌐 API Base: http://localhost:${PORT}/api`);
         console.log(`💚 Health: http://localhost:${PORT}/health`);

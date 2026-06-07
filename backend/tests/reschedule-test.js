@@ -38,7 +38,7 @@ async function get(url) {
 
 async function run() {
   console.log("═══════════════════════════════════════");
-  console.log("  RESCHEDULING TEST — SSP");
+  console.log("  RESCHEDULING TEST — TOPIQ");
   console.log("═══════════════════════════════════════\n");
 
   try {

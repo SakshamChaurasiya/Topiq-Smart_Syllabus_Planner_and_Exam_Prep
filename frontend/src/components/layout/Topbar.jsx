@@ -73,7 +73,7 @@ const Topbar = ({ title, subtitle, onMenuClick }) => {
         {/* Brand chip (hidden on mobile) */}
         <div className="topbar-brand-chip">
           <Zap size={12} strokeWidth={2.5} />
-          <span>SSP</span>
+          <span>Topiq</span>
         </div>
 
         {/* Theme toggle */}

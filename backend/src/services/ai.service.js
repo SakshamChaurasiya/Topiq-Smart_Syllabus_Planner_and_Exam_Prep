@@ -38,7 +38,6 @@ const callAI = async (systemPrompt, userPrompt) => {
             .replace(/\s*```$/i, "")
             .trim();
 
-        console.log("[AI Service] Raw response (first 300 chars):", cleaned.slice(0, 300));
         return cleaned;
 
     } catch (error) {
@@ -124,7 +123,6 @@ SYLLABUS TEXT ENDS HERE.
 Parse only what is above. Do not add anything that is not in that text.`;
 
         const result = await callAI(systemPrompt, userPrompt);
-        console.log("[DEBUG] analyzeSyllabus callAI returned:", result === null ? "NULL" : result?.slice(0, 100));
         if (!result) return getMockSyllabusAnalysis(subjectName);
         return JSON.parse(result);
     } catch (error) {
@@ -234,7 +232,7 @@ Subject name: "${subjectName}"`;
         });
 
         const text = result.response.text();
-        console.log("[AI Service] Image syllabus response (first 300):", text.slice(0, 300));
+        
 
         const cleaned = text
             .replace(/^```(?:json)?\s*/i, "")
@@ -367,7 +365,7 @@ Do not repeat the same topic on multiple days unless it is explicitly marked
 and note the split in the studyTip.`;
 
         const result = await callAI(systemPrompt, userPrompt);
-        console.log("[DEBUG] analyzeSyllabus callAI returned:", result === null ? "NULL" : result?.slice(0, 100));
+       
         if (!result)
             return getMockStudyPlan(daysRemaining, availableHoursPerDay, syllabusUnits);
         return JSON.parse(result);
@@ -485,7 +483,6 @@ Return this exact JSON:
 }`;
 
         const result = await callAI(systemPrompt, userPrompt);
-        console.log("[DEBUG] analyzeSyllabus callAI returned:", result === null ? "NULL" : result?.slice(0, 100));
         if (!result) return getMockCheatCode(daysRemaining, subjectName);
         return JSON.parse(result);
     } catch (error) {
@@ -555,7 +552,6 @@ Minimum 1 topic, maximum equal to the number of topics in the syllabus list.
 Do not include topics with frequency 0.`;
 
         const result = await callAI(systemPrompt, userPrompt);
-        console.log("[DEBUG] analyzeSyllabus callAI returned:", result === null ? "NULL" : result?.slice(0, 100));
         if (!result) return getMockPYQAnalysis();
         return JSON.parse(result);
     } catch (error) {
@@ -733,37 +729,6 @@ const analyzePYQFromFile = async (pdfBuffer, existingTopics = []) => {
 
         const topicList = existingTopics.map((t, i) => `${i + 1}. "${t}"`).join("\n");
 
-        //         const prompt = `You are analyzing a past year exam question paper (which may be a scanned PDF image).
-
-        // Your job is to identify which topics from the syllabus list below appear as questions in this paper.
-
-        // KNOWN SYLLABUS TOPICS (return ONLY topics from this exact list, using exact names):
-        // ${topicList}
-
-        // INSTRUCTIONS:
-        // 1. Read every question visible in the document.
-        // 2. Match each question to the closest syllabus topic from the list above.
-        // 3. If a question does not clearly match any topic in the list, ignore it.
-        // 4. Count how many different years/papers each topic appeared in.
-        // 5. Note the year if visible anywhere in the document.
-        // 6. Estimate marks per topic if marks are printed, otherwise use 0.
-
-        // Return this exact JSON (no markdown fences, no explanation, raw JSON only):
-        // {
-        //   "pyqSuggestedTopics": [
-        //     {
-        //       "topic": "<exact topic name from syllabus list>",
-        //       "frequency": <number>,
-        //       "yearsAppeared": ["<year if visible, else 'Unknown'>"],
-        //       "estimatedMarks": <number or 0>
-        //     }
-        //   ]
-        // }
-
-        // Sort by frequency descending. Only include topics that actually appear in this document.`;
-
-        // ✅ Correct contents format for @google/generative-ai SDK
-
         const prompt = `You are analyzing a past year exam question paper. This PDF may be:
 - A scanned image with no text layer (use vision to read it)
 - Low quality or blurry (do your best to read questions)
@@ -829,7 +794,7 @@ If you could not read anything at all, return: { "pyqSuggestedTopics": [], "read
         });
 
         const text = result.response.text();
-        console.log("[AI Service] PYQ raw response (first 300):", text.slice(0, 300));
+       
 
         const cleaned = text
             .replace(/^```(?:json)?\s*/i, "")
@@ -838,9 +803,7 @@ If you could not read anything at all, return: { "pyqSuggestedTopics": [], "read
 
         const parsed = JSON.parse(cleaned);
 
-        // Log what Gemini saw
-        console.log("[AI Service] PYQ readability:", parsed?.readabilityNote);
-        console.log("[AI Service] PYQ topics found:", parsed?.pyqSuggestedTopics?.length ?? 0);
+        
 
         // If Gemini explicitly said it couldn't read anything
         if (!parsed.pyqSuggestedTopics || parsed.pyqSuggestedTopics.length === 0) {

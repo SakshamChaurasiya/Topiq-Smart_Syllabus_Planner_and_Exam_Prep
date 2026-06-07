@@ -51,7 +51,7 @@ const register = async (req, res) => {
         // Generate JWT token
         const token = generateToken(user._id);
 
-        return sendSuccess(res, 201, "Account created successfully! Welcome to SSP.", {
+        return sendSuccess(res, 201, "Account created successfully! Welcome to Topiq.", {
             token,
             user: {
                 id: user._id,

@@ -48,7 +48,7 @@ const SharedCheatNote = () => {
       {/* Header */}
       <div className="public-note-header">
         <span className="public-note-badge">
-          Shared by a Smart Syllabus Planner user
+          Shared by a Topiq user
         </span>
         <h1 className="public-note-title">
           {data.shareTitle}
@@ -92,7 +92,7 @@ const SharedCheatNote = () => {
           className="btn btn-primary" 
           style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}
         >
-          <Rocket size={14} /> Create your own study plan at Smart Syllabus Planner
+          <Rocket size={14} /> Create your own study plan at Topiq
         </a>
       </div>
 

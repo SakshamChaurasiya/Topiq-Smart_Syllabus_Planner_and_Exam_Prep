@@ -38,9 +38,9 @@ const Login = () => {
         {/* Logo */}
         <div className="auth-logo">
           <div className="auth-logo-mark">
-            <Zap size={18} strokeWidth={2.5} />
+            T
           </div>
-          <span className="auth-logo-name">SSP</span>
+          <span className="auth-logo-name">Topiq</span>
         </div>
 
         {/* Heading */}

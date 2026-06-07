@@ -52,7 +52,7 @@ const Register = () => {
     setLoading(true);
     try {
       await register(form.name, form.email, form.password, form.targetGoal, form.institution.trim());
-      toast.success('Welcome to Smart Syllabus Planner!');
+      toast.success('Welcome to Topiq!');
       navigate('/dashboard');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Registration failed. Try again.');
@@ -75,9 +75,9 @@ const Register = () => {
         {/* Logo */}
         <div className="auth-logo">
           <div className="auth-logo-mark">
-            <Zap size={18} strokeWidth={2.5} />
+            T
           </div>
-          <span className="auth-logo-name">SSP</span>
+          <span className="auth-logo-name">Topiq</span>
         </div>
 
         {/* Step indicator */}

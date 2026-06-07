@@ -1,5 +1,5 @@
 /* ================================================
-   SSP — Sidebar Styles (2025 redesign)
+   Topiq — Sidebar Styles (2025 redesign)
    ================================================ */
 
 /* ── Base ── */
@@ -25,12 +25,43 @@
 .sidebar::-webkit-scrollbar-track { background: transparent; }
 .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
+/* ── Brand Header ── */
+.sidebar-brand-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 4px 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 14px;
+}
+
+.sidebar-brand-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r);
+  background: #6C47FF;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.sidebar-brand-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--txt);
+}
+
 /* ── User header ── */
 .sidebar-user-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 4px 14px;
+  padding: 0 4px 14px;
   border-bottom: 1px solid var(--border);
   margin-bottom: 14px;
 }

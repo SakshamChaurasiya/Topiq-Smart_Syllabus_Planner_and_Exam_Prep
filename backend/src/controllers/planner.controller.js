@@ -390,7 +390,7 @@ const exportStudyPlanToIcs = async (req, res) => {
         let icsLines = [
             "BEGIN:VCALENDAR",
             "VERSION:2.0",
-            "PRODID:-//SmartSyllabusPlanner//SSP//EN",
+            "PRODID:-//Topiq//Topiq//EN",
             "CALSCALE:GREGORIAN",
             "METHOD:PUBLISH"
         ];

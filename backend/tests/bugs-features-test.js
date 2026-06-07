@@ -62,7 +62,7 @@ async function get(url, headers) {
 
 async function run() {
   console.log("═══════════════════════════════════════");
-  console.log("  BUGS & FEATURES PIPELINE TEST — SSP");
+  console.log("  BUGS & FEATURES PIPELINE TEST — TOPIQ");
   console.log("═══════════════════════════════════════\n");
 
   try {

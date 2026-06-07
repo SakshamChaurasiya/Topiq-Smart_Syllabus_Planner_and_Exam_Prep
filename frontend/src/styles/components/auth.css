@@ -1,5 +1,5 @@
 /* ================================================
-   SSP — Auth Page Styles (2025 redesign)
+   Topiq — Auth Page Styles (2025 redesign)
    Flat centered card, no blobs or gradients
    ================================================ */
 
@@ -42,11 +42,14 @@
   justify-content: center;
   color: #fff;
   flex-shrink: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 18px;
 }
 
 .auth-logo-name {
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 800;
   font-size: 1.1rem;
   color: var(--txt);
   letter-spacing: -0.01em;

@@ -68,6 +68,12 @@ const Sidebar = ({ unreadCount = 0, mobileOpen = false, onClose }) => {
           <X size={14} />
         </button>
 
+        {/* ── Brand header ── */}
+        <div className="sidebar-brand-header">
+          <div className="sidebar-brand-logo">T</div>
+          <span className="sidebar-brand-name">Topiq</span>
+        </div>
+
         {/* ── User header (avatar + name) ── */}
         <div className="sidebar-user-header">
           <div className="sidebar-avatar-circle">{initials}</div>

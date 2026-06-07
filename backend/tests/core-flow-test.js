@@ -5,7 +5,7 @@
  * Run: node tests/core-flow-test.js
  */
 
-const BASE = "http://localhost:5000/api";
+const BASE = "http://localhost:5001/api";
 const TS = Date.now();
 const EMAIL = `coretest_${TS}@test.com`;
 const PASSWORD = "test123456";
@@ -40,7 +40,7 @@ async function del(url) {
 
 async function run() {
   console.log("═══════════════════════════════════════");
-  console.log("  CORE FLOW TESTS — Smart Syllabus Planner");
+  console.log("  CORE FLOW TESTS — Topiq");
   console.log("═══════════════════════════════════════\n");
 
   // 1. Register
@@ -166,6 +166,9 @@ Unit 5: Graphs
     availableHoursPerDay: 4,
     targetGoal: "good"
   }, HEADERS());
+  if (planRes.status !== 201) {
+    console.error("❌ Generate plan failed with status:", planRes.status, "data:", planRes.data);
+  }
   assert("Generate plan → 201", planRes.status === 201);
   assert("Plan has missions created", planRes.data?.data?.missionsCreated > 0);
 

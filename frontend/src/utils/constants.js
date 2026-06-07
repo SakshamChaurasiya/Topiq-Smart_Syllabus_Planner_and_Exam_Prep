@@ -84,4 +84,4 @@ export const RARITY_COLORS = {
 
 export const REVISION_INTERVALS = [1, 3, 7, 14, 30]; // days — spaced repetition
 
-export const APP_NAME = import.meta.env.VITE_APP_NAME || 'Smart Syllabus Planner';
+export const APP_NAME = import.meta.env.VITE_APP_NAME || 'Topiq';

@@ -41,7 +41,7 @@ async function put(url, body) {
 
 async function run() {
   console.log("═══════════════════════════════════════");
-  console.log("  CALENDAR EXPORT TEST — SSP");
+  console.log("  CALENDAR EXPORT TEST — TOPIQ");
   console.log("═══════════════════════════════════════\n");
 
   try {
@@ -90,7 +90,7 @@ async function run() {
     const icsContent = exportRes.data;
     assert("ICS starts with BEGIN:VCALENDAR", icsContent.startsWith("BEGIN:VCALENDAR"));
     assert("ICS has VERSION:2.0", icsContent.includes("VERSION:2.0"));
-    assert("ICS has PRODID", icsContent.includes("PRODID:-//SmartSyllabusPlanner//SSP//EN"));
+    assert("ICS has PRODID", icsContent.includes("PRODID:-//Topiq//Topiq//EN"));
     assert("ICS includes VEVENT", icsContent.includes("BEGIN:VEVENT"));
     assert("ICS includes VALARM reminder", icsContent.includes("BEGIN:VALARM"));
     assert("ICS includes TRIGGER:-PT60M", icsContent.includes("TRIGGER:-PT60M"));

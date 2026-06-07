@@ -41,7 +41,7 @@ async function get(url, headers) {
 
 async function run() {
   console.log("═══════════════════════════════════════");
-  console.log("  AI FLASHCARDS & SHARING TEST — SSP");
+  console.log("  AI FLASHCARDS & SHARING TEST — TOPIQ");
   console.log("═══════════════════════════════════════\n");
 
   try {
