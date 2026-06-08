@@ -18,7 +18,7 @@ Students have syllabuses but no structured way to extract priority information f
 | Smart Study Planner | Construct day-by-day roadmaps customized to study limits |
 | Crisis Mode | Dense timetables and score simulations for emergency prep |
 | PYQ Analysis | Map syllabus topics against past exam papers using Gemini |
-| Gamification | User levels, experience points, and study streak tracking |
+| Gamification | User levels, experience points, study streak tracking, and Streak Freeze Token protection |
 | Daily Missions | Automate study calendar tasks into dashboard items |
 | AI Flashcards | Keyboard-accessible deck flips and public share links |
 | Notification Center | Centralized system logs for notifications and alerts |
@@ -190,6 +190,8 @@ Note: Get a free Gemini API key at aistudio.google.com/app/apikey. The app runs 
 | POST | /api/flashcards/generate | Generate AI flashcards | Yes |
 | POST | /api/flashcards/:id/share | Create public share link | Yes |
 | GET | /api/public/cheatnote/:token | View shared cheat note | No |
+| GET | /api/streak-freeze | Get streak freeze tokens for user | Yes |
+| POST | /api/streak-freeze/award | Award one streak freeze token to user | Yes |
 
 All protected routes require Authorization: Bearer <token> header.
 

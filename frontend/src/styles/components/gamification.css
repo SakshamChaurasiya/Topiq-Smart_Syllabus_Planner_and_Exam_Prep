@@ -346,6 +346,27 @@
   background-clip: text;
 }
 
+/* ── Streak Freeze Badge ── */
+.streak-freeze-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-full);
+  color: var(--info);
+  font-size: 0.8rem;
+  margin-left: 8px;
+  cursor: pointer;
+  transition: all var(--t);
+}
+
+.streak-freeze-badge:hover {
+  border-color: var(--info);
+  transform: scale(1.05);
+}
+
 /* ── Responsive ── */
 @media (max-width: 640px) {
   .xp-bar {

@@ -64,6 +64,16 @@ const userSchema = new mongoose.Schema(
             default: 0,
         },
 
+        streakFreezeTokens: {
+            type: Number,
+            default: 3,
+        },
+
+        streakFreezeUsedAt: {
+            type: Date,
+            default: null,
+        },
+
         // Last date the user was active / completed a mission
         lastActiveDate: {
             type: Date,

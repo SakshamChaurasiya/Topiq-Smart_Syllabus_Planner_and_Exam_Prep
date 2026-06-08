@@ -60,6 +60,7 @@ const missionRoutes      = require("./routes/mission.routes");
 const notificationRoutes = require("./routes/notification.routes");
 const dashboardRoutes    = require("./routes/dashboard.routes");
 const flashcardRoutes    = require("./routes/flashcard.routes");
+const streakFreezeRoutes = require("./routes/streakFreeze.routes");
 
 app.use("/api/auth",          authRoutes);
 app.use("/api/subjects",      subjectRoutes);
@@ -69,6 +70,7 @@ app.use("/api/study-plan",    studyPlanRoutes);
 app.use("/api/missions",      missionRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/dashboard",     dashboardRoutes);
+app.use("/api/streak-freeze", streakFreezeRoutes);
 app.use("/api",               flashcardRoutes);
 
 // ============================================
@@ -136,3 +138,5 @@ connectDB().then(() => {
     console.error("❌ Failed to start server:", error.message);
     process.exit(1);
 });
+
+module.exports = app;

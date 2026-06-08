@@ -50,8 +50,14 @@ const streakSync = async (req, res, next) => {
       // Consecutive day — increment streak
       user.streak = (user.streak || 0) + 1;
     } else {
-      // Missed at least one day — reset streak
-      user.streak = 0;
+      // Missed at least one day — reset streak (unless protected by a freeze token)
+      if (user.streakFreezeTokens > 0) {
+        user.streakFreezeTokens -= 1;
+        user.streakFreezeUsedAt = now;
+        console.log(`[StreakSync] Freeze token consumed for user ${user._id}`);
+      } else {
+        user.streak = 0;
+      }
     }
 
     user.lastActiveDate = now;

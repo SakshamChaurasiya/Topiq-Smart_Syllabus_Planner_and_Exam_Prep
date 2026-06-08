@@ -8,6 +8,8 @@ const Subject = require("../models/subject.model");
 const Syllabus = require("../models/syllabus.model");
 const { sendSuccess, sendError } = require("../utils/responseHelper");
 const { syncRevisionMissions, calculateSpacedRepetition } = require("../utils/spacedRepetition");
+const Notification = require("../models/notification.model");
+const { awardToken } = require("./streakFreeze.controller");
 
 // -------------------------------------------
 // @route   GET /api/missions
@@ -127,6 +129,7 @@ const updateMissionStatus = async (req, res) => {
             // 2. Check Level Up
             const getTargetXP = (lvl) => lvl * 250;
             let leveledUp = false;
+            const oldLevel = user.level;
             while (user.xp >= getTargetXP(user.level)) {
                 user.xp -= getTargetXP(user.level);
                 user.level += 1;
@@ -136,6 +139,52 @@ const updateMissionStatus = async (req, res) => {
             // 3. Update last active date
             user.lastActiveDate = new Date();
             await user.save();
+
+            // Award Streak Freeze token on level-up milestone (every 5 levels)
+            if (leveledUp) {
+                for (let lvl = oldLevel + 1; lvl <= user.level; lvl++) {
+                    if (lvl % 5 === 0) {
+                        await awardToken(user);
+                        await Notification.create({
+                            userId: user._id,
+                            title: "Streak Freeze Earned!",
+                            message: `🧊 Streak Freeze token earned! Reaching Level ${lvl} deserves protection.`,
+                            type: "streak-alert",
+                        });
+                    }
+                }
+            }
+
+            // 5. Award Streak Freeze token on 7-day milestone
+            if (user.streak > 0 && user.streak % 7 === 0) {
+                await awardToken(user);
+                await Notification.create({
+                    userId: user._id,
+                    title: "Streak Freeze Earned!",
+                    message: "🧊 Streak Freeze token earned! Your 7-day streak is protected.",
+                    type: "streak-alert",
+                });
+            }
+
+            // Award Streak Freeze tokens on significant streak milestones (30-day and 100-day)
+            if (user.streak === 30) {
+                await awardToken(user);
+                await Notification.create({
+                    userId: user._id,
+                    title: "Streak Freeze Earned!",
+                    message: "🧊 Streak Freeze token earned! 30-day streak milestone protected.",
+                    type: "streak-alert",
+                });
+            } else if (user.streak === 100) {
+                await awardToken(user);
+                await awardToken(user);
+                await Notification.create({
+                    userId: user._id,
+                    title: "Streak Freeze Earned!",
+                    message: "🧊 Streak Freeze tokens earned! Ultimate 100-day streak milestone protected.",
+                    type: "streak-alert",
+                });
+            }
 
             // 4. Update Spaced Repetition Progress
             if ((mission.type === "study" || mission.type === "revision") && mission.topicName) {

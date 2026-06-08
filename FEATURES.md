@@ -120,21 +120,30 @@ Files are sent to Gemini Vision APIs using inline base64 data to process scanned
 
 ---
 
-### 7. Gamification — XP, Levels, Streaks
+### 7. Gamification — XP, Levels, Streaks & Streak Freezes
 **Category:** Gamification
 **Status:** Implemented
 
 #### What it does
-Motivates students through reward points, level progressions, and consecutive study streaks. Progress is displayed visually across the primary dashboard and profile menus.
+Motivates students through reward points, level progressions, consecutive study streaks, and protects user progress with Streak Freeze Tokens if they miss active study days.
 
 #### Key capabilities
 - Grants Experience Points (XP) dynamically upon successful completion of daily study tasks.
 - Automated level calculation utilizing a standardized progression threshold formula.
-- Continuous consecutive-day streak counter that increments on active days and resets to 0 if a student misses a calendar day.
-- Visual progress tracking using linear indicators and streak flame indicators.
+- Continuous consecutive-day streak counter that increments on active days.
+- **Streak Freeze Protection**: Automatically consumes a Streak Freeze Token if a student misses a calendar day, preserving their consecutive-day streak.
+- **Default Provisioning**: Every new student account is created with **3 free Streak Freeze Tokens** by default to protect initial progress.
+- **Automatic Milestone Awards**:
+  - **Weekly Milestones**: Awards 1 Streak Freeze Token on streak counts that are multiples of 7.
+  - **Level Milestones**: Awards 1 Streak Freeze Token upon reaching any level that is a multiple of 5 (e.g. level 5, 10, 15...).
+  - **30-Day Streak Milestone**: Awards 1 extra token upon reaching a 30-day streak count.
+  - **100-Day Streak Milestone**: Awards 2 extra tokens upon reaching a 100-day streak count.
+- **Visual Status Badges**: Displays a protective ice badge (`🧊`) with an interactive, hoverable tooltip showing active token counts next to the streak flame.
 
 #### Technical implementation
-Streak validation and level calculations are managed by backend Mongoose hooks that evaluate update timestamps, recalculating level boundaries as `Level * 250 XP`.
+- Streak validation and level calculations are managed by backend Mongoose hooks and middleware (`streakSync.js`) evaluating update timestamps, with level boundaries recalculated as `Level * 250 XP`.
+- Streak protection logic intercepts reset operations, decrementing token counts and setting `streakFreezeUsedAt = now` to shield the active streak.
+- Milestone logic in `mission.controller.js` triggers direct internal token awards and schedules corresponding dashboard alert notifications.
 
 ---
 

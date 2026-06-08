@@ -9,6 +9,7 @@ import ProgressRing from '../components/ui/ProgressRing';
 import Badge from '../components/ui/Badge';
 import XPProgressBar from '../components/gamification/XPProgressBar';
 import StreakBadge from '../components/gamification/StreakBadge';
+import { streakFreezeAPI } from '../api/streakFreeze.api';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 import {
@@ -38,6 +39,7 @@ const getMissionsMsg = (done, total) => {
 const Dashboard = () => {
   const [data,    setData]    = useState(null);
   const [loading, setLoading] = useState(true);
+  const [freezeTokens, setFreezeTokens] = useState(0);
   const navigate = useNavigate();
 
   const fetchDashboard = async () => {
@@ -51,7 +53,19 @@ const Dashboard = () => {
     }
   };
 
-  useEffect(() => { fetchDashboard(); }, []);
+  const fetchFreezeTokens = async () => {
+    try {
+      const res = await streakFreezeAPI.getTokens();
+      setFreezeTokens(res.data.data.streakFreezeTokens || 0);
+    } catch (err) {
+      // Silently fail as streak freeze is supplementary UI
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboard();
+    fetchFreezeTokens();
+  }, []);
 
   const completeMission = async (id) => {
     try {
@@ -126,7 +140,7 @@ const Dashboard = () => {
           targetXP={dashboardUser.targetXP || 250}
           level={dashboardUser.level || 1}
         />
-        <StreakBadge streak={dashboardUser.streak || 0} />
+        <StreakBadge streak={dashboardUser.streak || 0} freezeTokens={freezeTokens} />
       </div>
 
       {/* ── TODAY'S PROGRESS ── */}
