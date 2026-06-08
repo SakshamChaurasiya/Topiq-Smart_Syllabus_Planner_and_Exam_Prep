@@ -10,6 +10,7 @@ import Badge from '../components/ui/Badge';
 import XPProgressBar from '../components/gamification/XPProgressBar';
 import StreakBadge from '../components/gamification/StreakBadge';
 import { streakFreezeAPI } from '../api/streakFreeze.api';
+import ConfidenceRating from '../components/gamification/ConfidenceRating';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 import {
@@ -40,7 +41,31 @@ const Dashboard = () => {
   const [data,    setData]    = useState(null);
   const [loading, setLoading] = useState(true);
   const [freezeTokens, setFreezeTokens] = useState(0);
+  const [ratingMissionId, setRatingMissionId] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setRatingMissionId(null);
+      }
+    };
+
+    const handleClickOutside = (e) => {
+      if (ratingMissionId) {
+        if (!e.target.closest('.confidence-panel') && !e.target.closest('.mission-checkbox')) {
+          setRatingMissionId(null);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [ratingMissionId]);
 
   const fetchDashboard = async () => {
     try {
@@ -214,48 +239,67 @@ const Dashboard = () => {
             ) : (
               <div>
                 {todayMissions.map((mission, idx) => (
-                  <div
-                    key={mission._id}
-                    className={`mission-card animate-slide-up${mission.status === 'completed' ? ' completed' : ''}`}
-                    style={{ animationDelay: `${idx * 0.04}s` }}
-                  >
-                    {/* Checkbox */}
+                  <div key={mission._id} style={{ display: 'flex', flexDirection: 'column' }}>
                     <div
-                      className={`mission-checkbox${mission.status === 'completed' ? ' checked' : ''}`}
-                      onClick={() => mission.status !== 'completed' && completeMission(mission._id)}
-                      style={{ cursor: mission.status === 'completed' ? 'default' : 'pointer' }}
+                      className={`mission-card animate-slide-up${mission.status === 'completed' ? ' completed' : ''}`}
+                      style={{ animationDelay: `${idx * 0.04}s` }}
                     >
-                      {mission.status === 'completed' && (
-                        <Check size={11} strokeWidth={3} style={{ color: '#fff' }} />
-                      )}
-                    </div>
-
-                    {/* Body */}
-                    <div className="mission-body">
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
-                        <span className="mission-title">{mission.title}</span>
-                        <Badge type={mission.priority} label={mission.priority} />
-                      </div>
-                      <div className="mission-meta">
-                        {mission.subjectId?.name && (
-                          <span>
-                            <BookOpen size={10} strokeWidth={2} style={{ display: 'inline', verticalAlign: 'middle' }} />{' '}
-                            {mission.subjectId.name}
-                          </span>
+                      {/* Checkbox */}
+                      <div
+                        className={`mission-checkbox${mission.status === 'completed' ? ' checked' : ''}`}
+                        onClick={() => {
+                          if (mission.status !== 'completed') {
+                            setRatingMissionId(prev => prev === mission._id ? null : mission._id);
+                          }
+                        }}
+                        style={{ cursor: mission.status === 'completed' ? 'default' : 'pointer' }}
+                      >
+                        {mission.status === 'completed' && (
+                          <Check size={11} strokeWidth={3} style={{ color: '#fff' }} />
                         )}
-                        <span>{mission.estimatedMinutes} min</span>
-                        <span>{mission.xpReward} XP</span>
+                      </div>
+
+                      {/* Body */}
+                      <div className="mission-body">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
+                          <span className="mission-title">{mission.title}</span>
+                          <Badge type={mission.priority} label={mission.priority} />
+                        </div>
+                        <div className="mission-meta">
+                          {mission.subjectId?.name && (
+                            <span>
+                              <BookOpen size={10} strokeWidth={2} style={{ display: 'inline', verticalAlign: 'middle' }} />{' '}
+                              {mission.subjectId.name}
+                            </span>
+                          )}
+                          <span>{mission.estimatedMinutes} min</span>
+                          <span>{mission.xpReward} XP</span>
+                        </div>
+                      </div>
+
+                      {/* Type icon */}
+                      <div className="mission-type-icon">
+                        {mission.type === 'study'
+                          ? <BookMarked size={15} strokeWidth={1.75} />
+                          : mission.type === 'revision'
+                          ? <RefreshCcw size={15} strokeWidth={1.75} />
+                          : <FileText size={15} strokeWidth={1.75} />}
                       </div>
                     </div>
 
-                    {/* Type icon */}
-                    <div className="mission-type-icon">
-                      {mission.type === 'study'
-                        ? <BookMarked size={15} strokeWidth={1.75} />
-                        : mission.type === 'revision'
-                        ? <RefreshCcw size={15} strokeWidth={1.75} />
-                        : <FileText size={15} strokeWidth={1.75} />}
-                    </div>
+                    {ratingMissionId === mission._id && (
+                      <div className="confidence-panel show">
+                        <ConfidenceRating
+                          missionId={mission._id}
+                          topicName={mission.topicName || mission.title}
+                          onRated={(rating) => {
+                            toast.success("Mission complete! +XP");
+                            setRatingMissionId(null);
+                            fetchDashboard();
+                          }}
+                        />
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

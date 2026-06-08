@@ -237,6 +237,26 @@ The dashboard aggregates subject, plan, and mission collections using MongoDB ag
 
 ---
 
+### 13. Confidence Rating Per Topic
+**Category:** Gamification
+**Status:** Implemented
+
+#### What it does
+Enables students to rate their understanding of a topic when completing daily study missions, dynamically adjusting their study priority and awarding gamification bonus points.
+
+#### Key capabilities
+- **Three-tiered feedback**: Students choose between *Shaky*, *Okay*, or *Solid* confidence ratings.
+- **Bonus rewards**: Completed tasks grant additional XP based on self-reflection (+15 XP for Shaky, +5 XP for Solid).
+- **Dynamic priority reallocation**: Flags *Shaky* topics by elevating their importance to `critical` in the syllabus, and sets *Solid* topics to `low` priority to direct future study cycles.
+- **Inline rating panel**: Opens a clean drawer beneath the checkbox on the dashboard to collect feedback seamlessly without disrupting the dashboard view.
+
+#### Technical implementation
+- Modified the Mongoose `Mission` schema to save confidence enums.
+- Implemented the `updateTopicPriority` utility to perform in-place updates of subdocument properties inside the Syllabus model.
+- Designed a custom React component leveraging Vite build systems and Vanilla CSS transitions.
+
+---
+
 ## User Workflow
 
 1. **Signup & Setup**: The student registers an account and sets up a student profile, selecting a primary academic target goal (Pass Mode, Score Mode, or Topper Mode) that serves as the default configuration for study materials.

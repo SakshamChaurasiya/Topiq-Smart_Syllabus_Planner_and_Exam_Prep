@@ -24,6 +24,7 @@ Students have syllabuses but no structured way to extract priority information f
 | Notification Center | Centralized system logs for notifications and alerts |
 | Rate Limiting & Cache | File-hash cache and local rate limiting middleware |
 | Central Dashboard | Dynamic analytics interface showing current progress metrics |
+| Confidence Rating | Self-assessment tool modifying syllabus topic priorities and awarding bonus XP |
 
 Full feature documentation is available in FEATURES.md.
 

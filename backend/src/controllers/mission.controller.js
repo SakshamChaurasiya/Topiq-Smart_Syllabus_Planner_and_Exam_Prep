@@ -10,6 +10,7 @@ const { sendSuccess, sendError } = require("../utils/responseHelper");
 const { syncRevisionMissions, calculateSpacedRepetition } = require("../utils/spacedRepetition");
 const Notification = require("../models/notification.model");
 const { awardToken } = require("./streakFreeze.controller");
+const { updateTopicPriority } = require("../utils/topicPriority");
 
 // -------------------------------------------
 // @route   GET /api/missions
@@ -100,11 +101,15 @@ const getTodayMissions = async (req, res) => {
 // -------------------------------------------
 const updateMissionStatus = async (req, res) => {
     try {
-        const { status } = req.body;
+        const { status, confidence } = req.body;
         const validStatuses = ["pending", "in-progress", "completed", "skipped"];
 
         if (!validStatuses.includes(status)) {
             return sendError(res, 400, `Invalid status. Must be one of: ${validStatuses.join(", ")}`);
+        }
+
+        if (confidence && !["shaky", "okay", "solid"].includes(confidence)) {
+            return sendError(res, 400, "Invalid confidence rating. Must be shaky, okay, or solid.");
         }
 
         const mission = await Mission.findOne({
@@ -121,7 +126,15 @@ const updateMissionStatus = async (req, res) => {
         const user = req.user;
         if (status === "completed") {
             mission.completedAt = new Date();
+            if (confidence) {
+                mission.confidence = confidence;
+            }
             xpEarned = mission.xpReward || 10;
+            if (confidence === "shaky") {
+                xpEarned += 15;
+            } else if (confidence === "solid") {
+                xpEarned += 5;
+            }
 
             // 1. Award XP to User
             user.xp += xpEarned;
@@ -233,6 +246,10 @@ const updateMissionStatus = async (req, res) => {
         }
 
         await mission.save();
+
+        if (status === "completed" && confidence) {
+            await updateTopicPriority(mission.subjectId, mission.topicName, confidence);
+        }
 
         return sendSuccess(res, 200, `Mission marked as ${status}.`, {
             missionId: mission._id,

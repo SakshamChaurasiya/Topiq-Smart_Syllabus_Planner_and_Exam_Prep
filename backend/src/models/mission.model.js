@@ -81,6 +81,12 @@ const missionSchema = new mongoose.Schema(
             default: null,
         },
 
+        confidence: {
+            type: String,
+            enum: ['shaky', 'okay', 'solid'],
+            default: null,
+        },
+
         // The topic this mission is about
         topicName: {
             type: String,

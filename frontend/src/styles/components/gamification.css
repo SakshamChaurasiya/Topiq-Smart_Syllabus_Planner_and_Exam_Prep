@@ -396,3 +396,48 @@
     font-size: 1.5rem;
   }
 }
+
+/* ── Confidence Rating Panel ── */
+.confidence-panel {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r12);
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.confidence-panel.show {
+  max-height: 200px;
+}
+
+.confidence-panel-content {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.confidence-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--txt-3);
+}
+
+.confidence-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  border-radius: var(--r8);
+  transition: all var(--t);
+}
+
+.confidence-btn:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
