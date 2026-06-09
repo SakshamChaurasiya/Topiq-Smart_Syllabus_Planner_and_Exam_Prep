@@ -38,7 +38,7 @@ const createRateLimiter = ({ max, windowMs, keyPrefix, message }) => {
         record = await RateLimit.findOneAndUpdate(
           { key, resetAt: { $gt: now } },
           { $inc: { count: 1 }, $setOnInsert: { resetAt, createdAt: now } },
-          { upsert: true, new: true, setDefaultsOnInsert: true }
+          { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
         );
       } catch (upsertErr) {
         // Race condition on upsert (duplicate key) — just fetch the existing record

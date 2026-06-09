@@ -285,7 +285,14 @@ const getPlan = async (req, res) => {
 
         if (!plan) return sendError(res, 404, "No active study plan found for this subject.");
 
-        return sendSuccess(res, 200, "Study plan fetched.", plan);
+        const planObj = plan.toObject();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const exam = new Date(planObj.examDate);
+        exam.setHours(0, 0, 0, 0);
+        planObj.daysRemaining = Math.max(0, Math.ceil((exam - today) / (1000 * 60 * 60 * 24)));
+
+        return sendSuccess(res, 200, "Study plan fetched.", planObj);
     } catch (error) {
         console.error("[Planner] GetPlan error:", error.message);
         return sendError(res, 500, "Failed to fetch study plan.");

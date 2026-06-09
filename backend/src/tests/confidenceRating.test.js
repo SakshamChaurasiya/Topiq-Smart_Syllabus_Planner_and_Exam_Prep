@@ -12,8 +12,12 @@ describe('Confidence Rating Feature', () => {
 
     beforeAll(async () => {
         jest.setTimeout(25000);
-        if (mongoose.connection.readyState === 0) {
-            await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/topiq_test');
+        if (mongoose.connection.readyState !== 1) {
+            if (mongoose.connection.readyState === 2) {
+                await new Promise((resolve) => mongoose.connection.once('connected', resolve));
+            } else {
+                await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/topiq_test');
+            }
         }
     });
 

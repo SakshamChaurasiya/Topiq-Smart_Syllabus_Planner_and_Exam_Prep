@@ -13,6 +13,47 @@ if (
     genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 }
 
+const Groq = require("groq-sdk");
+
+let groqClient = null;
+if (
+    process.env.GROQ_API_KEY &&
+    process.env.GROQ_API_KEY !== "your-groq-api-key-here"
+) {
+    groqClient = new Groq({ apiKey: process.env.GROQ_API_KEY });
+}
+
+const GROQ_MODEL = "llama-3.3-70b-versatile";
+
+const callGroq = async (systemPrompt, userPrompt) => {
+    if (!groqClient) {
+        console.warn("[AI Service] Groq key not configured — skipping Groq fallback.");
+        return null;
+    }
+    try {
+        const completion = await groqClient.chat.completions.create({
+            model: GROQ_MODEL,
+            messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: userPrompt },
+            ],
+            temperature: 0.7,
+        });
+        const text = completion.choices[0]?.message?.content || null;
+        if (!text) return null;
+
+        // Strip markdown fences same as Gemini cleanup
+        const cleaned = text
+            .replace(/^```(?:json)?\s*/i, "")
+            .replace(/\s*```$/i, "")
+            .trim();
+        return cleaned;
+    } catch (error) {
+        console.error("[AI Service] callGroq error:", error?.message);
+        return null;
+    }
+};
+
 const callAI = async (systemPrompt, userPrompt) => {
     if (!genAI) {
         console.warn("[AI Service] Gemini key not configured — returning mock response.");
@@ -41,6 +82,15 @@ const callAI = async (systemPrompt, userPrompt) => {
         return cleaned;
 
     } catch (error) {
+        const status = error?.status;
+        const isGeminiOverloaded = status === 503 || status === 429;
+
+        if (isGeminiOverloaded) {
+            console.warn(`[AI Service] Gemini returned ${status} — switching to Groq fallback.`);
+            return await callGroq(systemPrompt, userPrompt);
+        }
+
+        console.error("[AI Service] callAI error:", error);
         return null;
     }
 };
@@ -157,7 +207,7 @@ const analyzeSyllabusFromImage = async (
         if (!genAI) return getMockSyllabusAnalysis(subjectName);
 
         const model = genAI.getGenerativeModel({
-            model: "gemini-3.5-flash",
+            model: "gemini-2.5-flash",
             generationConfig: { temperature: 0.2 },
         });
 
@@ -770,7 +820,7 @@ Only include topics that actually appear in this document.
 If you could not read anything at all, return: { "pyqSuggestedTopics": [], "readabilityNote": "Could not read document" }`;
 
         const model = genAI.getGenerativeModel({
-            model: "gemini-3.5-flash",
+            model: "gemini-2.5-flash",
             generationConfig: {
                 temperature: 0.1,
             },

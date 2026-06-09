@@ -461,6 +461,11 @@ const getSyllabus = async (req, res) => {
         });
 
         if (!syllabus) {
+            // Self-healing: If Subject hasSyllabus is true, set it to false and reset counts
+            await Subject.findOneAndUpdate(
+                { _id: req.params.subjectId, userId: req.user._id, hasSyllabus: true },
+                { hasSyllabus: false, totalTopics: 0, completedTopics: 0, progress: 0 }
+            );
             return sendError(res, 404, "No syllabus found for this subject.");
         }
 

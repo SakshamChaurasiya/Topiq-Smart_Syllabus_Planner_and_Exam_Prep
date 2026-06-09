@@ -76,6 +76,17 @@ const getDashboard = async (req, res) => {
         const completedToday = todayMissions.filter((m) => m.status === "completed").length;
         const todayCompletionRate = totalToday > 0 ? Math.round((completedToday / totalToday) * 100) : 0;
 
+        // Dynamic daysRemaining for active plans
+        const todayDay = new Date();
+        todayDay.setHours(0, 0, 0, 0);
+        const processedActivePlans = recentPlans.map(plan => {
+            const planObj = plan.toObject();
+            const exam = new Date(planObj.examDate);
+            exam.setHours(0, 0, 0, 0);
+            planObj.daysRemaining = Math.max(0, Math.ceil((exam - todayDay) / (1000 * 60 * 60 * 24)));
+            return planObj;
+        });
+
         // Overall subject progress
         const totalSubjects = subjects.length;
         const subjectsWithSyllabus = subjects.filter((s) => s.hasSyllabus).length;
@@ -118,7 +129,7 @@ const getDashboard = async (req, res) => {
             todayMissions,
             upcomingExams,
             weakSubjects,
-            activePlans: recentPlans,
+            activePlans: processedActivePlans,
             subjects: subjects.slice(0, 6), // Show first 6 subjects on dashboard
         });
     } catch (error) {

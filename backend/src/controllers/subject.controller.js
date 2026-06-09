@@ -100,7 +100,22 @@ const updateSubject = async (req, res) => {
         // Update only provided fields
         if (name !== undefined) subject.name = name;
         if (code !== undefined) subject.code = code;
-        if (examDate !== undefined) subject.examDate = examDate;
+        if (examDate !== undefined) {
+            subject.examDate = examDate;
+
+            // Update active study plan's examDate and daysRemaining in sync
+            const exam = new Date(examDate);
+            exam.setHours(0, 0, 0, 0);
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const daysRemaining = Math.max(1, Math.ceil((exam - today) / (1000 * 60 * 60 * 24)));
+
+            await StudyPlan.updateMany(
+                { subjectId: subject._id, userId: req.user._id, isActive: true },
+                { examDate: exam, daysRemaining }
+            );
+        }
         if (difficulty !== undefined) subject.difficulty = difficulty;
         if (color !== undefined) subject.color = color;
         if (priority !== undefined) subject.priority = priority;
