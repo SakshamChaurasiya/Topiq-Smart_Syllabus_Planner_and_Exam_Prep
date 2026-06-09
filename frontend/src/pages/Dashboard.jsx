@@ -18,6 +18,8 @@ import toast from 'react-hot-toast';
 import { multiplierAPI } from '../api/multiplier.api';
 import MultiplierBanner from '../components/gamification/MultiplierBanner';
 import QuizCTA from '../components/gamification/QuizCTA';
+import { weekReportAPI } from '../api/weekReport.api';
+import WeeklyReport from '../components/ui/WeeklyReport';
 import {
   BookOpen, Target, CalendarDays, Bell, Map,
   Check, RefreshCcw, FileText, Plus, Rocket,
@@ -50,6 +52,8 @@ const Dashboard = () => {
   const [badges, setBadges] = useState([]);
   const [leveledUp, setLeveledUp] = useState(false);
   const [multiplier, setMultiplier] = useState(null);
+  const [weekReport, setWeekReport] = useState(null);
+  const [weekReportLoading, setWeekReportLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -113,11 +117,23 @@ const Dashboard = () => {
     }
   };
 
+  const fetchWeekReport = async () => {
+    try {
+      const res = await weekReportAPI.get();
+      setWeekReport(res.data.data);
+    } catch {
+      setWeekReport(null);
+    } finally {
+      setWeekReportLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchDashboard();
     fetchFreezeTokens();
     fetchBadges();
     fetchMultiplier();
+    fetchWeekReport();
   }, []);
 
   const completeMission = async (id) => {
@@ -507,6 +523,8 @@ const Dashboard = () => {
               ))}
             </div>
           )}
+
+          <WeeklyReport report={weekReport} loading={weekReportLoading} />
 
           {/* Smart Recommendations */}
           <div className="card">

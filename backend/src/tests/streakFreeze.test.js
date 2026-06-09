@@ -18,7 +18,7 @@ describe('Streak Freeze Token Feature', () => {
                 await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/topiq_test');
             }
         }
-    });
+    }, 25000);
 
     afterAll(async () => {
         await mongoose.connection.close();
@@ -168,7 +168,7 @@ describe('Streak Freeze Token Feature', () => {
     it('should award a token and send a notification when the user levels up to a multiple of 5', async () => {
         const userInDb = await User.findById(testUser._id);
         userInDb.level = 4;
-        userInDb.xp = 990;
+        userInDb.xp = 410;
         userInDb.streak = 1;
         userInDb.streakFreezeTokens = 0;
         await userInDb.save();

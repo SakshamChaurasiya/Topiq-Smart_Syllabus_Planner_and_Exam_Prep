@@ -2,6 +2,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { getLevelTitle } from '../../constants/xpSystem';
 import {
   LayoutDashboard, BookOpen, Target,
   Bell, User, LogOut, Sun, Moon, X, Sparkles, ArrowRight,
@@ -79,6 +80,9 @@ const Sidebar = ({ unreadCount = 0, mobileOpen = false, onClose }) => {
           <div className="sidebar-avatar-circle">{initials}</div>
           <div className="sidebar-user-meta">
             <div className="sidebar-user-name">{user?.name || 'Student'}</div>
+            <div className="sidebar-user-level-title" style={{ color: 'var(--txt-3)', fontSize: '0.72rem', marginTop: '2px', fontWeight: 600 }}>
+              {getLevelTitle(user?.level || 1).emoji} {getLevelTitle(user?.level || 1).title}
+            </div>
             <div className="sidebar-user-level" style={{ color: goal.color }}>
               {goal.text}
             </div>

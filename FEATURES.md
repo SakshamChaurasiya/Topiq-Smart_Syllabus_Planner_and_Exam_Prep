@@ -303,6 +303,47 @@ Provides students with an optional, skippable multiple-choice quiz (MCQ) contain
 
 ---
 
+### 16. Weekly Performance Report
+**Category:** Gamification
+**Status:** Implemented
+
+#### What it does
+Provides students with a summary card on their Dashboard showing key performance and learning analytics of their active study missions for the current week. It displays weekly mission completion counts, overall completion rates, hours studied, streaks, unique study topics covered, and subject strengths/weaknesses.
+
+#### Key capabilities
+- **Dynamic Weekly Progress Analytics**: Calculates the weekly completion rate as a rounded percentage and displays it in a progress bar.
+- **Hours & Topic Tracking**: Aggregates total hours studied and the count of unique topics studied (using completed study missions) this week.
+- **Subject Insights**: Highlights the "Strongest" subject (most completed missions) and "Needs Work" subject (missions due but 0 completed) to focus study plans.
+- **Perfect Week Awards**: Showcases a "Perfect week! 🏆" badge when the student achieves a 100% completion rate for the week's missions.
+
+#### Technical implementation
+- Weekly statistics are calculated within `weekReport.controller.js` by querying user missions in the `[startOfWeek, now]` range.
+- Exposed GET `/api/week-report` route protected by auth middleware.
+- Built reusable `WeeklyReport` React component supporting skeleton shimmer states.
+- Integrated into the Dashboard page to load stats on component mount.
+
+---
+
+### 17. Visual Level Title Display
+**Category:** Gamification
+**Status:** Implemented
+
+#### What it does
+Visualizes the student's level titles, emojis, and tier badges throughout the user interface. Level progress is translated into tier titles (e.g. `First Year Energy`, `Chai & Notes`, `Focused`, `On A Roll`, `Unstoppable`, `Exam God`) next to the level number in the user's Profile and underneath their username in the navigation Sidebar.
+
+#### Key capabilities
+- **Sidebar Level Title**: Displays a small level meta text line (e.g. `📖 First Year Energy`) directly below the student name using the current authentication context.
+- **Visual LevelBadge Card**: Houses a reusable `<LevelBadge>` component rendering a colored circle with the level number, matching emojis, and title texts.
+- **Adaptive Sizing Variants**: Supports `sm`, `md`, and `lg` sizing profiles handled natively via Vanilla CSS class structures.
+- **Tier Badge Highlighting**: Highlights level tiers (Starter, Rising, Intermediate, Advanced, Elite, Legendary) next to the level records using matching Prompt 0 accent colors.
+
+#### Technical implementation
+- Title mapping is imported from the shared frontend constants `xpSystem.js` utility.
+- Created reusable `LevelBadge.jsx` component and styled circle wrappers in `gamification.css`.
+- Integrates dynamically into layout templates (Sidebar) and user preferences views (ProfilePage).
+
+---
+
 ## User Workflow
 
 1. **Signup & Setup**: The student registers an account and sets up a student profile, selecting a primary academic target goal (Pass Mode, Score Mode, or Topper Mode) that serves as the default configuration for study materials.

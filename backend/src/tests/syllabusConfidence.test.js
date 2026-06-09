@@ -21,7 +21,7 @@ describe('Syllabus Topic Completion Confidence Feature', () => {
                 await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/topiq_test');
             }
         }
-    });
+    }, 25000);
 
     afterAll(async () => {
         await mongoose.connection.close();

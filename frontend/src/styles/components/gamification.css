@@ -846,3 +846,71 @@
   line-height: 1;
 }
 .quiz-cta-dismiss:hover { color: var(--txt-2); }
+
+/* ── LevelBadge Component ── */
+.level-badge-container {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.level-badge-circle {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: #fff;
+}
+
+.level-badge-emoji {
+  display: block;
+  text-align: center;
+}
+
+.level-badge-title {
+  color: var(--txt-3);
+  font-size: 0.68rem;
+  white-space: nowrap;
+  text-align: center;
+}
+
+/* Size variants */
+.level-badge-sm .level-badge-circle {
+  width: 32px;
+  height: 32px;
+  font-size: 0.75rem;
+}
+.level-badge-sm .level-badge-emoji {
+  font-size: 1rem;
+  margin-top: 4px;
+}
+.level-badge-sm .level-badge-title {
+  margin-top: 2px;
+}
+
+.level-badge-md .level-badge-circle {
+  width: 48px;
+  height: 48px;
+  font-size: 1rem;
+}
+.level-badge-md .level-badge-emoji {
+  font-size: 1.35rem;
+  margin-top: 4px;
+}
+.level-badge-md .level-badge-title {
+  margin-top: 2px;
+}
+
+.level-badge-lg .level-badge-circle {
+  width: 64px;
+  height: 64px;
+  font-size: 1.25rem;
+}
+.level-badge-lg .level-badge-emoji {
+  font-size: 1.75rem;
+  margin-top: 4px;
+}
+.level-badge-lg .level-badge-title {
+  margin-top: 2px;
+}

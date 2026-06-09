@@ -5,6 +5,8 @@ import { authAPI } from '../api/auth.api';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 import { User, Edit3, Mail, MapPin, Calendar, Target, Award, Zap, Flame, LogOut } from 'lucide-react';
+import { getLevelTitle } from '../constants/xpSystem';
+import LevelBadge, { getTierColor } from '../components/gamification/LevelBadge';
 
 const goalOptions = [
   { value: 'pass',      label: 'Pass Mode',    desc: 'Focus on clearing exams (40%+)',   colorClass: 'goal-pass' },
@@ -68,16 +70,21 @@ const ProfilePage = () => {
         {/* Left: Profile card */}
         <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           {/* Avatar */}
-          <div className="profile-avatar-wrap">
-            <div className="profile-avatar">
-              {user?.name?.charAt(0)?.toUpperCase() || '?'}
-            </div>
-            <div>
-              <div style={{ fontWeight: 800, fontSize: '1.2rem', marginBottom: 4 }}>{user?.name}</div>
-              <div style={{ fontSize: '0.85rem', color: 'var(--txt-2)', marginBottom: 6 }}>{user?.email}</div>
-              <div className={`profile-badge-goal ${currentGoal.colorClass}`}>
-                {currentGoal.label}
+          <div className="profile-avatar-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', width: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div className="profile-avatar">
+                {user?.name?.charAt(0)?.toUpperCase() || '?'}
               </div>
+              <div>
+                <div style={{ fontWeight: 800, fontSize: '1.2rem', marginBottom: 4 }}>{user?.name}</div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--txt-2)', marginBottom: 6 }}>{user?.email}</div>
+                <div className={`profile-badge-goal ${currentGoal.colorClass}`}>
+                  {currentGoal.label}
+                </div>
+              </div>
+            </div>
+            <div style={{ flexShrink: 0 }}>
+              <LevelBadge level={user?.level || 1} size="md" />
             </div>
           </div>
 
@@ -88,7 +95,21 @@ const ProfilePage = () => {
               { label: 'College / University', value: user?.institution || 'Not specified', icon: <MapPin size={14} /> },
               { label: 'Member Since', value: user?.createdAt ? format(new Date(user.createdAt), 'dd MMMM yyyy') : '—', icon: <Calendar size={14} /> },
               { label: 'Study Goal', value: currentGoal.label, icon: <Target size={14} /> },
-              { label: 'Level', value: `Level ${user?.level || 1}`, icon: <Award size={14} /> },
+              { 
+                label: 'Level', 
+                value: (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <span>Level {user?.level || 1}</span>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--txt-2)' }}>
+                      {getLevelTitle(user?.level || 1).emoji} {getLevelTitle(user?.level || 1).title}
+                    </span>
+                    <span className="badge" style={{ backgroundColor: getTierColor(getLevelTitle(user?.level || 1).tier), color: '#fff', fontSize: '0.65rem', padding: '2px 6px', textTransform: 'capitalize' }}>
+                      {getLevelTitle(user?.level || 1).tier}
+                    </span>
+                  </div>
+                ), 
+                icon: <Award size={14} /> 
+              },
               { label: 'Experience', value: `${user?.xp || 0} / ${user?.targetXP || 250} XP`, icon: <Zap size={14} /> },
               { label: 'Current Streak', value: `${user?.streak || 0} Day(s)`, icon: <Flame size={14} /> },
             ].map(info => (
