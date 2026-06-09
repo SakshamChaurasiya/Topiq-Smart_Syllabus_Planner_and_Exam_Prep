@@ -33,14 +33,52 @@ const CheatCodePage = () => {
   const [showDisclaimer, setShowDisclaimer] = useState(true);
 
   useEffect(() => {
+    setSubject(null);
+    setSyllabus(null);
+    setResult(null);
+    setSelectedMode(null);
+    setLoading(true);
+
     const fetch = async () => {
       try {
-        const [subRes, sylRes] = await Promise.allSettled([
+        const [subRes, sylRes, planRes] = await Promise.allSettled([
           subjectAPI.getById(subjectId),
           syllabusAPI.getBySubject(subjectId),
+          plannerAPI.getPlan(subjectId, 'cheat'),
         ]);
         if (subRes.status  === 'fulfilled') setSubject(subRes.value.data.data);
         if (sylRes.status  === 'fulfilled') setSyllabus(sylRes.value.data.data);
+        if (planRes.status === 'fulfilled') {
+          const plan = planRes.value.data.data;
+          if (plan && plan.isActive && plan.mode !== 'normal' && plan.cheatCodeData) {
+            setResult(plan.cheatCodeData);
+
+            let modeObj = null;
+            if (plan.mode === '1day') modeObj = MODES.find(m => m.days === 1);
+            else if (plan.mode === '3day') modeObj = MODES.find(m => m.days === 3);
+            else if (plan.mode === '7day') modeObj = MODES.find(m => m.days === 7);
+            else if (plan.mode === '15day') modeObj = MODES.find(m => m.days === 15);
+            else if (plan.mode === 'custom') modeObj = MODES.find(m => m.days === -1);
+
+            if (modeObj) {
+              setSelectedMode(modeObj);
+              if (modeObj.days === -1) {
+                setCustomDays(plan.daysRemaining);
+              }
+            }
+
+            if (plan.availableHoursPerDay) {
+              setHoursPerDay(plan.availableHoursPerDay);
+            }
+            if (plan.targetGoal) {
+              setTargetGoal(plan.targetGoal);
+            }
+          } else {
+            setResult(null);
+          }
+        } else {
+          setResult(null);
+        }
       } catch {}
       finally { setLoading(false); }
     };
@@ -186,7 +224,7 @@ const CheatCodePage = () => {
                 transition: 'all 0.2s',
               }}
             >
-              {generating ? '⏳ AI is cooking...' : `⚡ Activate ${selectedMode?.label || 'Cheat Code'}`}
+              {generating ? '⏳ AI is cooking...' : result ? '⚡ Regenerate Cheat Code' : `⚡ Activate ${selectedMode?.label || 'Cheat Code'}`}
             </button>
           </div>
         </div>

@@ -45,11 +45,15 @@ const PlannerPage = () => {
       const [subRes, sylRes, planRes] = await Promise.allSettled([
         subjectAPI.getById(subjectId),
         syllabusAPI.getBySubject(subjectId),
-        plannerAPI.getPlan(subjectId),
+        plannerAPI.getPlan(subjectId, 'normal'),
       ]);
       if (subRes.status  === 'fulfilled') setSubject(subRes.value.data.data);
       if (sylRes.status  === 'fulfilled') setSyllabus(sylRes.value.data.data);
-      if (planRes.status === 'fulfilled') setPlan(planRes.value.data.data);
+      if (planRes.status === 'fulfilled') {
+        setPlan(planRes.value.data.data);
+      } else {
+        setPlan(null);
+      }
       if (subRes.status === 'fulfilled' && subRes.value.data.data?.examDate) {
         setForm(f => ({ ...f, examDate: subRes.value.data.data.examDate.split('T')[0] }));
       }
@@ -57,7 +61,14 @@ const PlannerPage = () => {
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchData(); }, [subjectId]);
+  useEffect(() => {
+    setSubject(null);
+    setSyllabus(null);
+    setPlan(null);
+    setExpandedDay(null);
+    setLoading(true);
+    fetchData();
+  }, [subjectId]);
 
   const handleGenerate = async (e) => {
     e.preventDefault();

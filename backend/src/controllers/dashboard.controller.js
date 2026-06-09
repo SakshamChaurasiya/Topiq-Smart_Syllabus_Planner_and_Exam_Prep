@@ -45,7 +45,7 @@ const getDashboard = async (req, res) => {
                 .limit(10),
 
             // Active study plans
-            StudyPlan.find({ userId, isActive: true })
+            StudyPlan.find({ userId, isActive: true, mode: "normal" })
                 .populate("subjectId", "name color examDate")
                 .select("subjectId examDate daysRemaining completionPercentage mode targetGoal"),
 

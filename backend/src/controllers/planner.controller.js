@@ -141,7 +141,7 @@ const generatePlan = async (req, res) => {
         });
 
         // Deactivate any existing plan for this subject
-        await StudyPlan.updateMany({ subjectId, userId: req.user._id }, { isActive: false });
+        await StudyPlan.updateMany({ subjectId, userId: req.user._id, mode: "normal" }, { isActive: false });
 
         // Save new plan
         const plan = await StudyPlan.create({
@@ -231,7 +231,7 @@ const generateCheatCode = async (req, res) => {
         examDate.setDate(today.getDate() + days);
 
         // Deactivate previous plan
-        await StudyPlan.updateMany({ subjectId, userId: req.user._id }, { isActive: false });
+        await StudyPlan.updateMany({ subjectId, userId: req.user._id, mode: { $ne: "normal" } }, { isActive: false });
 
         const plan = await StudyPlan.create({
             userId: req.user._id,
@@ -247,6 +247,7 @@ const generateCheatCode = async (req, res) => {
             survivalStrategy: aiResult.survivalStrategy || "",
             planSummary: aiResult.message || "",
             isActive: true,
+            cheatCodeData: aiResult,
         });
 
         // Notification
@@ -277,11 +278,19 @@ const generateCheatCode = async (req, res) => {
 // -------------------------------------------
 const getPlan = async (req, res) => {
     try {
-        const plan = await StudyPlan.findOne({
+        const { mode } = req.query;
+        const query = {
             subjectId: req.params.subjectId,
             userId: req.user._id,
             isActive: true,
-        });
+        };
+        if (mode === "normal") {
+            query.mode = "normal";
+        } else if (mode === "cheat") {
+            query.mode = { $ne: "normal" };
+        }
+
+        const plan = await StudyPlan.findOne(query);
 
         if (!plan) return sendError(res, 404, "No active study plan found for this subject.");
 

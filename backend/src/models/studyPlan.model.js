@@ -141,6 +141,12 @@ const studyPlanSchema = new mongoose.Schema(
             default: "",
         },
 
+        // Raw AI cheat code JSON response
+        cheatCodeData: {
+            type: mongoose.Schema.Types.Mixed,
+            default: null,
+        },
+
         // Whether this is the currently active plan
         isActive: {
             type: Boolean,
