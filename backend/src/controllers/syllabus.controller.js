@@ -674,6 +674,20 @@ const uploadPYQ = async (req, res) => {
 
         await syllabus.save();
 
+        // Check if user now has 3+ PYQ uploads
+        try {
+            const pyqCount = await Syllabus.countDocuments({
+                userId: req.user._id,
+                "pyqAnalysis.uploadedAt": { $ne: null }
+            });
+            if (pyqCount >= 3) {
+                const { awardBadge } = require("../utils/badges");
+                await awardBadge(req.user._id, "pyq_hunter");
+            }
+        } catch (badgeErr) {
+            console.error("[Syllabus] Error awarding pyq_hunter badge:", badgeErr);
+        }
+
         return sendSuccess(res, 200, "PYQ analysis completed successfully.", syllabus.pyqAnalysis);
     } catch (error) {
         console.error("[Syllabus] PYQ upload/analysis error:", error.message);

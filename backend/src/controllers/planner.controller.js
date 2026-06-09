@@ -259,6 +259,14 @@ const generateCheatCode = async (req, res) => {
             subjectId,
         });
 
+        // Award badge
+        try {
+            const { awardBadge } = require("../utils/badges");
+            await awardBadge(req.user._id, "crisis_survivor");
+        } catch (badgeErr) {
+            console.error("[Planner] Error awarding crisis_survivor badge:", badgeErr);
+        }
+
         return sendSuccess(res, 201, `Cheat Code (${mode}) activated!`, {
             mode,
             daysRemaining: days,

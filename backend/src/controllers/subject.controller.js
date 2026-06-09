@@ -121,8 +121,16 @@ const updateSubject = async (req, res) => {
         if (priority !== undefined) subject.priority = priority;
         if (notes !== undefined) subject.notes = notes;
         if (completedTopics !== undefined) subject.completedTopics = completedTopics;
-
         await subject.save(); // Triggers the pre-save hook to recalculate progress
+
+        if (subject.completedTopics === subject.totalTopics && subject.totalTopics > 0) {
+            try {
+                const { awardBadge } = require("../utils/badges");
+                await awardBadge(req.user._id, "topper");
+            } catch (badgeErr) {
+                console.error("[Subject] Error awarding topper badge:", badgeErr);
+            }
+        }
 
         return sendSuccess(res, 200, "Subject updated successfully.", subject);
     } catch (error) {

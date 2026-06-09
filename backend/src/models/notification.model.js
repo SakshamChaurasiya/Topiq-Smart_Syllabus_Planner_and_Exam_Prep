@@ -35,6 +35,7 @@ const notificationSchema = new mongoose.Schema(
                 "plan-generated",
                 "streak-alert",
                 "general",
+                "achievement",
             ],
             default: "general",
         },

@@ -247,6 +247,21 @@ const updateMissionStatus = async (req, res) => {
 
         await mission.save();
 
+        if (status === "completed") {
+            try {
+                const completedCount = await Mission.countDocuments({
+                    userId: req.user._id,
+                    status: "completed",
+                });
+                if (completedCount === 1) {
+                    const { awardBadge } = require("../utils/badges");
+                    await awardBadge(req.user._id, "first_blood");
+                }
+            } catch (badgeErr) {
+                console.error("[Mission] Error awarding first_blood badge:", badgeErr);
+            }
+        }
+
         if (status === "completed" && confidence) {
             await updateTopicPriority(mission.subjectId, mission.topicName, confidence);
         }

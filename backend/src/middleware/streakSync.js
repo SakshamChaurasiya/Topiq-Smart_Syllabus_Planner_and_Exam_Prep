@@ -49,6 +49,14 @@ const streakSync = async (req, res, next) => {
     if (wasActiveYesterday) {
       // Consecutive day — increment streak
       user.streak = (user.streak || 0) + 1;
+      if (user.streak === 14) {
+        try {
+          const { awardBadge } = require("../utils/badges");
+          await awardBadge(user._id, "no_days_off");
+        } catch (badgeErr) {
+          console.error("[StreakSync] Error awarding no_days_off badge:", badgeErr);
+        }
+      }
     } else {
       // Missed at least one day — reset streak (unless protected by a freeze token)
       if (user.streakFreezeTokens > 0) {

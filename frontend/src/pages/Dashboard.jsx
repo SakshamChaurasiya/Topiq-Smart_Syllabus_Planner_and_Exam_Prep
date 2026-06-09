@@ -9,6 +9,8 @@ import ProgressRing from '../components/ui/ProgressRing';
 import Badge from '../components/ui/Badge';
 import XPProgressBar from '../components/gamification/XPProgressBar';
 import StreakBadge from '../components/gamification/StreakBadge';
+import BadgeShelf from '../components/gamification/BadgeShelf';
+import { badgeAPI } from '../api/badge.api';
 import { streakFreezeAPI } from '../api/streakFreeze.api';
 import ConfidenceRating from '../components/gamification/ConfidenceRating';
 import { format } from 'date-fns';
@@ -42,6 +44,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [freezeTokens, setFreezeTokens] = useState(0);
   const [ratingMissionId, setRatingMissionId] = useState(null);
+  const [badges, setBadges] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -87,9 +90,19 @@ const Dashboard = () => {
     }
   };
 
+  const fetchBadges = async () => {
+    try {
+      const res = await badgeAPI.getBadges();
+      setBadges(res.data.data.earned || []);
+    } catch {
+      setBadges([]);
+    }
+  };
+
   useEffect(() => {
     fetchDashboard();
     fetchFreezeTokens();
+    fetchBadges();
   }, []);
 
   const completeMission = async (id) => {
@@ -166,6 +179,7 @@ const Dashboard = () => {
           level={dashboardUser.level || 1}
         />
         <StreakBadge streak={dashboardUser.streak || 0} freezeTokens={freezeTokens} />
+        <BadgeShelf badges={badges} />
       </div>
 
       {/* ── TODAY'S PROGRESS ── */}

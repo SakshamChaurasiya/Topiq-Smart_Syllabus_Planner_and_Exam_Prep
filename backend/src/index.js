@@ -61,6 +61,7 @@ const notificationRoutes = require("./routes/notification.routes");
 const dashboardRoutes    = require("./routes/dashboard.routes");
 const flashcardRoutes    = require("./routes/flashcard.routes");
 const streakFreezeRoutes = require("./routes/streakFreeze.routes");
+const badgeRoutes        = require("./routes/badge.routes");
 
 app.use("/api/auth",          authRoutes);
 app.use("/api/subjects",      subjectRoutes);
@@ -71,6 +72,7 @@ app.use("/api/missions",      missionRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/dashboard",     dashboardRoutes);
 app.use("/api/streak-freeze", streakFreezeRoutes);
+app.use("/api/badges",        badgeRoutes);
 app.use("/api",               flashcardRoutes);
 
 // ============================================
