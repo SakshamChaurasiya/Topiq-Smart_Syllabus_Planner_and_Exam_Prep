@@ -242,13 +242,17 @@ The dashboard aggregates subject, plan, and mission collections using MongoDB ag
 **Status:** Implemented
 
 #### What it does
-Enables students to rate their understanding of a topic when completing daily study missions, dynamically adjusting their study priority and awarding gamification bonus points.
+Enables students to rate their understanding of a topic when completing daily study missions, checking off units/topics, or reviewing their roadmap. The self-assessment dynamically updates topic study priorities, recalculates spaced repetition intervals, and awards gamification bonus points.
 
 #### Key capabilities
 - **Three-tiered feedback**: Students choose between *Shaky*, *Okay*, or *Solid* confidence ratings.
-- **Bonus rewards**: Completed tasks grant additional XP based on self-reflection (+15 XP for Shaky, +5 XP for Solid).
+- **Bonus rewards**: Completed tasks/missions grant additional XP based on self-reflection (+15 XP for Shaky, +5 XP for Solid).
 - **Dynamic priority reallocation**: Flags *Shaky* topics by elevating their importance to `critical` in the syllabus, and sets *Solid* topics to `low` priority to direct future study cycles.
-- **Inline rating panel**: Opens a clean drawer beneath the checkbox on the dashboard to collect feedback seamlessly without disrupting the dashboard view.
+- **Cross-page visibility and integration**: Available seamlessly across three key user interfaces:
+  * **Dashboard**: Opens inline beneath active study missions.
+  * **Syllabus Page**: Renders inline when marking unit-wise topics completed directly in the course syllabus.
+  * **Planner Page**: Renders inline when completing topics within the day-by-day study roadmap.
+- **Unified Completion State**: Toggling topic completion on the Planner or Syllabus pages updates both views instantly, keeping the student's progress perfectly synchronized.
 
 #### Technical implementation
 - Modified the Mongoose `Mission` schema to save confidence enums.
