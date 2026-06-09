@@ -7,6 +7,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
 const { sendSuccess, sendError } = require("../utils/responseHelper");
 const { syncExamNotifications } = require("../utils/examNotifications");
+const { getXPForLevel } = require("../utils/xpSystem");
 
 // -------------------------------------------
 // Helper: Generate a signed JWT token
@@ -62,7 +63,7 @@ const register = async (req, res) => {
                 xp: user.xp,
                 level: user.level,
                 streak: user.streak,
-                targetXP: user.level * 250,
+                targetXP: getXPForLevel(user.level),
                 institution: user.institution || "",
             },
         });
@@ -116,7 +117,7 @@ const login = async (req, res) => {
                 xp: user.xp,
                 level: user.level,
                 streak: user.streak,
-                targetXP: user.level * 250,
+                targetXP: getXPForLevel(user.level),
                 institution: user.institution || "",
             },
         });
@@ -145,7 +146,7 @@ const getMe = async (req, res) => {
             xp: user.xp,
             level: user.level,
             streak: user.streak,
-            targetXP: user.level * 250,
+            targetXP: getXPForLevel(user.level),
             createdAt: user.createdAt,
             institution: user.institution || "",
         });
@@ -184,7 +185,7 @@ const updateProfile = async (req, res) => {
             xp: updatedUser.xp,
             level: updatedUser.level,
             streak: updatedUser.streak,
-            targetXP: updatedUser.level * 250,
+            targetXP: getXPForLevel(updatedUser.level),
             institution: updatedUser.institution || "",
         });
     } catch (error) {

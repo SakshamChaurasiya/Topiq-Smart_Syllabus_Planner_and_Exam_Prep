@@ -62,7 +62,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
   animation: shimmer 2s infinite;
 }
 
@@ -364,24 +364,24 @@
   .xp-bar {
     padding: 12px 16px;
   }
-  
+
   .xp-icon {
     font-size: 1.2rem;
   }
-  
+
   .xp-label {
     font-size: 0.8rem;
   }
-  
+
   .streak-badge {
     padding: 10px 16px;
     font-size: 0.85rem;
   }
-  
+
   .achievement-badge {
     padding: 16px;
   }
-  
+
   .achievement-icon {
     width: 48px;
     height: 48px;
@@ -433,3 +433,280 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* ── New XP & Level System Customizations ── */
+.xp-bar .level-badge {
+  padding: 2px 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: 12px;
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.level-title-text {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--txt-2);
+}
+
+.xp-level-up-flash {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.15rem;
+  z-index: 10;
+  pointer-events: none;
+  animation: levelUpFlash 2s ease-in-out forwards;
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+}
+
+@keyframes levelUpFlash {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  20% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+
+  80% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+.xp-bar-tier-starter {
+  --xp-tier-color: var(--txt-3);
+}
+
+.xp-bar-tier-rising {
+  --xp-tier-color: var(--info);
+}
+
+.xp-bar-tier-intermediate {
+  --xp-tier-color: var(--accent);
+}
+
+.xp-bar-tier-advanced {
+  --xp-tier-color: var(--warning);
+}
+
+.xp-bar-tier-elite {
+  --xp-tier-color: var(--danger);
+}
+
+.xp-bar-tier-legendary {
+  --xp-tier-color: #f59e0b;
+}
+
+.xp-progress-fill {
+  background: var(--xp-tier-color, var(--gradient-primary));
+}
+
+/* ── XP Bar Container ── */
+.xp-bar-container {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r12);
+}
+
+.xp-top-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.xp-level-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: var(--r-full);
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #fff;
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: 0.01em;
+}
+
+.xp-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  gap: 8px;
+}
+
+.xp-title-text {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--txt-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.xp-numbers {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--txt-3);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.xp-track {
+  height: 8px;
+  background: var(--surface2);
+  border-radius: var(--r-full);
+  overflow: hidden;
+}
+
+.xp-fill {
+  height: 100%;
+  border-radius: var(--r-full);
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+  background-size: 200% 100%;
+  animation: xpShimmer 2.5s linear infinite;
+  position: relative;
+}
+
+@keyframes xpShimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* Level-up overlay */
+.xp-levelup-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  border-radius: var(--r12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: levelUpFlash 2.5s ease forwards;
+  pointer-events: none;
+}
+
+.xp-levelup-text {
+  font-size: 1rem;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.02em;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.25);
+}
+
+@keyframes levelUpFlash {
+  0%   { opacity: 0; transform: scale(0.85); }
+  15%  { opacity: 1; transform: scale(1.02); }
+  75%  { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+/* ── Streak Badge ── */
+.streak-badge-wrap {
+  display: inline-flex;
+  align-items: stretch;
+  flex-shrink: 0;
+}
+
+.streak-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  white-space: nowrap;
+  transition: all var(--t);
+}
+
+.streak-badge-pill.hot {
+  background: linear-gradient(135deg, #fb923c, #ef4444);
+  color: #fff;
+  border: none;
+}
+
+.streak-badge-pill.cold {
+  background: var(--surface2);
+  color: var(--txt-2);
+  border: 1.5px solid var(--border);
+}
+
+/* radius applied via inline style based on whether freeze token is present */
+
+.streak-flame {
+  display: inline-block;
+  transition: font-size var(--t);
+}
+
+.streak-flame.pulse {
+  animation: flamePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes flamePulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.2); }
+}
+
+.streak-freeze-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 10px;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-left: none;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #38bdf8;
+  white-space: nowrap;
+}
+
+/* ── Dash gami bar layout ── */
+/* Override the existing .dash-gami-bar if it exists, else add fresh */
+.dash-gami-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+  .dash-gami-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .streak-badge-wrap {
+    align-self: flex-start;
+  }
+  .xp-meta-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+}

@@ -45,6 +45,7 @@ const Dashboard = () => {
   const [freezeTokens, setFreezeTokens] = useState(0);
   const [ratingMissionId, setRatingMissionId] = useState(null);
   const [badges, setBadges] = useState([]);
+  const [leveledUp, setLeveledUp] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -107,8 +108,13 @@ const Dashboard = () => {
 
   const completeMission = async (id) => {
     try {
-      await missionAPI.updateStatus(id, 'completed');
+      const res = await missionAPI.updateStatus(id, 'completed');
       toast.success('Mission complete! Keep going!');
+      const newUser = res.data?.data?.user;
+      if (newUser && dashboardUser && newUser.level > dashboardUser.level) {
+        setLeveledUp(true);
+        setTimeout(() => setLeveledUp(false), 2500);
+      }
       fetchDashboard();
     } catch { toast.error('Failed to update.'); }
   };
@@ -177,6 +183,8 @@ const Dashboard = () => {
           currentXP={dashboardUser.xp || 0}
           targetXP={dashboardUser.targetXP || 250}
           level={dashboardUser.level || 1}
+          leveledUp={leveledUp}
+          levelTitle={dashboardUser.levelTitle}
         />
         <StreakBadge streak={dashboardUser.streak || 0} freezeTokens={freezeTokens} />
         <BadgeShelf badges={badges} />
@@ -306,10 +314,21 @@ const Dashboard = () => {
                         <ConfidenceRating
                           missionId={mission._id}
                           topicName={mission.topicName || mission.title}
-                          onRated={(rating) => {
+                          onRated={async (rating) => {
                             toast.success("Mission complete! +XP");
                             setRatingMissionId(null);
-                            fetchDashboard();
+                            const oldLvl = dashboardUser.level;
+                            try {
+                              const res = await dashboardAPI.get();
+                              const newUserData = res.data?.data?.user;
+                              if (newUserData && oldLvl && newUserData.level > oldLvl) {
+                                setLeveledUp(true);
+                                setTimeout(() => setLeveledUp(false), 2500);
+                              }
+                              setData(res.data.data);
+                            } catch {
+                              fetchDashboard();
+                            }
                           }}
                         />
                       </div>

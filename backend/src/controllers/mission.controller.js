@@ -11,6 +11,7 @@ const { syncRevisionMissions, calculateSpacedRepetition } = require("../utils/sp
 const Notification = require("../models/notification.model");
 const { awardToken } = require("./streakFreeze.controller");
 const { updateTopicPriority } = require("../utils/topicPriority");
+const { getXPForLevel } = require("../utils/xpSystem");
 
 // -------------------------------------------
 // @route   GET /api/missions
@@ -140,11 +141,10 @@ const updateMissionStatus = async (req, res) => {
             user.xp += xpEarned;
 
             // 2. Check Level Up
-            const getTargetXP = (lvl) => lvl * 250;
             let leveledUp = false;
             const oldLevel = user.level;
-            while (user.xp >= getTargetXP(user.level)) {
-                user.xp -= getTargetXP(user.level);
+            while (user.xp >= getXPForLevel(user.level)) {
+                user.xp -= getXPForLevel(user.level);
                 user.level += 1;
                 leveledUp = true;
             }
@@ -281,7 +281,7 @@ const updateMissionStatus = async (req, res) => {
                 xp: user.xp,
                 level: user.level,
                 streak: user.streak,
-                targetXP: user.level * 250,
+                targetXP: getXPForLevel(user.level),
             },
         });
     } catch (error) {

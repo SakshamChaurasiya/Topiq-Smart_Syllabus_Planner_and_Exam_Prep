@@ -10,6 +10,7 @@ const Notification = require("../models/notification.model");
 const { sendSuccess, sendError } = require("../utils/responseHelper");
 const { syncExamNotifications } = require("../utils/examNotifications");
 const { syncRevisionMissions } = require("../utils/spacedRepetition");
+const { getXPForLevel, getLevelTitle } = require("../utils/xpSystem");
 
 // -------------------------------------------
 // @route   GET /api/dashboard
@@ -112,7 +113,8 @@ const getDashboard = async (req, res) => {
                 xp: user.xp,
                 level: user.level,
                 streak: user.streak,
-                targetXP: user.level * 250,
+                targetXP: getXPForLevel(user.level),
+                levelTitle: getLevelTitle(user.level),
             },
             overview: {
                 totalSubjects,
