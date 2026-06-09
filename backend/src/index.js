@@ -62,6 +62,7 @@ const dashboardRoutes    = require("./routes/dashboard.routes");
 const flashcardRoutes    = require("./routes/flashcard.routes");
 const streakFreezeRoutes = require("./routes/streakFreeze.routes");
 const badgeRoutes        = require("./routes/badge.routes");
+const multiplierRoutes   = require("./routes/multiplier.routes");
 
 app.use("/api/auth",          authRoutes);
 app.use("/api/subjects",      subjectRoutes);
@@ -73,6 +74,7 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/dashboard",     dashboardRoutes);
 app.use("/api/streak-freeze", streakFreezeRoutes);
 app.use("/api/badges",        badgeRoutes);
+app.use("/api/multiplier",    multiplierRoutes);
 app.use("/api",               flashcardRoutes);
 
 // ============================================
@@ -136,6 +138,17 @@ if (process.env.NODE_ENV !== "test") {
             console.log(`🌐 API Base: http://localhost:${PORT}/api`);
             console.log(`💚 Health: http://localhost:${PORT}/health`);
             console.log("========================================");
+
+            // Daily XP Multiplier notifications job
+            try {
+                const { sendMultiplierNotification } = require("./utils/multiplierNotifier");
+                sendMultiplierNotification();
+                setInterval(() => {
+                    sendMultiplierNotification();
+                }, 24 * 60 * 60 * 1000);
+            } catch (notifierError) {
+                console.error("[Multiplier Job Startup Error]", notifierError.message);
+            }
         });
     }).catch((error) => {
         console.error("❌ Failed to start server:", error.message);

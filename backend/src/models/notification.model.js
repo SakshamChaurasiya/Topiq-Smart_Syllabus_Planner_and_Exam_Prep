@@ -36,6 +36,7 @@ const notificationSchema = new mongoose.Schema(
                 "streak-alert",
                 "general",
                 "achievement",
+                "xp-boost",
             ],
             default: "general",
         },

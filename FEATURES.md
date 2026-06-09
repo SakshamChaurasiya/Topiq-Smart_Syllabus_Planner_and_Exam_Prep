@@ -261,6 +261,27 @@ Enables students to rate their understanding of a topic when completing daily st
 
 ---
 
+### 14. XP Multiplier Days
+**Category:** Gamification
+**Status:** Implemented
+
+#### What it does
+Boosts student motivation on specific calendar days by multiplying all experience points (XP) earned from completing missions. It features a guaranteed 2x multiplier on Fridays, and a weekly-changing 1.5x bonus day on a random weekday (Monday through Thursday) determined deterministically on the server side using the current ISO week number.
+
+#### Key capabilities
+- **Dynamic Multiplier Display**: Shows an active, dismissible informational banner on the Dashboard detailing the current multiplier reason (e.g. `2x XP Friday 🔥` or `1.5x Bonus Day ⚡`) when active.
+- **Seeded Randomness**: Uses the ISO week number to pick a consistent, server-side global bonus weekday so no database sync or persistence layer is needed.
+- **Pre-emptive Alerts**: A daily notification job inspects tomorrow's multiplier and pre-emptively notifies all active users (users who logged in or completed a mission within the last 7 days) about upcoming XP boosts.
+- **Personalized Feedback**: Displays responsive success toasts displaying the exact multiplied XP earned along with the multiplier reason when completing missions on the Dashboard.
+
+#### Technical implementation
+- Multipliers are calculated deterministically on the server using `multiplierDay.js` utility.
+- Integrated the calculations inline inside `updateMissionStatus` to scale the calculated mission base XP and confidence bonuses before saving and returning them in the response.
+- Registered public GET routes under `/api/multiplier/today` and `/api/multiplier/tomorrow` without authentication protect middleware.
+- Configured a daily interval notifier task on server startup that queries recently active users and bulk-creates notification documents with category `xp-boost`.
+
+---
+
 ## User Workflow
 
 1. **Signup & Setup**: The student registers an account and sets up a student profile, selecting a primary academic target goal (Pass Mode, Score Mode, or Topper Mode) that serves as the default configuration for study materials.

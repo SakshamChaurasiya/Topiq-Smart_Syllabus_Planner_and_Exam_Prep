@@ -25,6 +25,7 @@ Students have syllabuses but no structured way to extract priority information f
 | Rate Limiting & Cache | File-hash cache and local rate limiting middleware |
 | Central Dashboard | Dynamic analytics interface showing current progress metrics |
 | Confidence Rating | Self-assessment tool on Dashboard, Syllabus, and Planner pages that modifies syllabus topic priorities and awards bonus XP |
+| XP Multiplier Days | Server-side global 2x Friday and 1.5x weekly bonus days with custom multiplier banners and pre-emptive alerts |
 
 Full feature documentation is available in FEATURES.md.
 
@@ -193,6 +194,8 @@ Note: Get a free Gemini API key at aistudio.google.com/app/apikey. The app runs 
 | GET | /api/public/cheatnote/:token | View shared cheat note | No |
 | GET | /api/streak-freeze | Get streak freeze tokens for user | Yes |
 | POST | /api/streak-freeze/award | Award one streak freeze token to user | Yes |
+| GET | /api/multiplier/today | Get today's active multiplier settings | No |
+| GET | /api/multiplier/tomorrow | Get tomorrow's multiplier settings | No |
 
 All protected routes require Authorization: Bearer <token> header.
 

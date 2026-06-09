@@ -15,6 +15,8 @@ import { streakFreezeAPI } from '../api/streakFreeze.api';
 import ConfidenceRating from '../components/gamification/ConfidenceRating';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
+import { multiplierAPI } from '../api/multiplier.api';
+import MultiplierBanner from '../components/gamification/MultiplierBanner';
 import {
   BookOpen, Target, CalendarDays, Bell, Map,
   Check, RefreshCcw, FileText, Plus, Rocket,
@@ -46,6 +48,7 @@ const Dashboard = () => {
   const [ratingMissionId, setRatingMissionId] = useState(null);
   const [badges, setBadges] = useState([]);
   const [leveledUp, setLeveledUp] = useState(false);
+  const [multiplier, setMultiplier] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -100,17 +103,35 @@ const Dashboard = () => {
     }
   };
 
+  const fetchMultiplier = async () => {
+    try {
+      const res = await multiplierAPI.getToday();
+      setMultiplier(res.data.data);
+    } catch {
+      setMultiplier({ active: false });
+    }
+  };
+
   useEffect(() => {
     fetchDashboard();
     fetchFreezeTokens();
     fetchBadges();
+    fetchMultiplier();
   }, []);
 
   const completeMission = async (id) => {
     try {
       const res = await missionAPI.updateStatus(id, 'completed');
-      toast.success('Mission complete! Keep going!');
-      const newUser = res.data?.data?.user;
+      const resData = res.data?.data || {};
+      const { xpEarned, multiplierApplied, multiplierReason } = resData;
+
+      if (multiplierApplied) {
+        toast.success(`⚡ ${xpEarned} XP earned! (${multiplierReason})`);
+      } else {
+        toast.success(`+${xpEarned} XP earned!`);
+      }
+
+      const newUser = resData.user;
       if (newUser && dashboardUser && newUser.level > dashboardUser.level) {
         setLeveledUp(true);
         setTimeout(() => setLeveledUp(false), 2500);
@@ -176,6 +197,12 @@ const Dashboard = () => {
           <div className="stat-pill-label">Upcoming Exams</div>
         </div>
       </div>
+
+      <MultiplierBanner
+        multiplier={multiplier?.multiplier || 1}
+        reason={multiplier?.reason || ''}
+        active={multiplier?.active || false}
+      />
 
       {/* ── GAMIFICATION BAR ── */}
       <div className="dash-gami-bar">
@@ -314,8 +341,14 @@ const Dashboard = () => {
                         <ConfidenceRating
                           missionId={mission._id}
                           topicName={mission.topicName || mission.title}
-                          onRated={async (rating) => {
-                            toast.success("Mission complete! +XP");
+                          onRated={async (rating, res) => {
+                            const resData = res?.data?.data || {};
+                            const { xpEarned, multiplierApplied, multiplierReason } = resData;
+                            if (multiplierApplied) {
+                              toast.success(`⚡ ${xpEarned} XP earned! (${multiplierReason})`);
+                            } else {
+                              toast.success(`+${xpEarned} XP earned!`);
+                            }
                             setRatingMissionId(null);
                             const oldLvl = dashboardUser.level;
                             try {

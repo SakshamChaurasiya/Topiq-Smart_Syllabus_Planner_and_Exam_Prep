@@ -710,3 +710,36 @@
     gap: 2px;
   }
 }
+
+/* ── XP Multiplier Banner ── */
+.multiplier-banner {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 10px 16px;
+  border-radius: var(--r12);
+  background: var(--surface);
+  margin-bottom: 12px;
+}
+
+.multiplier-banner-text {
+  flex: 1;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--txt);
+}
+
+.multiplier-banner-dismiss {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: var(--txt-3);
+  transition: color var(--t);
+  padding: 0;
+}
+
+.multiplier-banner-dismiss:hover {
+  color: var(--txt);
+}

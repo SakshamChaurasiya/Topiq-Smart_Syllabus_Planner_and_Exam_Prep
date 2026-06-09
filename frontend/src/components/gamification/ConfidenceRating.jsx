@@ -7,11 +7,12 @@ const ConfidenceRating = ({ missionId, topicName, onRated }) => {
   const handleRating = async (rating) => {
     setLoadingRating(rating);
     try {
+      let res;
       if (missionId) {
-        await missionAPI.updateStatus(missionId, 'completed', { confidence: rating });
+        res = await missionAPI.updateStatus(missionId, 'completed', { confidence: rating });
       }
       if (onRated) {
-        onRated(rating);
+        onRated(rating, res);
       }
     } catch (error) {
       console.error('[ConfidenceRating] Failed to save rating:', error);

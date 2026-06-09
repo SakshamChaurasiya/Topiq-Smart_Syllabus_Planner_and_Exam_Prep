@@ -12,6 +12,7 @@ const Notification = require("../models/notification.model");
 const { awardToken } = require("./streakFreeze.controller");
 const { updateTopicPriority } = require("../utils/topicPriority");
 const { getXPForLevel } = require("../utils/xpSystem");
+const { getTodayMultiplier } = require("../utils/multiplierDay");
 
 // -------------------------------------------
 // @route   GET /api/missions
@@ -125,6 +126,10 @@ const updateMissionStatus = async (req, res) => {
         // Set completion timestamp
         let xpEarned = 0;
         const user = req.user;
+        let multiplierApplied = false;
+        let multiplierReason = null;
+        let baseXP = 0;
+
         if (status === "completed") {
             mission.completedAt = new Date();
             if (confidence) {
@@ -136,6 +141,12 @@ const updateMissionStatus = async (req, res) => {
             } else if (confidence === "solid") {
                 xpEarned += 5;
             }
+
+            const { multiplier, reason } = getTodayMultiplier();
+            baseXP = xpEarned;
+            xpEarned = Math.round(xpEarned * multiplier);
+            multiplierApplied = multiplier > 1;
+            multiplierReason = multiplierApplied ? reason : null;
 
             // 1. Award XP to User
             user.xp += xpEarned;
@@ -277,6 +288,9 @@ const updateMissionStatus = async (req, res) => {
             status: mission.status,
             completedAt: mission.completedAt,
             xpEarned: status === "completed" ? xpEarned : 0,
+            multiplierApplied,
+            multiplierReason,
+            baseXP,
             user: {
                 xp: user.xp,
                 level: user.level,
