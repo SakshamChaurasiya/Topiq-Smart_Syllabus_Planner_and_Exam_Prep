@@ -203,7 +203,13 @@ const updateMissionStatus = async (req, res) => {
             if ((mission.type === "study" || mission.type === "revision") && mission.topicName) {
                 const syllabus = await Syllabus.findOne({ subjectId: mission.subjectId, userId: user._id });
                 if (syllabus) {
-                    const rating = req.body.rating || "got-it"; // 'got-it' | 'shaky' | 'no-idea'
+                    let rating = req.body.rating;
+                    if (!rating && confidence) {
+                        rating = confidence === "shaky" ? "shaky" : "got-it";
+                    }
+                    if (!rating) {
+                        rating = "got-it";
+                    }
                     
                     let progressEntry = syllabus.topicProgress.find(
                         tp => tp.topicName.toLowerCase().trim() === mission.topicName.toLowerCase().trim()

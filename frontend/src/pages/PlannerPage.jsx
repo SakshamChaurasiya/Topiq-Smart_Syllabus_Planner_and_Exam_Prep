@@ -7,6 +7,7 @@ import { syllabusAPI } from '../api/syllabus.api';
 import { LoadingScreen } from '../components/ui/LoadingSpinner';
 import Badge from '../components/ui/Badge';
 import EmptyState from '../components/ui/EmptyState';
+import ConfidenceRating from '../components/gamification/ConfidenceRating';
 import { format, isPast } from 'date-fns';
 import toast from 'react-hot-toast';
 import {
@@ -33,6 +34,41 @@ const PlannerPage = () => {
   const [exporting, setExporting] = useState(false);
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const [rescheduling, setRescheduling] = useState(false);
+  const [ratingTopicId, setRatingTopicId] = useState(null);
+
+  const getTopicFromSyllabus = (topicName) => {
+    if (!syllabus || !syllabus.units) return null;
+    for (const unit of syllabus.units) {
+      const found = unit.topics.find(t => t.name.toLowerCase().trim() === topicName.toLowerCase().trim());
+      if (found) return found;
+    }
+    return null;
+  };
+
+  const handleTopicToggle = async (topicId, currentStatus) => {
+    if (currentStatus) {
+      try {
+        await syllabusAPI.markTopic(syllabus._id, topicId, false);
+        toast.success('Topic marked incomplete.');
+        fetchData();
+      } catch {
+        toast.error('Failed to update topic.');
+      }
+    } else {
+      setRatingTopicId(topicId);
+    }
+  };
+
+  const handleTopicRate = async (topicId, confidence) => {
+    try {
+      await syllabusAPI.markTopic(syllabus._id, topicId, true, confidence);
+      toast.success('Topic completed! ✨');
+      setRatingTopicId(null);
+      fetchData();
+    } catch {
+      toast.error('Failed to save confidence rating.');
+    }
+  };
 
   const [form, setForm] = useState({
     examDate: '',
@@ -467,21 +503,62 @@ const PlannerPage = () => {
                               <span>{day.studyTip}</span>
                             </div>
                           )}
-                          {day.topics?.map((t, ti) => (
-                            <div key={ti} className="roadmap-topic-row">
-                              <div className="roadmap-topic-indicator" style={{ background: importanceColor[t.importance] || 'var(--primary)' }} />
-                              <div className="roadmap-topic-info">
-                                <div className="roadmap-topic-title">{t.topicName}</div>
-                                <div className="roadmap-topic-sub">{t.unitName}</div>
+                          {day.topics?.map((t, ti) => {
+                            const topic = getTopicFromSyllabus(t.topicName);
+                            const isCompleted = topic ? topic.isCompleted : false;
+
+                            return (
+                              <div key={ti} style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                                <div className="roadmap-topic-row" style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%' }}>
+                                  {/* Checkbox */}
+                                  {topic && (
+                                    <div
+                                      onClick={() => handleTopicToggle(topic._id, isCompleted)}
+                                      style={{
+                                        width: 18,
+                                        height: 18,
+                                        borderRadius: 4,
+                                        flexShrink: 0,
+                                        border: `2px solid ${isCompleted ? 'var(--success)' : importanceColor[t.importance] || 'var(--border-strong)'}`,
+                                        background: isCompleted ? 'var(--success)' : 'transparent',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        transition: 'all 0.15s',
+                                      }}
+                                    >
+                                      {isCompleted && <span style={{ color: '#fff', fontSize: '0.65rem', fontWeight: 700 }}>✓</span>}
+                                    </div>
+                                  )}
+                                  
+                                  {/* Topic contents */}
+                                  <div className="roadmap-topic-info" style={{ flex: 1, minWidth: 0, opacity: isCompleted ? 0.55 : 1 }}>
+                                    <div className="roadmap-topic-title" style={{ textDecoration: isCompleted ? 'line-through' : 'none' }}>
+                                      {t.topicName}
+                                    </div>
+                                    <div className="roadmap-topic-sub">{t.unitName}</div>
+                                  </div>
+                                  <div className="roadmap-topic-meta" style={{ opacity: isCompleted ? 0.55 : 1 }}>
+                                    <Badge type={t.importance} label={t.importance} />
+                                    <span className="roadmap-topic-hours">
+                                      <Clock size={12} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 2 }} /> {t.estimatedHours}h
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Confidence rating panel */}
+                                {topic && ratingTopicId === topic._id && (
+                                  <div className="confidence-panel show" style={{ padding: '10px 14px', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 8, margin: '4px 0 12px 30px' }}>
+                                    <ConfidenceRating
+                                      topicName={t.topicName}
+                                      onRated={(rating) => handleTopicRate(topic._id, rating)}
+                                    />
+                                  </div>
+                                )}
                               </div>
-                              <div className="roadmap-topic-meta">
-                                <Badge type={t.importance} label={t.importance} />
-                                <span className="roadmap-topic-hours">
-                                  <Clock size={12} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 2 }} /> {t.estimatedHours}h
-                                </span>
-                              </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       )}
                     </div>

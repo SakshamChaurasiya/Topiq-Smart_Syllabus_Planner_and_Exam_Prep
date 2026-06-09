@@ -7,7 +7,9 @@ const ConfidenceRating = ({ missionId, topicName, onRated }) => {
   const handleRating = async (rating) => {
     setLoadingRating(rating);
     try {
-      await missionAPI.updateStatus(missionId, 'completed', { confidence: rating });
+      if (missionId) {
+        await missionAPI.updateStatus(missionId, 'completed', { confidence: rating });
+      }
       if (onRated) {
         onRated(rating);
       }

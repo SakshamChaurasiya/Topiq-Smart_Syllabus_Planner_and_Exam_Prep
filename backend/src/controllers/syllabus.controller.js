@@ -490,7 +490,11 @@ const getSyllabus = async (req, res) => {
 const markTopicComplete = async (req, res) => {
     try {
         const { syllabusId, topicId } = req.params;
-        const { isCompleted } = req.body;
+        const { isCompleted, confidence } = req.body;
+
+        if (confidence && !["shaky", "okay", "solid"].includes(confidence)) {
+            return sendError(res, 400, "Invalid confidence rating. Must be shaky, okay, or solid.");
+        }
 
         const syllabus = await Syllabus.findOne({
             _id: syllabusId,
@@ -509,6 +513,15 @@ const markTopicComplete = async (req, res) => {
                 topic.isCompleted = isCompleted;
                 topicFound = true;
 
+                // Sync confidence with priority
+                if (isCompleted && confidence) {
+                    if (confidence === "shaky") {
+                        topic.importance = "critical";
+                    } else if (confidence === "solid") {
+                        topic.importance = "low";
+                    }
+                }
+
                 // Recalculate unit completion
                 unit.completedTopics = unit.topics.filter((t) => t.isCompleted).length;
 
@@ -520,15 +533,28 @@ const markTopicComplete = async (req, res) => {
                     let progressEntry = syllabus.topicProgress.find(
                         tp => tp.topicName.toLowerCase().trim() === topic.name.toLowerCase().trim()
                     );
+                    
+                    let rating = "got-it";
+                    if (confidence === "shaky") {
+                        rating = "shaky";
+                    }
+
                     if (!progressEntry) {
-                        const calculated = calculateSpacedRepetition(0, "got-it");
+                        const calculated = calculateSpacedRepetition(0, rating);
                         syllabus.topicProgress.push({
                             topicName: topic.name,
                             lastStudiedAt: new Date(),
                             nextReviewDate: calculated.nextReviewDate,
                             intervalIndex: calculated.intervalIndex,
-                            rating: "got-it"
+                            rating: rating
                         });
+                    } else {
+                        const currentInterval = progressEntry.intervalIndex;
+                        const calculated = calculateSpacedRepetition(currentInterval, rating);
+                        progressEntry.lastStudiedAt = new Date();
+                        progressEntry.nextReviewDate = calculated.nextReviewDate;
+                        progressEntry.intervalIndex = calculated.intervalIndex;
+                        progressEntry.rating = rating;
                     }
                 }
                 break;

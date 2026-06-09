@@ -8,8 +8,8 @@ export const syllabusAPI = {
   submitText:  (data)     => axiosInstance.post('/syllabus/text', data),
   analyze:     (id, data) => axiosInstance.post(`/syllabus/${id}/analyze`, data, { timeout: 120000 }),
   getBySubject:(subjectId)=> axiosInstance.get(`/syllabus/${subjectId}`),
-  markTopic:   (syllabusId, topicId, isCompleted) =>
-    axiosInstance.put(`/syllabus/${syllabusId}/topic/${topicId}/complete`, { isCompleted }),
+  markTopic:   (syllabusId, topicId, isCompleted, confidence) =>
+    axiosInstance.put(`/syllabus/${syllabusId}/topic/${topicId}/complete`, { isCompleted, confidence }),
   uploadPYQ:   (syllabusId, formData) =>
     axiosInstance.post(`/syllabus/${syllabusId}/pyq-upload`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },

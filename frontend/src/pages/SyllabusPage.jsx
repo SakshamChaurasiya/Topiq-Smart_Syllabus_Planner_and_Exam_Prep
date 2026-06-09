@@ -6,6 +6,7 @@ import { subjectAPI } from '../api/subject.api';
 import { LoadingScreen, LoadingSpinner } from '../components/ui/LoadingSpinner';
 import Badge from '../components/ui/Badge';
 import toast from 'react-hot-toast';
+import ConfidenceRating from '../components/gamification/ConfidenceRating';
 
 const SyllabusPage = () => {
   const { id: subjectId } = useParams();
@@ -147,12 +148,28 @@ const SyllabusPage = () => {
     } finally { setAnalyzing(false); }
   };
 
+  const [ratingTopicId, setRatingTopicId] = useState(null);
+
   // Mark topic complete / incomplete
   const handleTopicToggle = async (topicId, currentStatus) => {
+    if (currentStatus) {
+      try {
+        await syllabusAPI.markTopic(syllabus._id, topicId, false);
+        toast.success('Topic marked incomplete.');
+        fetchData();
+      } catch { toast.error('Failed to update topic.'); }
+    } else {
+      setRatingTopicId(topicId);
+    }
+  };
+
+  const handleTopicRate = async (topicId, confidence) => {
     try {
-      await syllabusAPI.markTopic(syllabus._id, topicId, !currentStatus);
+      await syllabusAPI.markTopic(syllabus._id, topicId, true, confidence);
+      toast.success('Topic completed! ✨');
+      setRatingTopicId(null);
       fetchData();
-    } catch { toast.error('Failed to update topic.'); }
+    } catch { toast.error('Failed to save confidence rating.'); }
   };
 
   // Upload and analyze PYQ PDF
@@ -776,6 +793,14 @@ const SyllabusPage = () => {
                             </div>
                             {topic.summary && (
                               <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '2px 0 0', lineHeight: 1.5 }}>{topic.summary}</p>
+                            )}
+                            {ratingTopicId === topic._id && (
+                              <div className="confidence-panel show" style={{ marginTop: 12, padding: '10px 14px', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 8 }}>
+                                <ConfidenceRating
+                                  topicName={topic.name}
+                                  onRated={(rating) => handleTopicRate(topic._id, rating)}
+                                />
+                              </div>
                             )}
                           </div>
 
