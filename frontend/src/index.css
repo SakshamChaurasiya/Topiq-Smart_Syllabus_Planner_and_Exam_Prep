@@ -455,3 +455,49 @@ img { max-width: 100%; height: auto; display: block; }
   color: var(--txt);
   background: var(--bg-hover);
 }
+
+/* ── Study Analytics ── */
+.activity-grid-wrap {
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.activity-cell {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  position: relative;
+  transition: opacity var(--t-fast);
+}
+
+.activity-cell:hover {
+  opacity: 0.85;
+}
+
+.week-history-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.week-history-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.week-card {
+  width: 120px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 10px 12px;
+  transition: border-color var(--t-fast);
+}
+
+.week-card.current {
+  border-color: var(--accent);
+  background: rgba(108, 71, 255, 0.05);
+}

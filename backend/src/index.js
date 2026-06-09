@@ -65,6 +65,7 @@ const badgeRoutes        = require("./routes/badge.routes");
 const multiplierRoutes   = require("./routes/multiplier.routes");
 const quizRoutes         = require("./routes/quiz.routes");
 const weekReportRoutes   = require("./routes/weekReport.routes");
+const analyticsRoutes    = require("./routes/analytics.routes");
 
 app.use("/api/auth",          authRoutes);
 app.use("/api/subjects",      subjectRoutes);
@@ -79,6 +80,7 @@ app.use("/api/badges",        badgeRoutes);
 app.use("/api/multiplier",    multiplierRoutes);
 app.use("/api/quiz",          quizRoutes);
 app.use("/api/week-report",   weekReportRoutes);
+app.use("/api/analytics",     analyticsRoutes);
 app.use("/api",               flashcardRoutes);
 
 // ============================================

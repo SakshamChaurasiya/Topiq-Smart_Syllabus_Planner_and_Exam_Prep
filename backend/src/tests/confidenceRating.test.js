@@ -6,24 +6,26 @@ const Mission = require('../models/mission.model');
 const Syllabus = require('../models/syllabus.model');
 
 describe('Confidence Rating Feature', () => {
+    jest.setTimeout(30000);
     let testUser;
     let userToken;
     let subjectId;
 
     beforeAll(async () => {
-        jest.setTimeout(25000);
-        if (mongoose.connection.readyState !== 1) {
-            if (mongoose.connection.readyState === 2) {
-                await new Promise((resolve) => mongoose.connection.once('connected', resolve));
-            } else {
-                await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/topiq_test');
-            }
+        const state = mongoose.connection.readyState;
+        if (state === 2) {
+            // connecting — wait for it
+            await new Promise((resolve) => mongoose.connection.once('connected', resolve));
+        } else if (state === 3) {
+            // disconnecting — wait then reconnect
+            await new Promise((resolve) => mongoose.connection.once('disconnected', resolve));
+            await mongoose.connect(process.env.MONGO_URI);
+        } else if (state === 0) {
+            // disconnected — reconnect
+            await mongoose.connect(process.env.MONGO_URI);
         }
-    }, 25000);
-
-    afterAll(async () => {
-        await mongoose.connection.close();
-    });
+        // state === 1 means already connected, nothing to do
+    }, 30000);
 
     beforeEach(async () => {
         await User.deleteMany({ email: /test_confidence/ });

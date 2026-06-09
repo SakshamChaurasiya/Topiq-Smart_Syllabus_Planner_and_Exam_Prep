@@ -1,10 +1,11 @@
 // ProfilePage.jsx — View & update user profile
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../api/auth.api';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
-import { User, Edit3, Mail, MapPin, Calendar, Target, Award, Zap, Flame, LogOut } from 'lucide-react';
+import { User, Edit3, Mail, MapPin, Calendar, Target, Award, Zap, Flame, LogOut, BarChart2 } from 'lucide-react';
 import { getLevelTitle } from '../constants/xpSystem';
 import LevelBadge, { getTierColor } from '../components/gamification/LevelBadge';
 
@@ -16,6 +17,7 @@ const goalOptions = [
 
 const ProfilePage = () => {
   const { user, updateUser, logout } = useAuth();
+  const navigate = useNavigate();
 
   const [form, setForm]     = useState({
     name: user?.name || '',
@@ -222,6 +224,39 @@ const ProfilePage = () => {
             </div>
           </div>
         )}
+      </div>
+
+      <div className="divider" style={{ margin: '28px 0' }} />
+      <div style={{ marginBottom: 8 }}>
+        <h3 style={{ fontWeight: 700, fontSize: '0.9rem', letterSpacing: '-0.01em', marginBottom: 16 }}>
+          Study Overview
+        </h3>
+      </div>
+      <div className="stat-row">
+        <div className="stat-pill">
+          <div className="stat-pill-value">{user?.xp || 0}</div>
+          <div className="stat-pill-label">Total XP</div>
+        </div>
+        <div className="stat-pill">
+          <div className="stat-pill-value">{user?.level || 1}</div>
+          <div className="stat-pill-label">Level</div>
+        </div>
+        <div className="stat-pill">
+          <div className="stat-pill-value">{user?.streak || 0}</div>
+          <div className="stat-pill-label">Day Streak</div>
+        </div>
+        <div 
+          className="stat-pill" 
+          onClick={() => navigate('/analytics')}
+          style={{ cursor: 'pointer', transition: 'border-color var(--t-fast)' }}
+          onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--accent)'}
+          onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
+        >
+          <div className="stat-pill-value" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+            <BarChart2 size={20} />
+          </div>
+          <div className="stat-pill-label" style={{ color: 'var(--accent)' }}>Full Report</div>
+        </div>
       </div>
     </div>
   );

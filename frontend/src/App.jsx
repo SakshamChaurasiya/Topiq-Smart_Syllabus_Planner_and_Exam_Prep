@@ -19,6 +19,7 @@ import CheatCodePage from './pages/CheatCodePage';
 import MissionsPage from './pages/MissionsPage';
 import NotificationsPage from './pages/NotificationsPage';
 import ProfilePage  from './pages/ProfilePage';
+import AnalyticsPage from './pages/AnalyticsPage';
 
 function App() {
   return (
@@ -58,6 +59,7 @@ function App() {
             <Route path="/missions"           element={<MissionsPage />} />
             <Route path="/notifications"      element={<NotificationsPage />} />
             <Route path="/profile"            element={<ProfilePage />} />
+            <Route path="/analytics"          element={<AnalyticsPage />} />
           </Route>
 
           {/* Fallback */}
