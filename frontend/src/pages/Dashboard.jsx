@@ -17,6 +17,7 @@ import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 import { multiplierAPI } from '../api/multiplier.api';
 import MultiplierBanner from '../components/gamification/MultiplierBanner';
+import QuizCTA from '../components/gamification/QuizCTA';
 import {
   BookOpen, Target, CalendarDays, Bell, Map,
   Check, RefreshCcw, FileText, Plus, Rocket,
@@ -244,9 +245,20 @@ const Dashboard = () => {
             />
           </div>
           {todayStats.completionRate === 100 && (
-            <div className="dash-progress-done-msg">
-              Outstanding! All missions completed for today.
-            </div>
+            <QuizCTA
+              completedMissions={todayMissions || []}
+              defaultMessage="Outstanding! All missions completed for today."
+              onQuizComplete={(result) => {
+                if (result.bonusXP > 0) {
+                  toast.success(`+${result.bonusXP} bonus XP earned! 🎯`);
+                }
+                if (result.leveledUp) {
+                  setLeveledUp(true);
+                  setTimeout(() => setLeveledUp(false), 2500);
+                }
+                fetchDashboard();
+              }}
+            />
           )}
         </div>
       )}

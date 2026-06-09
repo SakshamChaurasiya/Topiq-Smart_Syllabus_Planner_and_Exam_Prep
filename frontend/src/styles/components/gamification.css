@@ -743,3 +743,106 @@
 .multiplier-banner-dismiss:hover {
   color: var(--txt);
 }
+
+/* ── Quick Quiz ── */
+.quiz-progress-bar-wrap {
+  margin-bottom: 16px;
+}
+.quiz-progress-label {
+  font-size: 0.72rem;
+  color: var(--txt-3);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.quiz-question-text {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--txt);
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+.quiz-option-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r8);
+  background: var(--bg);
+  color: var(--txt);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin-bottom: 8px;
+  transition: border-color var(--t-fast), background var(--t-fast);
+}
+.quiz-option-btn:hover {
+  border-color: var(--border2);
+  background: var(--bg-hover);
+}
+.quiz-option-btn.selected {
+  border-color: var(--accent);
+  background: rgba(108, 71, 255, 0.08);
+  font-weight: 600;
+}
+.quiz-skip-link {
+  font-size: 0.75rem;
+  color: var(--txt-3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+  padding: 0;
+  margin-top: 10px;
+  text-decoration: underline;
+  display: block;
+  text-align: right;
+}
+.quiz-skip-link:hover { color: var(--txt-2); }
+.quiz-result-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  font-size: 0.82rem;
+  color: var(--txt-2);
+  line-height: 1.5;
+}
+.quiz-score-display {
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: 900;
+  margin-bottom: 12px;
+  letter-spacing: -0.03em;
+}
+
+/* ── Quiz CTA ── */
+.quiz-cta-wrap {
+  position: relative;
+  text-align: center;
+  padding: 4px 0 8px;
+}
+.quiz-cta-message {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--success);
+  margin-bottom: 10px;
+}
+.quiz-cta-sub {
+  font-size: 0.72rem;
+  color: var(--txt-3);
+  margin-top: 6px;
+}
+.quiz-cta-dismiss {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: none;
+  border: none;
+  font-size: 0.85rem;
+  color: var(--txt-3);
+  cursor: pointer;
+  padding: 2px 4px;
+  line-height: 1;
+}
+.quiz-cta-dismiss:hover { color: var(--txt-2); }

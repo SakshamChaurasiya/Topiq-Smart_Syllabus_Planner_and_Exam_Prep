@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { format, isPast } from 'date-fns';
 import toast from 'react-hot-toast';
 import { BookOpen, RefreshCw, FileText, Edit3, Target, Calendar, Check, SkipForward, ArrowRight, ClipboardList } from 'lucide-react';
+import QuizCTA from '../components/gamification/QuizCTA';
 
 const typeIcon = {
   study:    <BookOpen size={14} />,
@@ -152,9 +153,18 @@ const MissionsPage = () => {
                 }} />
               </div>
               {todayStats.completionRate === 100 && (
-                <div style={{ textAlign: 'center', marginTop: 10, color: 'var(--success)', fontWeight: 700, fontSize: '0.9rem' }}>
-                  All missions done today! Amazing work!
-                </div>
+                <QuizCTA
+                  completedMissions={data?.missions || []}
+                  defaultMessage="All missions done today! Amazing work! 🎉"
+                  onQuizComplete={(result) => {
+                    if (result.bonusXP > 0) {
+                      toast.success(`Quiz done! +${result.bonusXP} bonus XP 🎯`);
+                    } else {
+                      toast('Quiz done! Keep practicing 📚', { icon: '📚' });
+                    }
+                    fetchToday();
+                  }}
+                />
               )}
             </div>
           )}

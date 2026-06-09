@@ -282,6 +282,27 @@ Boosts student motivation on specific calendar days by multiplying all experienc
 
 ---
 
+### 15. Quick Quiz
+**Category:** Gamification
+**Status:** Implemented
+
+#### What it does
+Provides students with an optional, skippable multiple-choice quiz (MCQ) containing 3 questions based on one of today's completed study topic names. It serves as a study validation step, appearing only after the student has reached a 100% completion rate for today's tasks.
+
+#### Key capabilities
+- **Stateless AI Generation**: Generates application or analysis level MCQs dynamically using Gemini AI with a Groq fallback, passing questions statelessly between client and backend.
+- **Graded XP Bonuses**: Awards tiered experience points depending on quiz score (0 correct → 0 XP, 1 correct → 5 XP, 2 correct → 15 XP, 3 correct → 30 XP) and updates user levels.
+- **Comprehensive Feedback**: Displays answers checking, score emojis, and descriptive explanations for each question upon submission.
+- **Rate Limited Generation**: Protects expensive AI endpoints by restricting quiz generation queries to a maximum of 3 requests per hour.
+
+#### Technical implementation
+- Implemented `generateQuizQuestions` wrapper inside `ai.service.js` specifying JSON structures.
+- Created `quiz.controller.js` to structure quiz generation and handle grade submissions.
+- Added `/api/quiz/generate` (authorized and rate-limited) and `/api/quiz/submit` (authorized) routes.
+- Built reusable decoupled `QuizCTA` and `QuickQuiz` React modules styled in Vanilla CSS.
+
+---
+
 ## User Workflow
 
 1. **Signup & Setup**: The student registers an account and sets up a student profile, selecting a primary academic target goal (Pass Mode, Score Mode, or Topper Mode) that serves as the default configuration for study materials.

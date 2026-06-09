@@ -26,6 +26,7 @@ Students have syllabuses but no structured way to extract priority information f
 | Central Dashboard | Dynamic analytics interface showing current progress metrics |
 | Confidence Rating | Self-assessment tool on Dashboard, Syllabus, and Planner pages that modifies syllabus topic priorities and awards bonus XP |
 | XP Multiplier Days | Server-side global 2x Friday and 1.5x weekly bonus days with custom multiplier banners and pre-emptive alerts |
+| Quick Quiz | Dynamic AI-generated MCQ quizzes on completed study topics for bonus XP rewards |
 
 Full feature documentation is available in FEATURES.md.
 
@@ -196,6 +197,8 @@ Note: Get a free Gemini API key at aistudio.google.com/app/apikey. The app runs 
 | POST | /api/streak-freeze/award | Award one streak freeze token to user | Yes |
 | GET | /api/multiplier/today | Get today's active multiplier settings | No |
 | GET | /api/multiplier/tomorrow | Get tomorrow's multiplier settings | No |
+| POST | /api/quiz/generate | Generate 3 MCQ questions for a topic (rate limited) | Yes |
+| POST | /api/quiz/submit | Submit answers to calculate scores and award bonus XP | Yes |
 
 All protected routes require Authorization: Bearer <token> header.
 

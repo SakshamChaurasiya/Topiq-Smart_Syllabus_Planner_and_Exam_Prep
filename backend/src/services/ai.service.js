@@ -875,6 +875,44 @@ If you could not read anything at all, return: { "pyqSuggestedTopics": [], "read
     }
 };
 
+const generateQuizQuestions = async (topicName, subjectName, difficulty = 'medium') => {
+  try {
+    const systemPrompt = `You are a strict academic quiz generator.
+Generate exactly 3 multiple choice questions for the given topic.
+RULES:
+- Each question must have exactly 4 options labeled A, B, C, D.
+- Exactly one option must be correct per question.
+- Questions must test understanding, not just recall of definitions.
+- Difficulty: ${difficulty}. Medium = application-level. Hard = analysis-level.
+- Return valid raw JSON only. No explanation text outside the JSON.`;
+
+    const userPrompt = `Generate 3 MCQ questions for the topic: "${topicName}"
+from the subject: "${subjectName}".
+
+Return this exact JSON:
+{
+  "questions": [
+    {
+      "question": "<the question text>",
+      "options": ["A. <option>", "B. <option>", "C. <option>", "D. <option>"],
+      "correctIndex": <0, 1, 2, or 3>,
+      "explanation": "<one sentence why the correct answer is right>"
+    }
+  ]
+}
+Return exactly 3 question objects. No more, no less.`;
+
+    const result = await callAI(systemPrompt, userPrompt);
+    if (!result) return null;
+    const parsed = JSON.parse(result);
+    if (!parsed.questions || parsed.questions.length !== 3) return null;
+    return parsed;
+  } catch (error) {
+    console.warn('[AI Service] generateQuizQuestions failed:', error.message);
+    return null;
+  }
+};
+
 module.exports = {
     analyzeSyllabus,
     analyzeSyllabusFromImage,
@@ -883,4 +921,5 @@ module.exports = {
     analyzePYQ,
     generateFlashcards,
     analyzePYQFromFile,
+    generateQuizQuestions,
 };

@@ -63,6 +63,7 @@ const flashcardRoutes    = require("./routes/flashcard.routes");
 const streakFreezeRoutes = require("./routes/streakFreeze.routes");
 const badgeRoutes        = require("./routes/badge.routes");
 const multiplierRoutes   = require("./routes/multiplier.routes");
+const quizRoutes         = require("./routes/quiz.routes");
 
 app.use("/api/auth",          authRoutes);
 app.use("/api/subjects",      subjectRoutes);
@@ -75,6 +76,7 @@ app.use("/api/dashboard",     dashboardRoutes);
 app.use("/api/streak-freeze", streakFreezeRoutes);
 app.use("/api/badges",        badgeRoutes);
 app.use("/api/multiplier",    multiplierRoutes);
+app.use("/api/quiz",          quizRoutes);
 app.use("/api",               flashcardRoutes);
 
 // ============================================
