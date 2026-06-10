@@ -230,49 +230,84 @@ const getStudyAnalytics = async (req, res) => {
 
         // -----------------------------------------------------------
         // D. DAILY AVERAGE — last 30 IST calendar days
+        // dailyCounts30 is built from activityMap (all 3 sources)
+        // so streak and bestDay match exactly what the grid shows.
         // -----------------------------------------------------------
         const thirtyStartStr = addDays(todayStr, -29);
-        const thirtyStartUTC = istDateStrToUTC(thirtyStartStr);
-        const thirtyEndUTC = new Date(istDateStrToUTC(todayStr).getTime() + 24 * 60 * 60 * 1000 - 1);
 
+        // Build dailyCounts30 from activityMap (missions + topics + planner)
+        const dailyCounts30 = {};
+        for (const [dateStr, val] of Object.entries(activityMap)) {
+            if (dateStr >= thirtyStartStr && dateStr <= todayStr) {
+                dailyCounts30[dateStr] = val.count;
+            }
+        }
+
+        // completed30 still needed for hours/minutes averages
+        const thirtyStartUTC = istDateStrToUTC(thirtyStartStr);
+        const thirtyEndUTC = new Date(
+            istDateStrToUTC(todayStr).getTime() + 24 * 60 * 60 * 1000 - 1
+        );
         const completed30 = await Mission.find({
             userId,
             status: "completed",
             completedAt: { $gte: thirtyStartUTC, $lte: thirtyEndUTC },
         });
 
-        const avgMissionsPerDay = Math.round((completed30.length / 30) * 10) / 10;
-        const totalMins30 = completed30.reduce((s, m) => s + (m.estimatedMinutes || 0), 0);
+        const avgMissionsPerDay =
+            Math.round((completed30.length / 30) * 10) / 10;
+        const totalMins30 = completed30.reduce(
+            (s, m) => s + (m.estimatedMinutes || 0), 0
+        );
         const avgMinutesPerDay = Math.round(totalMins30 / 30);
 
-        const dailyCounts30 = {};
-        completed30.forEach((m) => {
-            if (m.completedAt) {
-                const ds = toISTDateStr(m.completedAt);
-                dailyCounts30[ds] = (dailyCounts30[ds] || 0) + 1;
-            }
-        });
-
+        // bestDay: day with highest combined activity count in last 30 days
         let bestDate = null;
-        let maxCompleted = 0;
+        let maxCount = 0;
         for (const ds in dailyCounts30) {
-            if (dailyCounts30[ds] > maxCompleted) {
-                maxCompleted = dailyCounts30[ds];
+            if (dailyCounts30[ds] > maxCount) {
+                maxCount = dailyCounts30[ds];
                 bestDate = ds;
             }
         }
 
+        // longestStreak: longest consecutive days with any activity
+        // Uses dailyCounts30 (all sources) so it matches the grid
         let longestStreak = 0;
-        let currentStreak = 0;
+        let runningStreak = 0;
+        let ongoingCalculatedStreak = 0;
         for (let i = 0; i < 30; i++) {
             const ds = addDays(thirtyStartStr, i);
-            if (dailyCounts30[ds] > 0) {
-                currentStreak++;
-                longestStreak = Math.max(longestStreak, currentStreak);
+            if ((dailyCounts30[ds] || 0) > 0) {
+                runningStreak++;
+                if (i === 28 || i === 29) {
+                    ongoingCalculatedStreak = Math.max(ongoingCalculatedStreak, runningStreak);
+                }
+                longestStreak = Math.max(longestStreak, runningStreak);
             } else {
-                currentStreak = 0;
+                runningStreak = 0;
             }
         }
+
+        // Align the calculated ongoing streak with user's actual database streak
+        // (to resolve planned vs actual date drift from completed planner days)
+        const userStreak = req.user.streak || 0;
+        if (userStreak > 0 && ongoingCalculatedStreak > 0) {
+            let historicalMax = 0;
+            let temp = 0;
+            for (let i = 0; i < 28; i++) {
+                const ds = addDays(thirtyStartStr, i);
+                if ((dailyCounts30[ds] || 0) > 0) {
+                    temp++;
+                    historicalMax = Math.max(historicalMax, temp);
+                } else {
+                    temp = 0;
+                }
+            }
+            longestStreak = Math.max(historicalMax, userStreak);
+        }
+
+        const maxCompleted = maxCount;
 
         return sendSuccess(res, 200, "Study analytics fetched successfully.", {
             activityGrid,

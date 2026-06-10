@@ -17,11 +17,33 @@ const streakSync = async (req, res, next) => {
 
     const now = new Date();
 
-    const todayStart = new Date(now);
-    todayStart.setHours(0, 0, 0, 0);
+    // IST offset — matches analytics.controller.js
+    const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
 
-    const yesterdayStart = new Date(todayStart);
-    yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+    // Get YYYY-MM-DD string in IST for any UTC date
+    const toISTDateStr = (utcDate) => {
+      const ist = new Date(utcDate.getTime() + IST_OFFSET_MS);
+      const y = ist.getUTCFullYear();
+      const m = String(ist.getUTCMonth() + 1).padStart(2, '0');
+      const d = String(ist.getUTCDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    };
+
+    // IST midnight (00:00:00 IST) as a UTC Date for a given YYYY-MM-DD IST string
+    const istMidnightUTC = (istDateStr) => {
+      const [y, m, d] = istDateStr.split('-').map(Number);
+      return new Date(Date.UTC(y, m - 1, d) - IST_OFFSET_MS);
+    };
+
+    const todayISTStr     = toISTDateStr(now);
+    const yesterdayISTStr = (() => {
+      const [y, m, d] = todayISTStr.split('-').map(Number);
+      const dt = new Date(Date.UTC(y, m - 1, d - 1));
+      return `${dt.getUTCFullYear()}-${String(dt.getUTCMonth()+1).padStart(2,'0')}-${String(dt.getUTCDate()).padStart(2,'0')}`;
+    })();
+
+    const todayStart     = istMidnightUTC(todayISTStr);
+    const yesterdayStart = istMidnightUTC(yesterdayISTStr);
 
     const lastActive = user.lastActiveDate
       ? new Date(user.lastActiveDate)
@@ -35,11 +57,9 @@ const streakSync = async (req, res, next) => {
       return next();
     }
 
-    const lastActiveDay = new Date(lastActive);
-    lastActiveDay.setHours(0, 0, 0, 0);
-
-    const isActiveToday      = lastActiveDay.getTime() === todayStart.getTime();
-    const wasActiveYesterday = lastActiveDay.getTime() === yesterdayStart.getTime();
+    const lastActiveDayISTStr = toISTDateStr(lastActive);
+    const isActiveToday      = lastActiveDayISTStr === todayISTStr;
+    const wasActiveYesterday = lastActiveDayISTStr === yesterdayISTStr;
 
     if (isActiveToday) {
       // Already updated today — nothing to change, no DB write needed

@@ -7,21 +7,48 @@ const Mission = require("../models/mission.model");
 const Subject = require("../models/subject.model");
 const { sendSuccess, sendError } = require("../utils/responseHelper");
 
-const getStartOfWeek = (date = new Date()) => {
-    const d = new Date(date);
-    d.setHours(0, 0, 0, 0);
-    const day = d.getDay(); // 0 = Sunday, 1 = Monday, etc.
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-    d.setDate(diff);
-    return d;
+// IST offset — matches analytics.controller.js
+const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+
+// Get YYYY-MM-DD string in IST for any UTC date
+const toISTDateStr = (utcDate) => {
+    const ist = new Date(utcDate.getTime() + IST_OFFSET_MS);
+    const y = ist.getUTCFullYear();
+    const m = String(ist.getUTCMonth() + 1).padStart(2, '0');
+    const d = String(ist.getUTCDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
 };
 
-const formatWeekLabel = (start) => {
-    const s = new Date(start);
-    const e = new Date(start);
-    e.setDate(start.getDate() + 6);
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    return `${months[s.getMonth()]} ${s.getDate()} – ${months[e.getMonth()]} ${e.getDate()}`;
+// IST midnight (00:00 IST) as UTC Date — for use in MongoDB $gte/$lte queries
+const istMidnightUTC = (istDateStr) => {
+    const [y, m, d] = istDateStr.split('-').map(Number);
+    return new Date(Date.UTC(y, m - 1, d) - IST_OFFSET_MS);
+};
+
+// Returns UTC Date of Monday 00:00:00 IST of the week containing now
+const getStartOfWeek = () => {
+    const todayISTStr = toISTDateStr(new Date());
+    const [y, m, d] = todayISTStr.split('-').map(Number);
+    const jsDay = new Date(Date.UTC(y, m - 1, d)).getUTCDay(); // 0=Sun
+    const diffToMon = jsDay === 0 ? -6 : 1 - jsDay;
+    const monDate = new Date(Date.UTC(y, m - 1, d + diffToMon));
+    const monY = monDate.getUTCFullYear();
+    const monM = String(monDate.getUTCMonth() + 1).padStart(2, '0');
+    const monD = String(monDate.getUTCDate()).padStart(2, '0');
+    const monISTStr = `${monY}-${monM}-${monD}`;
+    return istMidnightUTC(monISTStr); // UTC Date for Monday 00:00 IST
+};
+
+const formatWeekLabel = (startUTC) => {
+    // Convert Monday UTC back to IST for display
+    const monISTStr = toISTDateStr(startUTC);
+    const [y, m, d] = monISTStr.split('-').map(Number);
+    const sunDate = new Date(Date.UTC(y, m - 1, d + 6));
+    const sunY = sunDate.getUTCFullYear();
+    const sunM = sunDate.getUTCMonth() + 1;
+    const sunD = sunDate.getUTCDate();
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    return `${months[m - 1]} ${d} – ${months[sunM - 1]} ${sunD}`;
 };
 
 const getWeekReport = async (req, res) => {
