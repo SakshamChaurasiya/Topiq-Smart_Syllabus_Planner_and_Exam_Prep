@@ -18,7 +18,9 @@ const { sendSuccess, sendError } = require("../utils/responseHelper");
 const getSubjects = async (req, res) => {
     try {
         const subjects = await Subject.find({ userId: req.user._id }).sort({ createdAt: -1 });
-        return sendSuccess(res, 200, "Subjects fetched successfully.", subjects);
+        const active   = subjects.filter(s => !s.isArchived);
+        const archived = subjects.filter(s => s.isArchived);
+        return sendSuccess(res, 200, "Subjects fetched successfully.", { active, archived });
     } catch (error) {
         console.error("[Subject] GetAll error:", error.message);
         return sendError(res, 500, "Failed to fetch subjects.");
@@ -172,4 +174,132 @@ const deleteSubject = async (req, res) => {
     }
 };
 
-module.exports = { getSubjects, getSubjectById, createSubject, updateSubject, deleteSubject };
+// ── HANDLER 1: submitExamReview ──
+// PUT /api/subjects/:id/exam-review
+// Saves the post-exam review and optionally archives the subject.
+const submitExamReview = async (req, res) => {
+  try {
+    const subject = await Subject.findOne({
+      _id: req.params.id,
+      userId: req.user._id,
+    });
+    if (!subject) return sendError(res, 404, 'Subject not found.');
+
+    const { rating, hardestTopic, topiqHelpfulness, reflection, action } = req.body;
+    // action: 'archive' | 'delete' | 'keep'
+
+    // Validate rating
+    const validRatings = ['terrible', 'hard', 'okay', 'good', 'crushed'];
+    if (!rating || !validRatings.includes(rating)) {
+      return sendError(res, 400, 'Valid rating is required (terrible/hard/okay/good/crushed).');
+    }
+
+    // Save review fields
+    subject.examReview = {
+      rating,
+      hardestTopic: hardestTopic || null,
+      topiqHelpfulness: topiqHelpfulness || null,
+      reflection: reflection?.slice(0, 200) || null,
+      completedAt: new Date(),
+      reviewDismissedCount: subject.examReview?.reviewDismissedCount || 0,
+      reviewDismissedAt: subject.examReview?.reviewDismissedAt || null,
+    };
+
+    if (action === 'archive') {
+      subject.isArchived = true;
+      subject.archivedAt = new Date();
+    }
+
+    await subject.save();
+
+    // Create a notification
+    const Notification = require('../models/notification.model');
+    const ratingEmoji = { terrible:'😰', hard:'😟', okay:'😐', good:'😊', crushed:'🎉' };
+    await Notification.create({
+      userId: req.user._id,
+      title: `Exam reviewed: ${subject.name}`,
+      message: `You rated your ${subject.name} exam as "${rating}" ${ratingEmoji[rating]}. ${action === 'archive' ? 'Subject archived.' : 'Subject kept active.'}`,
+      type: 'achievement',
+    }).catch(() => {}); // never crash over notification
+
+    if (action === 'delete') {
+      // Full cascade delete — same as deleteSubject
+      const subjectId = subject._id;
+      await Promise.all([
+        Subject.findByIdAndDelete(subjectId),
+        require('../models/syllabus.model').deleteMany({ subjectId }),
+        require('../models/studyPlan.model').deleteMany({ subjectId }),
+        require('../models/mission.model').deleteMany({ subjectId }),
+      ]);
+      return sendSuccess(res, 200, `"${subject.name}" reviewed and deleted.`, { action: 'deleted' });
+    }
+
+    return sendSuccess(res, 200, 'Exam review saved.', {
+      action: action || 'keep',
+      isArchived: subject.isArchived,
+      examReview: subject.examReview,
+    });
+  } catch (error) {
+    console.error('[Subject] submitExamReview error:', error.message);
+    return sendError(res, 500, 'Failed to save exam review.');
+  }
+};
+
+// ── HANDLER 2: dismissReview ──
+// PUT /api/subjects/:id/dismiss-review
+// Increments dismissal count. After 3 dismissals, banner stops appearing.
+const dismissReview = async (req, res) => {
+  try {
+    const subject = await Subject.findOne({
+      _id: req.params.id,
+      userId: req.user._id,
+    });
+    if (!subject) return sendError(res, 404, 'Subject not found.');
+
+    if (!subject.examReview) subject.examReview = {};
+    subject.examReview.reviewDismissedCount =
+      (subject.examReview.reviewDismissedCount || 0) + 1;
+    subject.examReview.reviewDismissedAt = new Date();
+
+    await subject.save();
+    return sendSuccess(res, 200, 'Review dismissed.', {
+      dismissCount: subject.examReview.reviewDismissedCount,
+    });
+  } catch (error) {
+    console.error('[Subject] dismissReview error:', error.message);
+    return sendError(res, 500, 'Failed to dismiss review.');
+  }
+};
+
+// ── HANDLER 3: unarchiveSubject ──
+// PUT /api/subjects/:id/unarchive
+// Moves subject back to active.
+const unarchiveSubject = async (req, res) => {
+  try {
+    const subject = await Subject.findOne({
+      _id: req.params.id,
+      userId: req.user._id,
+    });
+    if (!subject) return sendError(res, 404, 'Subject not found.');
+
+    subject.isArchived = false;
+    subject.archivedAt = null;
+    await subject.save();
+
+    return sendSuccess(res, 200, `"${subject.name}" moved back to active subjects.`, subject);
+  } catch (error) {
+    console.error('[Subject] unarchiveSubject error:', error.message);
+    return sendError(res, 500, 'Failed to unarchive subject.');
+  }
+};
+
+module.exports = {
+  getSubjects,
+  getSubjectById,
+  createSubject,
+  updateSubject,
+  deleteSubject,
+  submitExamReview,
+  dismissReview,
+  unarchiveSubject
+};

@@ -11,6 +11,9 @@ const {
     createSubject,
     updateSubject,
     deleteSubject,
+    submitExamReview,
+    dismissReview,
+    unarchiveSubject,
 } = require("../controllers/subject.controller");
 const { protect } = require("../middleware/auth.middleware");
 
@@ -22,5 +25,9 @@ router.get("/:id", getSubjectById);
 router.post("/", createSubject);
 router.put("/:id", updateSubject);
 router.delete("/:id", deleteSubject);
+
+router.put('/:id/exam-review',    submitExamReview);
+router.put('/:id/dismiss-review', dismissReview);
+router.put('/:id/unarchive',      unarchiveSubject);
 
 module.exports = router;

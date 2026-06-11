@@ -1426,5 +1426,152 @@
   color: var(--txt);
 }
 
+  /* ── Exam Review Banner ── */
+  .exam-review-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: linear-gradient(135deg, rgba(108, 71, 255, 0.08) 0%, rgba(180, 71, 255, 0.04) 100%);
+    border: 1px solid rgba(108, 71, 255, 0.2);
+    border-radius: var(--r-md);
+    cursor: pointer;
+    transition: all var(--t-fast);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  }
+  .exam-review-banner:hover {
+    background: linear-gradient(135deg, rgba(108, 71, 255, 0.12) 0%, rgba(180, 71, 255, 0.08) 100%);
+    border-color: var(--accent);
+    box-shadow: 0 4px 12px rgba(108, 71, 255, 0.06);
+  }
+  .exam-review-banner-emoji {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .exam-review-banner-text {
+    flex: 1;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--txt-2);
+    line-height: 1.3;
+  }
+  .exam-review-banner-cta {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--accent);
+    flex-shrink: 0;
+    background: rgba(108, 71, 255, 0.1);
+    padding: 4px 8px;
+    border-radius: var(--r-sm);
+    transition: all var(--t-fast);
+  }
+  .exam-review-banner:hover .exam-review-banner-cta {
+    background: var(--accent);
+    color: #fff;
+  }
+  .exam-review-banner-dismiss {
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    cursor: pointer;
+    color: var(--txt-3);
+    font-size: 0.7rem;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: all var(--t-fast);
+    font-family: var(--font-body);
+  }
+  .exam-review-banner-dismiss:hover {
+    background: var(--danger-bg);
+    color: var(--danger);
+    border-color: var(--danger-border);
+  }
+
+  /* ── Archived Subject Card ── */
+  .subject-card--archived {
+    opacity: 0.75;
+    filter: grayscale(0.3);
+    transition: opacity var(--t), filter var(--t);
+  }
+  .subject-card--archived:hover {
+    opacity: 0.95;
+    filter: grayscale(0);
+  }
+
+  /* ── ExamReviewModal action cards ── */
+  .review-action-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--r12);
+    cursor: pointer;
+    transition: border-color var(--t-fast), background var(--t-fast);
+    margin-bottom: 10px;
+    background: var(--surface);
+  }
+  .review-action-card:hover { background: var(--bg-hover); }
+  .review-action-card.archive:hover { border-color: var(--accent); }
+  .review-action-card.delete:hover  { border-color: var(--danger); }
+  .review-action-card.keep:hover    { border-color: var(--success); }
+  .review-action-card-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 2px; }
+  .review-action-card-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--txt);
+    margin-bottom: 3px;
+  }
+  .review-action-card-desc {
+    font-size: 0.75rem;
+    color: var(--txt-3);
+    line-height: 1.5;
+  }
+
+  /* ── Rating emoji buttons ── */
+  .rating-btn-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 20px 0;
+  }
+  .rating-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--r12);
+    background: var(--surface);
+    cursor: pointer;
+    transition: all var(--t-fast);
+    font-family: var(--font-body);
+    min-width: 64px;
+  }
+  .rating-btn:hover {
+    border-color: var(--border2);
+    background: var(--bg-hover);
+  }
+  .rating-btn.selected {
+    border-color: var(--accent);
+    background: rgba(108, 71, 255, 0.08);
+  }
+  .rating-btn-emoji { font-size: 1.3rem; }
+  .rating-btn-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--txt-3);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
 
 

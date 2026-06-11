@@ -385,6 +385,29 @@ Allows students to opt-in to a public profile shareable via a unique public user
 
 ---
 
+### 20. Post-Exam Review Flow & Subject Archive
+**Category:** Core
+**Status:** Implemented
+
+#### What it does
+Prompts students with a review flow when a subject's exam date has passed. Students rate their exam, reflect on difficult topics, and choose whether to archive, delete, or keep the subject active.
+
+#### Key capabilities
+- **Non-intrusive Review Banner**: Shows up automatically inside the SubjectCard when the exam date is in the past. It disappears after review submission or after being dismissed 3 times.
+- **Three-step Review Wizard**:
+  - *Step 1 (Rating Selection)*: Students select from 5 emoji reactions (Terrible, Hard, Okay, Good, Crushed it) with custom styling.
+  - *Step 2 (Optional Reflection)*: Students specify the hardest topic, rate Topiq's helpfulness, and write reflection notes (limited to 200 characters).
+  - *Step 3 (Action Selection)*: Archive the subject, delete it (with inline confirmation), or keep it active.
+- **Collapsible Completed Exams Section**: Displays archived subjects in a collapsed drawer. Archived subjects show the exam date, rating badge, Topiq helpfulness status, and hardest topic.
+- **Restoration (Unarchiving)**: Restores archived subjects back to active subjects, resetting the archived state.
+
+#### Technical implementation
+- Schema subdocument `examReview` nested inside Subject model storing rating enums and reflection statistics.
+- REST API handlers `submitExamReview`, `dismissReview`, and `unarchiveSubject` implemented under `subject.controller.js`.
+- Custom events `topiq:refetch-subjects` dispatched client-side to coordinate refetching across component trees without context drilling.
+
+---
+
 ## User Workflow
 
 1. **Signup & Setup**: The student registers an account and sets up a student profile, selecting a primary academic target goal (Pass Mode, Score Mode, or Topper Mode) that serves as the default configuration for study materials.

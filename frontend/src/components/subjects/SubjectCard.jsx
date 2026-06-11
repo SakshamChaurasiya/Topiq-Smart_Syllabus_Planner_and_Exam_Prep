@@ -4,15 +4,26 @@ import ProgressRing from '../ui/ProgressRing';
 import Badge from '../ui/Badge';
 import { format } from 'date-fns';
 import { Pencil, Trash2 } from 'lucide-react';
+import { subjectAPI } from '../../api/subject.api';
 
 const difficultyColors = { easy: 'var(--success)', medium: 'var(--warning)', hard: 'var(--danger)' };
 const priorityType    = { low: 'low', medium: 'medium', high: 'high', critical: 'critical' };
 
-const SubjectCard = ({ subject, onEdit, onDelete }) => {
+const SubjectCard = ({ subject, onEdit, onDelete, onReview }) => {
   const navigate = useNavigate();
   const daysLeft = subject.examDate
     ? Math.max(0, Math.ceil((new Date(subject.examDate) - new Date()) / 86400000))
     : null;
+
+  const examPassed = subject.examDate && daysLeft === 0 &&
+    new Date(subject.examDate) < new Date();
+  // More precise: exam date is in the past (not just 0 days left)
+  const examActuallyPassed = subject.examDate &&
+    new Date(subject.examDate) < new Date() &&
+    !subject.isArchived;
+  const hasReview = !!subject.examReview?.completedAt;
+  const dismissCount = subject.examReview?.reviewDismissedCount || 0;
+  const showReviewBanner = examActuallyPassed && !hasReview && dismissCount < 3;
 
   const progressColor = subject.progress >= 70 ? 'var(--success)' : subject.progress >= 40 ? 'var(--warning)' : 'var(--primary)';
 
@@ -85,12 +96,27 @@ const SubjectCard = ({ subject, onEdit, onDelete }) => {
           {subject.examDate ? (
             <div>
               <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: 2 }}>Exam Date</div>
-              <div style={{ fontSize: '0.82rem', fontWeight: 700, color: daysLeft <= 3 ? 'var(--danger)' : daysLeft <= 7 ? 'var(--warning)' : 'var(--text-secondary)' }}>
-                {format(new Date(subject.examDate), 'dd MMM')} — {daysLeft}d left
-              </div>
+              {examActuallyPassed && hasReview ? (
+                // Already reviewed — show rating badge
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span className="badge badge-success" style={{ fontSize: '0.7rem' }}>
+                    Exam Done
+                  </span>
+                  <span style={{ fontSize: '0.85rem' }}>
+                    {{ terrible:'😰', hard:'😟', okay:'😐', good:'😊', crushed:'🎉' }[subject.examReview?.rating]}
+                  </span>
+                </div>
+              ) : (
+                <div style={{
+                  fontSize: '0.82rem', fontWeight: 700,
+                  color: daysLeft <= 3 ? 'var(--danger)' : daysLeft <= 7 ? 'var(--warning)' : 'var(--txt-2)'
+                }}>
+                  {format(new Date(subject.examDate), 'dd MMM')} — {daysLeft}d left
+                </div>
+              )}
             </div>
           ) : (
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-disabled)' }}>No exam set</div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--txt-3)' }}>No exam date set</div>
           )}
         </div>
 
@@ -108,6 +134,30 @@ const SubjectCard = ({ subject, onEdit, onDelete }) => {
           ><Trash2 size={13} strokeWidth={2} /></button>
         </div>
       </div>
+
+      {showReviewBanner && (
+        <div
+          className="exam-review-banner animate-fade-in"
+          onClick={(e) => { e.stopPropagation(); onReview(subject); }}
+        >
+          <span className="exam-review-banner-emoji">🎓</span>
+          <span className="exam-review-banner-text">
+            Exam day passed — how did it go?
+          </span>
+          <span className="exam-review-banner-cta">Review →</span>
+          <button
+            className="exam-review-banner-dismiss"
+            onClick={async (e) => {
+              e.stopPropagation();
+              try {
+                await subjectAPI.dismissReview(subject._id);
+              } catch {}
+              // Optimistically hide — parent refetch will sync
+            }}
+            title="Dismiss"
+          >✕</button>
+        </div>
+      )}
     </div>
   );
 };

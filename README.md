@@ -31,6 +31,7 @@ Students have syllabuses but no structured way to extract priority information f
 | Visual Level Titles | Renders level titles, emojis, and tier-colored badges in ProfilePage and Sidebar user headers |
 | Public Leaderboard | Global, college-filtered, and weekly rankings showing student progress relative to peers |
 | Shareable Public Profiles | Opt-in profiles with unique usernames for sharing study stats and earned badges |
+| Post-Exam Review & Archive | Non-intrusive rating and reflection wizard when exam passes; archive, delete, or keep subjects active |
 
 Full feature documentation is available in FEATURES.md.
 
@@ -215,6 +216,9 @@ Note: Get a free Gemini API key at aistudio.google.com/app/apikey. The app runs 
 | GET | /api/leaderboard/weekly | Retrieve weekly completed mission ranking | Optional |
 | GET | /api/profile/:username | Fetch public profile page by username | No |
 | PUT | /api/profile/settings | Update student public profile settings | Yes |
+| PUT | /api/subjects/:id/exam-review | Submit post-exam review and archive/delete/keep | Yes |
+| PUT | /api/subjects/:id/dismiss-review | Increment dismissal count for review banner | Yes |
+| PUT | /api/subjects/:id/unarchive | Move subject back to active list | Yes |
 
 All protected routes require Authorization: Bearer <token> header.
 

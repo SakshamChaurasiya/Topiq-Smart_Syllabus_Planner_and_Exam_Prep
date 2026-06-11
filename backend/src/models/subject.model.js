@@ -87,6 +87,52 @@ const subjectSchema = new mongoose.Schema(
             type: String,
             default: "",
         },
+
+        examReview: {
+            rating: {
+                type: String,
+                enum: ['terrible', 'hard', 'okay', 'good', 'crushed'],
+                default: null,
+            },
+            hardestTopic: {
+                type: String,
+                default: null,
+                trim: true,
+            },
+            topiqHelpfulness: {
+                type: String,
+                enum: ['yes', 'somewhat', 'no'],
+                default: null,
+            },
+            reflection: {
+                type: String,
+                default: null,
+                maxlength: 200,
+                trim: true,
+            },
+            completedAt: {
+                type: Date,
+                default: null,
+            },
+            reviewDismissedCount: {
+                type: Number,
+                default: 0,
+            },
+            reviewDismissedAt: {
+                type: Date,
+                default: null,
+            },
+        },
+
+        isArchived: {
+            type: Boolean,
+            default: false,
+        },
+
+        archivedAt: {
+            type: Date,
+            default: null,
+        },
     },
     {
         timestamps: true,
