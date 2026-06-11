@@ -32,6 +32,7 @@ Students have syllabuses but no structured way to extract priority information f
 | Public Leaderboard | Global, college-filtered, and weekly rankings showing student progress relative to peers |
 | Shareable Public Profiles | Opt-in profiles with unique usernames for sharing study stats and earned badges |
 | Post-Exam Review & Archive | Non-intrusive rating and reflection wizard when exam passes; archive, delete, or keep subjects active |
+| Social Study Feed | Share notes, summaries, and resources, with Cloudinary uploads, strict college filtering, contributor scores, and clickable profiles |
 
 Full feature documentation is available in FEATURES.md.
 
@@ -47,6 +48,8 @@ Full feature documentation is available in FEATURES.md.
 | @google/generative-ai | ^0.24.1 | Google Gemini AI orchestrator |
 | pdf-parse | ^2.4.5 | Text extraction layer for digital files |
 | multer | ^2.1.1 | Upload payload file middleware |
+| cloudinary | ^2.5.1 | Cloud media storage API client |
+| multer-storage-cloudinary | ^4.0.0 | Multer storage engine for Cloudinary |
 | bcryptjs | ^3.0.3 | Secure hashing algorithms for credentials |
 | jsonwebtoken | ^9.0.3 | Token validation and stateless auth |
 | dotenv | ^17.4.2 | Server configuration environment loader |
@@ -170,6 +173,27 @@ frontend/
    - Start the development server: `npm run dev`
 5. Access the user interface at `http://localhost:5173`.
 
+### Database Seeding
+
+To populate your development database with realistic student users, feed posts, upvotes, reports, and badge achievements, run the mock seeder script.
+
+Ensure you have configured `MONGO_URI` in `backend/.env`.
+
+Run the following commands from the **project root directory** (`SmartSyllabusPlanner`):
+
+*   **Populate seed data** (only inserts if seed users do not exist):
+    ```bash
+    node backend/src/seedUsers.js
+    ```
+*   **Clean and reseed** (wipes all previous seed data and inserts fresh data):
+    ```bash
+    node backend/src/seedUsers.js --clean
+    ```
+*   **Wipe seed data** (deletes all seed data without reseeding):
+    ```bash
+    node backend/src/seedUsers.js --wipe
+    ```
+
 ### Environment Variables
 
 Configure the `.env` file in the `backend` directory using the following keys:
@@ -181,6 +205,9 @@ JWT_SECRET=your_jwt_secret_key
 GEMINI_API_KEY=your_gemini_api_key_from_aistudio.google.com
 CLIENT_URL=http://localhost:5173
 NODE_ENV=development
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 ```
 
 Note: Get a free Gemini API key at aistudio.google.com/app/apikey. The app runs in mock/demo mode if GEMINI_API_KEY is not set — all AI features return structured placeholder data.
@@ -219,6 +246,11 @@ Note: Get a free Gemini API key at aistudio.google.com/app/apikey. The app runs 
 | PUT | /api/subjects/:id/exam-review | Submit post-exam review and archive/delete/keep | Yes |
 | PUT | /api/subjects/:id/dismiss-review | Increment dismissal count for review banner | Yes |
 | PUT | /api/subjects/:id/unarchive | Move subject back to active list | Yes |
+| GET | /api/feed | Fetch social study feed with pagination and filters | Optional |
+| POST | /api/feed | Create a new study feed post (supports Cloudinary attachments) | Yes |
+| POST | /api/feed/:id/upvote | Toggle upvote on a post | Yes |
+| POST | /api/feed/:id/report | Report a feed post | Yes |
+| GET | /api/feed/user/:userId | Fetch posts and contributor score for a specific user | Yes |
 
 All protected routes require Authorization: Bearer <token> header.
 

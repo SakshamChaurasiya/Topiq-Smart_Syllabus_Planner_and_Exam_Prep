@@ -22,6 +22,7 @@ import ProfilePage  from './pages/ProfilePage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import PublicProfilePage from './pages/PublicProfilePage';
+import FeedPage from './pages/FeedPage';
 
 function App() {
   return (
@@ -64,6 +65,7 @@ function App() {
             <Route path="/profile"            element={<ProfilePage />} />
             <Route path="/analytics"          element={<AnalyticsPage />} />
             <Route path="/leaderboard"        element={<LeaderboardPage />} />
+            <Route path="/feed"               element={<FeedPage />} />
           </Route>
 
           {/* Fallback */}

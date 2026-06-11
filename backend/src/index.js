@@ -19,6 +19,7 @@ const path = require("path");
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const connectDB = require("./config/db");
+require("./config/cloudinary"); // Initialize Cloudinary on startup
 
 
 
@@ -67,6 +68,7 @@ const quizRoutes         = require("./routes/quiz.routes");
 const weekReportRoutes   = require("./routes/weekReport.routes");
 const analyticsRoutes    = require("./routes/analytics.routes");
 const leaderboardRoutes  = require("./routes/leaderboard.routes");
+const feedRoutes         = require("./routes/feed.routes");
 
 app.use("/api/auth",          authRoutes);
 app.use("/api/subjects",      subjectRoutes);
@@ -84,6 +86,7 @@ app.use("/api/week-report",   weekReportRoutes);
 app.use("/api/analytics",     analyticsRoutes);
 app.use("/api",               flashcardRoutes);
 app.use("/api",               leaderboardRoutes);
+app.use("/api/feed",          feedRoutes);
 
 // ============================================
 // HEALTH CHECK

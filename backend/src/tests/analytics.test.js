@@ -84,7 +84,7 @@ test("Study Analytics Backend Tests", async (t) => {
         await getStudyAnalytics(mockReq, res);
 
         assert.strictEqual(res.statusCode, 200);
-        
+
         // Grid should contain 1 grouped date (today) with count = 2 and minutes = 60
         const grid = res.jsonData.data.activityGrid;
         assert.strictEqual(grid.length, 1);

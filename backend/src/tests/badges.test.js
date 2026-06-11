@@ -113,7 +113,7 @@ describe('Achievement Badges System', () => {
                 difficulty: 'medium',
                 color: '#ef4444'
             });
-        
+
         const subjectId = subRes.body.data._id;
 
         // Create a mission

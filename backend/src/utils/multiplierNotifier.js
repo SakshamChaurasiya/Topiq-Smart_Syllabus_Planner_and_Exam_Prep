@@ -14,13 +14,22 @@ const sendMultiplierNotification = async () => {
             const sevenDaysAgo = new Date();
             sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-            // Find users active in the last 7 days
+            // Find users active in the last 7 days who haven't already received an xp-boost notification today
+            const startOfToday = new Date();
+            startOfToday.setHours(0, 0, 0, 0);
+
+            const usersWithNotificationToday = await Notification.find({
+                type: "xp-boost",
+                createdAt: { $gte: startOfToday }
+            }).distinct("userId");
+
             const activeUsers = await User.find({
-                lastActiveDate: { $gte: sevenDaysAgo }
+                lastActiveDate: { $gte: sevenDaysAgo },
+                _id: { $nin: usersWithNotificationToday }
             });
 
             if (activeUsers.length === 0) {
-                console.log("[Multiplier Notification] No active users in the last 7 days.");
+                console.log("[Multiplier Notification] No active users needing notifications in the last 7 days.");
                 return;
             }
 

@@ -222,6 +222,7 @@ const getPublicProfile = async (req, res) => {
         const subjectsCount = await Subject.countDocuments({ userId: user._id });
 
         const profileShape = {
+            _id: user._id,
             name: user.name,
             publicUsername: user.publicUsername,
             institution: user.institution,

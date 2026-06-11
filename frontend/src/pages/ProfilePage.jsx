@@ -3,7 +3,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../api/auth.api';
-import { format } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
+import { feedAPI } from '../api/feed.api';
 import toast from 'react-hot-toast';
 import { User, Edit3, Mail, MapPin, Calendar, Target, Award, Zap, Flame, LogOut, BarChart2, Globe, Lock } from 'lucide-react';
 import { getLevelTitle } from '../constants/xpSystem';
@@ -15,6 +16,87 @@ const goalOptions = [
   { value: 'good',      label: 'Score Mode',   desc: 'Aim for good scores (65%+)',        colorClass: 'goal-good' },
   { value: 'excellent', label: 'Topper Mode',  desc: 'Go for excellence (85%+)',          colorClass: 'goal-excellent' },
 ];
+
+const MyPostsPreview = ({ userId }) => {
+  const [posts, setPosts]   = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [score, setScore]   = useState(0);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!userId) return;
+    feedAPI.getUserPosts(userId, { limit: 3 })
+      .then(res => {
+        setPosts(res.data.data.posts || []);
+        setScore(res.data.data.contributorScore || 0);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [userId]);
+
+  if (loading) return (
+    <div style={{ fontSize:'0.82rem', color:'var(--txt-3)' }}>
+      Loading...
+    </div>
+  );
+
+  return (
+    <div>
+      {/* Contributor score pill */}
+      <div style={{ display:'inline-flex', alignItems:'center', gap:8,
+        background:'var(--surface)', border:'1px solid var(--border)',
+        borderRadius:'var(--r-full)', padding:'6px 14px',
+        fontSize:'0.78rem', fontWeight:700, marginBottom:16 }}>
+        💎 Contributor Score:
+        <span style={{ color:'var(--accent)', fontWeight:800 }}>
+          {score}
+        </span>
+      </div>
+
+      {posts.length === 0 ? (
+        <div style={{ fontSize:'0.82rem', color:'var(--txt-3)',
+          padding:'16px 0' }}>
+          You haven't shared anything yet.{' '}
+          <button className="btn btn-ghost btn-sm"
+            onClick={() => navigate('/feed')}
+            style={{ color:'var(--accent)', padding:0 }}>
+            Share your first resource →
+          </button>
+        </div>
+      ) : (
+        <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+          {posts.map(post => (
+            <div key={post._id} className="card"
+              style={{ padding:'12px 16px' }}>
+              <div style={{ display:'flex', justifyContent:'space-between',
+                alignItems:'flex-start', gap:8 }}>
+                <div style={{ fontWeight:700, fontSize:'0.85rem',
+                  color:'var(--txt)' }}>{post.title}</div>
+                <span className="badge badge-muted"
+                  style={{ fontSize:'0.62rem', flexShrink:0 }}>
+                  {post.subjectTag}
+                </span>
+              </div>
+              <div style={{ fontSize:'0.72rem', color:'var(--txt-3)',
+                marginTop:4 }}>
+                ▲ {post.upvoteCount || 0} upvotes ·{' '}
+                {formatDistanceToNow(new Date(post.createdAt),
+                  { addSuffix: true })}
+              </div>
+            </div>
+          ))}
+          {/* Link to full feed filtered to own posts */}
+          <button className="btn btn-ghost btn-sm"
+            onClick={() => navigate('/feed')}
+            style={{ alignSelf:'flex-start', color:'var(--txt-3)',
+              fontSize:'0.78rem' }}>
+            View all in feed →
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const ProfilePage = () => {
   const { user, updateUser, logout } = useAuth();
@@ -375,6 +457,19 @@ const ProfilePage = () => {
           {savingPublic ? 'Saving...' : 'Save Settings'}
         </button>
       </div>
+
+      {/* ── My Contributions ── */}
+      <div className="divider" style={{ margin: '24px 0' }} />
+      <div style={{ marginBottom: 16, display:'flex',
+        justifyContent:'space-between', alignItems:'center' }}>
+        <h3 style={{ fontWeight:700, fontSize:'0.9rem',
+          letterSpacing:'-0.01em' }}>My Contributions</h3>
+        <button className="btn btn-ghost btn-sm"
+          onClick={() => navigate('/feed')}>
+          View Feed →
+        </button>
+      </div>
+      <MyPostsPreview userId={user?._id} />
     </div>
   );
 };

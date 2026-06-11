@@ -12,4 +12,9 @@ export const BADGES_FRONTEND = [
   { id: 'ice_cold',         emoji: '🧊', name: 'Ice Cold',        desc: 'Used a Streak Freeze token',              color: '#3b82f6' },
   { id: 'no_days_off',      emoji: '💀', name: 'No Days Off',     desc: 'Achieved a 14-day streak',                color: '#8b5cf6' },
   { id: 'topper',           emoji: '🏆', name: 'Topper',          desc: 'Completed all topics in a subject',       color: '#10b981' },
+  { id: 'first_share',         emoji: '📝', name: 'First Share',         desc: 'Shared your first resource with the community', color: '#10b981' },
+  { id: 'viral_note',          emoji: '🔥', name: 'Viral Note',          desc: 'A post of yours reached 20+ upvotes',            color: '#ef4444' },
+  { id: 'campus_hero',         emoji: '🏫', name: 'Campus Hero',         desc: 'Posted 5+ resources for your college',           color: '#f59e0b' },
+  { id: 'trusted_contributor', emoji: '💎', name: 'Trusted Contributor', desc: 'Earned a Contributor Score above 100',           color: '#6366f1' },
+  { id: 'helper',              emoji: '🤝', name: 'Helper',              desc: 'Upvoted 10+ posts from other students',          color: '#38bdf8' },
 ];

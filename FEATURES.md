@@ -408,6 +408,31 @@ Prompts students with a review flow when a subject's exam date has passed. Stude
 
 ---
 
+### 21. Social Study Feed
+**Category:** Sharing
+**Status:** Implemented
+
+#### What it does
+Enables students to share study materials, notes, summaries, and resources with classmates. It features Cloudinary cloud storage for file uploads, strict college-scoped and subject-based feed filtering, user contributor score gamification, real-time upvotes, clickable author profiles, and post reporting (with an auto-hide threshold for moderation).
+
+#### Key capabilities
+- **Multi-type Posts**: Supports 4 post formats: Notes, Summaries, Resources (with external links), and Flashcard Shares (linked to custom deck tokens).
+- **Cloudinary File Attachments**: Bypasses local disk storage for new uploads, storing images or PDFs directly on Cloudinary and rendering them contextually inline.
+- **Strict College Isolation Filters**: Filters content between a student's own college or worldwide. The "My College" filter matches user colleges strictly to prevent cross-institution feed leakages.
+- **Clickable Public Profiles**: Direct links from feed posts' authors (avatar and name) to their public profile pages, styled with interactive hover underlines and color transforms.
+- **Contributor Score gamification**: Rewards creators (+15 per note/summary, +10 per resource, +20 per flashcard deck, and +1 per upvote received).
+- **Report & Moderation Auto-Hide**: Hides posts from the feed automatically once they receive 3 or more user reports.
+- **Profile Contribution shelves**: Embeds contributor scores and post history feeds under profile and public profile screens.
+
+#### Technical implementation
+- **Mongoose Schema & Indexing**: Created `feedPost.model.js` utilizing compound database indexing for rapid queries.
+- **Hybrid Storage Middleware**: Configured `upload.middleware.js` to route new multipart file payloads directly to Cloudinary while preserving static endpoints for legacy disk uploads.
+- **REST Feed Controller**: Added secure endpoints under `/api/feed` managing feed query logic, strict case-insensitive regex matching, upvote/report toggles, and user post list aggregates.
+- **Restart-Safe Multiplier Notifications**: Refactored the global XP multiplier alert generator (`multiplierNotifier.js`) to check for existing daily runs, preventing duplicate notification delivery during server restarts.
+- **Frontend Feed Interface**: Built `FeedPage.jsx`, `CreatePostModal.jsx`, and `PostCard.jsx` modules in Vanilla CSS, integrated with React Router.
+
+---
+
 ## User Workflow
 
 1. **Signup & Setup**: The student registers an account and sets up a student profile, selecting a primary academic target goal (Pass Mode, Score Mode, or Topper Mode) that serves as the default configuration for study materials.
@@ -435,7 +460,7 @@ Prompts students with a review flow when a subject's exam date has passed. Stude
 | **Scanned Document AI** | Gemini Vision API | Directly analyzes scanned documents and images through base64 inline buffers |
 | **Text Extraction** | pdf-parse | Parses and extracts plain text from digital text-layer PDF files |
 | **Security** | bcryptjs, jsonwebtoken | Secure password hashing and token-based state authorization |
-| **File Processing** | multer | Middleware handling file uploads and multi-part form data requests |
+| **File Processing** | multer, cloudinary, multer-storage-cloudinary | Middleware and cloud integration handling multipart file uploads and cloud storage |
 | **Utilities** | date-fns, crypto | Date arithmetic operations and secure unique token generation |
 
 ### Frontend
