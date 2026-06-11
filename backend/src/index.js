@@ -66,6 +66,7 @@ const multiplierRoutes   = require("./routes/multiplier.routes");
 const quizRoutes         = require("./routes/quiz.routes");
 const weekReportRoutes   = require("./routes/weekReport.routes");
 const analyticsRoutes    = require("./routes/analytics.routes");
+const leaderboardRoutes  = require("./routes/leaderboard.routes");
 
 app.use("/api/auth",          authRoutes);
 app.use("/api/subjects",      subjectRoutes);
@@ -82,6 +83,7 @@ app.use("/api/quiz",          quizRoutes);
 app.use("/api/week-report",   weekReportRoutes);
 app.use("/api/analytics",     analyticsRoutes);
 app.use("/api",               flashcardRoutes);
+app.use("/api",               leaderboardRoutes);
 
 // ============================================
 // HEALTH CHECK

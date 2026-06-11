@@ -5,9 +5,10 @@ import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../api/auth.api';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
-import { User, Edit3, Mail, MapPin, Calendar, Target, Award, Zap, Flame, LogOut, BarChart2 } from 'lucide-react';
+import { User, Edit3, Mail, MapPin, Calendar, Target, Award, Zap, Flame, LogOut, BarChart2, Globe, Lock } from 'lucide-react';
 import { getLevelTitle } from '../constants/xpSystem';
 import LevelBadge, { getTierColor } from '../components/gamification/LevelBadge';
+import { leaderboardAPI } from '../api/leaderboard.api';
 
 const goalOptions = [
   { value: 'pass',      label: 'Pass Mode',    desc: 'Focus on clearing exams (40%+)',   colorClass: 'goal-pass' },
@@ -27,12 +28,22 @@ const ProfilePage = () => {
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
 
+  const [publicSettings, setPublicSettings] = useState({
+    isPublicProfile: user?.isPublicProfile || false,
+    publicUsername: user?.publicUsername || '',
+  });
+  const [savingPublic, setSavingPublic] = useState(false);
+
   useEffect(() => {
     if (user) {
       setForm({
         name: user.name || '',
         targetGoal: user.targetGoal || 'good',
         institution: user.institution || ''
+      });
+      setPublicSettings({
+        isPublicProfile: user.isPublicProfile || false,
+        publicUsername: user.publicUsername || '',
       });
     }
   }, [user, editing]);
@@ -257,6 +268,112 @@ const ProfilePage = () => {
           </div>
           <div className="stat-pill-label" style={{ color: 'var(--accent)' }}>Full Report</div>
         </div>
+      </div>
+
+      <div className="divider" style={{ margin: '28px 0' }} />
+      <h3 style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: 16 }}>
+        Public Profile
+      </h3>
+      <div className="card">
+        {/* Toggle */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+              {publicSettings.isPublicProfile
+                ? <><Globe size={14} style={{ color: 'var(--success)' }} /> Profile is Public</>
+                : <><Lock size={14} style={{ color: 'var(--txt-3)' }} /> Profile is Private</>
+              }
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--txt-3)', marginTop: 3 }}>
+              {publicSettings.isPublicProfile ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
+                  <span>Visible at:</span>
+                  {publicSettings.publicUsername ? (
+                    <>
+                      <a 
+                        href={`/u/${publicSettings.publicUsername}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        style={{ color: 'var(--accent)', textDecoration: 'underline', fontWeight: 600 }}
+                      >
+                        {`${window.location.host}/u/${publicSettings.publicUsername}`}
+                      </a>
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        style={{ padding: '4px 8px', height: 'auto', display: 'inline-flex', alignItems: 'center' }}
+                        onClick={() => {
+                          navigator.clipboard.writeText(`${window.location.origin}/u/${publicSettings.publicUsername}`);
+                          toast.success('Link copied to clipboard!');
+                        }}
+                      >
+                        Copy
+                      </button>
+                    </>
+                  ) : (
+                    <span style={{ fontStyle: 'italic' }}>Set a username to view your link</span>
+                  )}
+                </div>
+              ) : (
+                'Enable to get a shareable profile link'
+              )}
+            </div>
+          </div>
+          {/* Toggle button using existing .btn classes */}
+          <button
+            type="button"
+            className={`btn btn-sm ${publicSettings.isPublicProfile ? 'btn-secondary' : 'btn-primary'}`}
+            onClick={() => setPublicSettings(s => ({ ...s, isPublicProfile: !s.isPublicProfile }))}
+          >
+            {publicSettings.isPublicProfile ? 'Make Private' : 'Make Public'}
+          </button>
+        </div>
+
+        {/* Username input — shown when public */}
+        {publicSettings.isPublicProfile && (
+          <div className="form-group" style={{ marginBottom: 12 }}>
+            <label className="form-label">Your Username</label>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input
+                className="form-input"
+                value={publicSettings.publicUsername}
+                onChange={e => setPublicSettings(s => ({ ...s, publicUsername: e.target.value }))}
+                placeholder="e.g. saksham-topiq"
+                style={{ flex: 1 }}
+                disabled={!!user?.publicUsername}
+              />
+            </div>
+            <div style={{ fontSize: '0.7rem', color: 'var(--txt-3)', marginTop: 4 }}>
+              {user?.publicUsername 
+                ? "Username cannot be changed once set." 
+                : "3–20 chars. Letters, numbers, underscore, hyphen only."
+              }
+            </div>
+          </div>
+        )}
+
+        <button
+          type="button"
+          className="btn btn-primary btn-sm"
+          disabled={savingPublic}
+          onClick={async () => {
+            setSavingPublic(true);
+            try {
+              const res = await leaderboardAPI.updateSettings({
+                isPublicProfile: publicSettings.isPublicProfile,
+                publicUsername: publicSettings.publicUsername || undefined,
+              });
+              updateUser({ ...user, ...res.data.data });
+              toast.success('Public profile settings saved!');
+            } catch (err) {
+              toast.error(err.response?.data?.message || 'Failed to save settings.');
+            } finally {
+              setSavingPublic(false);
+            }
+          }}
+        >
+          {savingPublic ? 'Saving...' : 'Save Settings'}
+        </button>
       </div>
     </div>
   );

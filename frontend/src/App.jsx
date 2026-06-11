@@ -20,6 +20,8 @@ import MissionsPage from './pages/MissionsPage';
 import NotificationsPage from './pages/NotificationsPage';
 import ProfilePage  from './pages/ProfilePage';
 import AnalyticsPage from './pages/AnalyticsPage';
+import LeaderboardPage from './pages/LeaderboardPage';
+import PublicProfilePage from './pages/PublicProfilePage';
 
 function App() {
   return (
@@ -48,6 +50,7 @@ function App() {
           <Route path="/login"   element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/shared/cheatnote/:shareToken" element={<SharedCheatNote />} />
+          <Route path="/u/:username" element={<PublicProfilePage />} />
 
           {/* Protected — all inside the app layout */}
           <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
@@ -60,6 +63,7 @@ function App() {
             <Route path="/notifications"      element={<NotificationsPage />} />
             <Route path="/profile"            element={<ProfilePage />} />
             <Route path="/analytics"          element={<AnalyticsPage />} />
+            <Route path="/leaderboard"        element={<LeaderboardPage />} />
           </Route>
 
           {/* Fallback */}

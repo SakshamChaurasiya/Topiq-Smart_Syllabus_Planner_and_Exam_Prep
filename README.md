@@ -29,6 +29,8 @@ Students have syllabuses but no structured way to extract priority information f
 | Quick Quiz | Dynamic AI-generated MCQ quizzes on completed study topics for bonus XP rewards |
 | Weekly Performance Report | Weekly dashboard card summarizing completion rates, study hours, unique topics, and subject strengths/weaknesses |
 | Visual Level Titles | Renders level titles, emojis, and tier-colored badges in ProfilePage and Sidebar user headers |
+| Public Leaderboard | Global, college-filtered, and weekly rankings showing student progress relative to peers |
+| Shareable Public Profiles | Opt-in profiles with unique usernames for sharing study stats and earned badges |
 
 Full feature documentation is available in FEATURES.md.
 
@@ -70,6 +72,7 @@ backend/
       auth.controller.js
       dashboard.controller.js
       flashcard.controller.js
+      leaderboard.controller.js
       mission.controller.js
       notification.controller.js
       planner.controller.js
@@ -87,10 +90,12 @@ backend/
       Mission.js
       Notification.js
       FlashcardSet.js
+      Badge.js
     routes/
       auth.routes.js
       dashboard.routes.js
       flashcard.routes.js
+      leaderboard.routes.js
       mission.routes.js
       notification.routes.js
       planner.routes.js
@@ -110,6 +115,7 @@ frontend/
       auth.api.js
       dashboard.api.js
       flashcard.api.js
+      leaderboard.api.js
       mission.api.js
       notification.api.js
       planner.api.js
@@ -135,6 +141,8 @@ frontend/
       NotificationsPage.jsx
       ProfilePage.jsx
       SharedCheatNote.jsx
+      LeaderboardPage.jsx
+      PublicProfilePage.jsx
     styles/
       variables.css
       animations.css
@@ -202,6 +210,11 @@ Note: Get a free Gemini API key at aistudio.google.com/app/apikey. The app runs 
 | POST | /api/quiz/generate | Generate 3 MCQ questions for a topic (rate limited) | Yes |
 | POST | /api/quiz/submit | Submit answers to calculate scores and award bonus XP | Yes |
 | GET | /api/week-report | Fetch weekly performance report analytics | Yes |
+| GET | /api/leaderboard/global | Retrieve top 100 users globally | Optional |
+| GET | /api/leaderboard/college | Retrieve top 50 users in college query | Optional |
+| GET | /api/leaderboard/weekly | Retrieve weekly completed mission ranking | Optional |
+| GET | /api/profile/:username | Fetch public profile page by username | No |
+| PUT | /api/profile/settings | Update student public profile settings | Yes |
 
 All protected routes require Authorization: Bearer <token> header.
 

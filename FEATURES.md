@@ -344,6 +344,47 @@ Visualizes the student's level titles, emojis, and tier badges throughout the us
 
 ---
 
+### 18. Public Leaderboard
+**Category:** Gamification
+**Status:** Implemented
+
+#### What it does
+Ranks users based on their academic achievements (level, total experience points, and study streaks). It provides global rankings, college-specific filters, and weekly completed mission tracking.
+
+#### Key capabilities
+- **Global Leaderboard**: Shows top 100 users ranked by level, then current XP, then streak.
+- **College Filtering**: Filters leaderboard entries dynamically by college or university name to view college ranking.
+- **Weekly Mission Leaderboard**: Tracks top 50 users based on active study missions completed within the current week (starting Monday 00:00 IST).
+- **Personal Rank Indicators**: Displays the logged-in student's active rank inline on top of the list for easy reference.
+- **Guest Access**: Accessible to non-authenticated visitors (myRank resolves to null).
+
+#### Technical implementation
+- Rank calculation runs on MongoDB sorted queries (`level: -1, xp: -1, streak: -1`) matching total XP order.
+- Weekly statistics are fetched using Mongoose `$match` and `$group` aggregations on completed missions in the active IST week timeframe.
+- Controller optional authentication parses JWT tokens to resolve user details without blocking guest access.
+
+---
+
+### 19. Shareable Public Profiles
+**Category:** Sharing
+**Status:** Implemented
+
+#### What it does
+Allows students to opt-in to a public profile shareable via a unique public username URL. It exposes select academic metrics and badges earned without compromising private account credentials.
+
+#### Key capabilities
+- **Opt-in Profile Visibility**: Users toggle public profile activation directly in their ProfilePage settings.
+- **Custom Public Usernames**: Validates unique, lowercase alphanumeric public usernames (3-20 characters, with hyphens or underscores).
+- **Public Profile Page**: Displays student name, level badge, college, total experience, day streak, total missions, and badges shelf.
+- **Secure Data Exclusion**: Never returns sensitive database fields like emails, passwords, or streak freeze tokens in public responses.
+
+#### Technical implementation
+- Added `isPublicProfile` boolean flags and `publicUsername` sparse unique indexes to the MongoDB user schema.
+- Built public profile rendering endpoints mapping user statistics, badge achievements, and subjects counts statelessly.
+- Created responsive profile settings inputs in ProfilePage synced dynamically with React Context updates.
+
+---
+
 ## User Workflow
 
 1. **Signup & Setup**: The student registers an account and sets up a student profile, selecting a primary academic target goal (Pass Mode, Score Mode, or Topper Mode) that serves as the default configuration for study materials.

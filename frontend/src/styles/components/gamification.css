@@ -914,3 +914,80 @@
 .level-badge-lg .level-badge-title {
   margin-top: 2px;
 }
+
+/* ── Leaderboard Row ── */
+.leaderboard-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  transition: background var(--t-fast);
+}
+.leaderboard-row:last-child { border-bottom: none; }
+.leaderboard-row:hover { background: var(--bg-hover); }
+.leaderboard-row.is-me {
+  background: rgba(108, 71, 255, 0.06);
+  border-left: 3px solid var(--accent);
+}
+.leaderboard-rank {
+  font-size: 0.75rem;
+  font-weight: 800;
+  width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+  color: var(--txt-3);
+}
+.leaderboard-rank.gold   { color: #f59e0b; }
+.leaderboard-rank.silver { color: #94a3b8; }
+.leaderboard-rank.bronze { color: #fb923c; }
+.leaderboard-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.leaderboard-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--txt);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.leaderboard-name.clickable {
+  cursor: pointer;
+  color: var(--accent);
+}
+.leaderboard-name.clickable:hover { text-decoration: underline; }
+.leaderboard-institution {
+  font-size: 0.7rem;
+  color: var(--txt-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.leaderboard-meta {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+.leaderboard-xp {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+.leaderboard-streak {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--warning);
+}

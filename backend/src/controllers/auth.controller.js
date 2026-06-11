@@ -65,6 +65,8 @@ const register = async (req, res) => {
                 streak: user.streak,
                 targetXP: getXPForLevel(user.level),
                 institution: user.institution || "",
+                isPublicProfile: user.isPublicProfile || false,
+                publicUsername: user.publicUsername || null,
             },
         });
     } catch (error) {
@@ -119,6 +121,8 @@ const login = async (req, res) => {
                 streak: user.streak,
                 targetXP: getXPForLevel(user.level),
                 institution: user.institution || "",
+                isPublicProfile: user.isPublicProfile || false,
+                publicUsername: user.publicUsername || null,
             },
         });
     } catch (error) {
@@ -149,6 +153,8 @@ const getMe = async (req, res) => {
             targetXP: getXPForLevel(user.level),
             createdAt: user.createdAt,
             institution: user.institution || "",
+            isPublicProfile: user.isPublicProfile || false,
+            publicUsername: user.publicUsername || null,
         });
     } catch (error) {
         console.error("[Auth] GetMe error:", error.message);
@@ -187,6 +193,8 @@ const updateProfile = async (req, res) => {
             streak: updatedUser.streak,
             targetXP: getXPForLevel(updatedUser.level),
             institution: updatedUser.institution || "",
+            isPublicProfile: updatedUser.isPublicProfile || false,
+            publicUsername: updatedUser.publicUsername || null,
         });
     } catch (error) {
         console.error("[Auth] UpdateProfile error:", error.message);

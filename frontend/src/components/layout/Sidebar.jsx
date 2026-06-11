@@ -6,7 +6,7 @@ import { getLevelTitle } from '../../constants/xpSystem';
 import {
   LayoutDashboard, BookOpen, Target,
   Bell, User, LogOut, Sun, Moon, X, Sparkles, ArrowRight,
-  BarChart2,
+  BarChart2, Trophy,
 } from 'lucide-react';
 
 const navSections = [
@@ -15,6 +15,7 @@ const navSections = [
     items: [
       { to: '/dashboard', Icon: LayoutDashboard, label: 'Dashboard' },
       { to: '/analytics', Icon: BarChart2,       label: 'Analytics' },
+      { to: '/leaderboard', Icon: Trophy,        label: 'Leaderboard' },
     ],
   },
   {

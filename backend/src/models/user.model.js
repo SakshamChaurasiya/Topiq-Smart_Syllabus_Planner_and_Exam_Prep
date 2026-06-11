@@ -86,12 +86,24 @@ const userSchema = new mongoose.Schema(
             default: "",
             trim: true,
         },
+        isPublicProfile: {
+            type: Boolean,
+            default: false,
+        },
+        publicUsername: {
+            type: String,
+            default: null,
+            trim: true,
+            lowercase: true,
+        },
     },
     {
         // Automatically add createdAt and updatedAt fields
         timestamps: true,
     }
 );
+
+userSchema.index({ publicUsername: 1 }, { unique: true, sparse: true });
 
 // -----------------------------------------------
 // MIDDLEWARE: Hash password before saving
