@@ -7,6 +7,7 @@ import { LoadingScreen, LoadingSpinner } from '../components/ui/LoadingSpinner';
 import Badge from '../components/ui/Badge';
 import toast from 'react-hot-toast';
 import ConfidenceRating from '../components/gamification/ConfidenceRating';
+import Modal from '../components/ui/Modal';
 
 const SyllabusPage = () => {
   const { id: subjectId } = useParams();
@@ -39,6 +40,21 @@ const SyllabusPage = () => {
   const [rateLimitReset, setRateLimitReset] = useState(0);
   const [isRateLimited, setIsRateLimited] = useState(false);
   const [cachedNotice, setCachedNotice] = useState(false);
+
+  // Edit syllabus state
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editTab, setEditTab] = useState('text'); // text | file
+  const [editedText, setEditedText] = useState('');
+  const [editFileTab, setEditFileTab] = useState('pdf'); // pdf | image
+  const [editUploading, setEditUploading] = useState(false);
+  const editFileInputRef = useRef(null);
+
+  // Auto-initialize editedText when modal opens
+  useEffect(() => {
+    if (syllabus && showEditModal) {
+      setEditedText(syllabus.rawContent || '');
+    }
+  }, [syllabus, showEditModal]);
 
   const fetchData = async () => {
     try {
@@ -111,6 +127,62 @@ const SyllabusPage = () => {
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to save text.');
     } finally { setUploading(false); }
+  };
+
+  // Save edited text syllabus and re-analyze
+  const handleEditSave = async () => {
+    if (!editedText.trim() || editedText.trim().length < 20) {
+      return toast.error('Please enter more syllabus content (at least 20 characters).');
+    }
+    setEditUploading(true);
+    try {
+      const res = await syllabusAPI.submitText({ subjectId, rawContent: editedText });
+      const newSyllabusId = res.data?.data?.syllabusId;
+      toast.success('Syllabus text updated! Starting AI analysis...');
+      
+      if (newSyllabusId) {
+        await syllabusAPI.analyze(newSyllabusId, { forceRerun: true });
+        toast.success('AI analysis updated successfully! ✨');
+      }
+      
+      setShowEditModal(false);
+      fetchData();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update syllabus.');
+    } finally {
+      setEditUploading(false);
+    }
+  };
+
+  // Upload file inside edit modal
+  const handleEditFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setEditUploading(true);
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('subjectId', subjectId);
+    try {
+      const res = await syllabusAPI.uploadFile(fd);
+      const isImg = editFileTab === 'image';
+      if (isImg) {
+        toast.success('Syllabus image uploaded and analyzed! ✨');
+      } else {
+        toast.success('Syllabus uploaded! Starting AI analysis...');
+        const newSyllabusId = res.data?.data?.syllabusId;
+        if (newSyllabusId) {
+          await syllabusAPI.analyze(newSyllabusId, { forceRerun: true });
+          toast.success('AI analysis complete! ✨');
+        }
+      }
+      setShowEditModal(false);
+      fetchData();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Upload failed.');
+    } finally {
+      setEditUploading(false);
+      if (editFileInputRef.current) editFileInputRef.current.value = '';
+    }
   };
 
   // Run AI analysis
@@ -459,6 +531,9 @@ const SyllabusPage = () => {
               </div>
 
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <button className="btn btn-secondary" onClick={() => { setEditTab('text'); setShowEditModal(true); }}>
+                  ✏️ Edit Syllabus
+                </button>
                 <button className="btn btn-primary" onClick={() => navigate(`/subjects/${subjectId}/planner`)}>
                   🗺️ Generate Plan
                 </button>
@@ -1054,13 +1129,22 @@ const SyllabusPage = () => {
           {/* Re-analyze option */}
           <div style={{ textAlign: 'center', padding: '24px 0', borderTop: '1px solid var(--border-subtle)' }}>
             <p style={{ marginBottom: 12, fontSize: '0.85rem' }}>Want to update the syllabus?</p>
-            <button 
-              className="btn btn-secondary btn-sm" 
-              onClick={() => handleAnalyze(true)} 
-              disabled={analyzing || isRateLimited}
-            >
-              {analyzing ? '⏳ Analyzing...' : '🔄 Re-run AI Analysis'}
-            </button>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
+              <button 
+                className="btn btn-secondary btn-sm" 
+                onClick={() => handleAnalyze(true)} 
+                disabled={analyzing || isRateLimited}
+              >
+                {analyzing ? '⏳ Analyzing...' : '🔄 Re-run AI Analysis'}
+              </button>
+              <button 
+                className="btn btn-primary btn-sm" 
+                onClick={() => { setEditTab('text'); setShowEditModal(true); }}
+                disabled={editUploading}
+              >
+                ✏️ Edit/Update Syllabus
+              </button>
+            </div>
             {isRateLimited && (
               <p style={{ color: 'var(--danger)', fontSize: '0.78rem', marginTop: 8 }}>
                 {rateLimitMessage} (Resets in {rateLimitReset} minutes)
@@ -1069,6 +1153,130 @@ const SyllabusPage = () => {
           </div>
         </>
       )}
+
+      {/* Edit/Update Syllabus Modal */}
+      <Modal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        title="✏️ Edit / Update Syllabus"
+        size="lg"
+      >
+        <div className="tabs" style={{ marginBottom: 20 }}>
+          <button
+            className={`tab-btn ${editTab === 'text' ? 'active' : ''}`}
+            onClick={() => setEditTab('text')}
+          >
+            ✏️ Edit Syllabus Text
+          </button>
+          <button
+            className={`tab-btn ${editTab === 'file' ? 'active' : ''}`}
+            onClick={() => setEditTab('file')}
+          >
+            📤 Re-upload File
+          </button>
+        </div>
+
+        {editTab === 'text' && (
+          <div>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: 12 }}>
+              Modify the raw text of your syllabus. Any edits will trigger a fresh AI re-analysis to generate updated units and topics.
+            </p>
+            <textarea
+              className="form-textarea"
+              rows={12}
+              style={{ width: '100%', fontFamily: 'monospace', fontSize: '0.85rem' }}
+              value={editedText}
+              onChange={(e) => setEditedText(e.target.value)}
+              placeholder="Syllabus text content..."
+              disabled={editUploading}
+            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 16 }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                {editedText.split(/\s+/).filter(Boolean).length} words
+              </span>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setShowEditModal(false)}
+                  disabled={editUploading}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="btn btn-primary"
+                  onClick={handleEditSave}
+                  disabled={editUploading}
+                >
+                  {editUploading ? '⏳ Saving & Analyzing...' : '💾 Save & Analyze'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {editTab === 'file' && (
+          <div>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: 16 }}>
+              Upload a new file to completely replace this subject's syllabus.
+            </p>
+            <div className="tabs" style={{ marginBottom: 16 }}>
+              <button
+                className={`tab-btn ${editFileTab === 'pdf' ? 'active' : ''}`}
+                onClick={() => setEditFileTab('pdf')}
+              >
+                📄 PDF
+              </button>
+              <button
+                className={`tab-btn ${editFileTab === 'image' ? 'active' : ''}`}
+                onClick={() => setEditFileTab('image')}
+              >
+                🖼️ Image
+              </button>
+            </div>
+
+            <input
+              ref={editFileInputRef}
+              type="file"
+              accept={editFileTab === 'pdf' ? '.pdf' : 'image/*'}
+              onChange={handleEditFileUpload}
+              style={{ display: 'none' }}
+              id="edit-syl-file-input"
+            />
+            <div
+              className={`upload-drop-zone${editUploading ? ' uploading' : ''}`}
+              onClick={() => !editUploading && editFileInputRef.current?.click()}
+            >
+              {editUploading ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+                  <LoadingSpinner />
+                  <p style={{ margin: 0 }}>Processing & Analyzing...</p>
+                </div>
+              ) : (
+                <>
+                  <div style={{ fontSize: '2.5rem', marginBottom: 12 }}>
+                    {editFileTab === 'pdf' ? '📄' : '🖼️'}
+                  </div>
+                  <div style={{ fontWeight: 700, marginBottom: 6 }}>
+                    Click to upload new {editFileTab === 'pdf' ? 'PDF' : 'image'}
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    {editFileTab === 'pdf' ? 'Supports .pdf files up to 10MB' : 'Supports JPG, PNG, WEBP up to 10MB'}
+                  </div>
+                </>
+              )}
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+              <button
+                className="btn btn-secondary"
+                onClick={() => setShowEditModal(false)}
+                disabled={editUploading}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
